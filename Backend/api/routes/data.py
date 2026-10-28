@@ -2,7 +2,7 @@ from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
 
-from ingestion_layer.constant import REGION_DATA
+from ingestion_layer.constant import REGION_DATA, register_managed_regions
 from ingestion_layer.disaster_history import fetch_historical_disasters
 from ingestion_layer.places import fetch_critical_infrastructure
 from ingestion_layer.population import fetch_population
@@ -119,6 +119,7 @@ def get_history(
 @router.get("/api/region")
 def get_region():
     try:
+        register_managed_regions()
         return REGION_DATA
     except Exception as error:
         raise HTTPException(status_code=500, detail=str(error))

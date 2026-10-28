@@ -10,14 +10,15 @@ import { isAbortError } from '@/services/apiError';
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultRegionName?: string | null;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
+  defaultRegionName = null,
 }) => {
   const [activeTab, setActiveTab] = useState<'general' | 'thresholds' | 'gis' | 'alerts' | 'provenance'>('general');
-  const [defaultCity, setDefaultCity] = useState('Kolkata');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [whatsappEnabled, setWhatsappEnabled] = useState(() => localStorage.getItem('whatsapp-enabled') === 'true');
   const [whatsappNumber, setWhatsappNumber] = useState(() => localStorage.getItem('whatsapp-number') ?? '');
@@ -177,22 +178,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === 'general' && (
             <div className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-800 mb-1.5">
+                <span className="block text-xs font-semibold text-slate-800 mb-1.5">
                   Default Operational Zone
-                </label>
-                <select
-                  value={defaultCity}
-                  onChange={(e) => setDefaultCity(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="Kolkata">Kolkata Coastal Metropolitan Area (West Bengal)</option>
-                  <option value="Puri">Puri Coastal Zone & Chilika (Odisha)</option>
-                  <option value="Visakhapatnam">Visakhapatnam Harbor & Coast (Andhra Pradesh)</option>
-                  <option value="Paradip">Paradip Deepwater Port & Estuary (Odisha)</option>
-                  <option value="Chennai">Chennai Coastal Basin (Tamil Nadu)</option>
-                  <option value="Kochi">Kochi Coastal Backwaters (Kerala)</option>
-                </select>
-                <p className="text-[11px] text-slate-500 mt-1">Sets the initial coastal municipality loaded on session start.</p>
+                </span>
+                <div className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-800">
+                  {defaultRegionName ?? 'No default region configured'}
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">Managed in Region Management. Changing the default there updates the header and dashboard.</p>
               </div>
 
 

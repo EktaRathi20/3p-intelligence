@@ -18,6 +18,7 @@ export const buildCity = (
     : null;
   const population = responses?.population?.total_population;
   const assessment = responses?.disasterIntelligence?.risk_assessment;
+  const localImpact = responses?.disasterIntelligence?.local_impact;
   const level = assessment?.level?.toUpperCase();
   const cityRiskLevel: CityLocation['riskLevel'] = level === 'RED'
     ? 'Red'
@@ -63,12 +64,21 @@ export const buildCity = (
     riskScore: assessment?.score ?? 0,
     riskLevel: cityRiskLevel,
     officialWarning: {
-      agency: assessment?.official_warning ? 'Backend warning' : 'Risk screening',
+      agency: assessment?.official_warning ? 'Official external warning' : 'Risk screening',
       level: assessment?.level ?? 'Unavailable',
       title: assessment?.note ?? 'No warning or risk assessment returned by the API.',
       validity: '',
       details: assessment?.factors.join(' · ') ?? '',
+      levelBasis: assessment?.level_basis,
+      screeningLevel: assessment?.screening_level,
+      warningFloor: assessment?.warning_floor ?? null,
     },
+    localImpact: localImpact ? {
+      verdict: localImpact.verdict,
+      distanceKm: localImpact.distance_to_footprint_km,
+      geometrySource: localImpact.geometry_source,
+      basis: localImpact.basis ?? [],
+    } : undefined,
     operationalRisk: { score: assessment?.score ?? 0, level: assessment?.level ?? 'Unavailable', factors: assessment?.factors ?? [] },
     aiPreparednessBrief: {
       summary: responses?.disasterIntelligence?.ai_analysis.summary ?? 'AI preparedness analysis is unavailable.',

@@ -1,9 +1,13 @@
 import ee
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from ingestion_layer.cache import load_json_cache, save_json_cache
 from ingestion_layer.constant import get_region_coords
 
 POPULATION_CACHE_TTL = timedelta(hours=24)
+
+
+def _utcnow_iso():
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _load_recent_population(region_key):
@@ -56,14 +60,14 @@ def fetch_population(region_key="vizag"):
         raw_population = pop_reduction.get("population")
         if raw_population is None or raw_population <= 0:
             return {
-                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "timestamp": _utcnow_iso(),
                 "region_target": region_key,
                 "total_population": None,
                 "source_error": "WorldPop returned no population pixels for this area.",
             }
-        
+
         population_data = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": _utcnow_iso(),
             "region_target": region_key,
             "total_population": int(raw_population),
         }
@@ -71,9 +75,9 @@ def fetch_population(region_key="vizag"):
         return population_data
 
     except Exception as e:
-        print(f"⚠️ [POPULATION] Error: {e}.")
+        print(f"[POPULATION] Error: {e}.")
         return {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": _utcnow_iso(),
             "region_target": region_key,
             "total_population": None,
             "source_error": str(e),

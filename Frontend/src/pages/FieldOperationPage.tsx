@@ -4,15 +4,15 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Clock3,
-  ClipboardCheck,
+
   ClipboardList,
   MapPin,
   MessageSquareText,
   Paperclip,
-  Plus,
+
   Search,
   Send,
-  Users,
+
   X,
 } from 'lucide-react';
 

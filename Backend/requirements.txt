@@ -1,10 +1,9 @@
 fastapi
 uvicorn[standard]
 earthengine-api
-google-genai
 requests
 python-dotenv
 python-socketio
 twilio
-google-cloud-aiplatform
 pyjwt
+h2o

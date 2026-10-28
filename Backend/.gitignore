@@ -37,3 +37,9 @@ data/geo/*.gz
 *.log
 .DS_Store
 Thumbs.db
+
+# Trained H2O risk models and training datasets (see Backend/models/README.md).
+# Only the README and the small model card are committed.
+models/*
+!models/README.md
+!models/model_card.json

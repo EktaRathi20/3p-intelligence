@@ -4,7 +4,7 @@ import { ApiError, normalizeApiError } from './apiError';
 const baseURL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
 const instance = axios.create({
   baseURL,
-  timeout: 15000,
+  timeout: 60000,
   headers: { 'Content-Type': 'application/json' },
 });
 

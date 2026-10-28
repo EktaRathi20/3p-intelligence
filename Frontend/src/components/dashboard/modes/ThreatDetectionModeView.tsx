@@ -3,6 +3,8 @@ import { AlertTriangle, CheckCircle2, CircleHelp, Clock3, LoaderCircle, Map, Shi
 import type { ApiRegion, DisasterIntelligenceResponse } from '@/types/api';
 import { CityLocation, MapPOI } from '@/types/domain';
 import { MapComponent } from '@/components/dashboard/MapComponent';
+import { ExternalLink, Radar } from 'lucide-react';
+import { formatAffectedPopulation, formatImpactDistance, formatWarningUpdated, verdictLabel } from '@/utils/localImpact';
 
 interface ThreatDetectionModeViewProps {
   city: CityLocation;
@@ -47,6 +49,16 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
   const analysis = disasterIntelligence?.ai_analysis;
   const dataUnavailable = disasterIntelligence?.data_quality.telemetry_status !== 'AVAILABLE';
   const riskLevel = assessment?.level ?? 'UNKNOWN';
+  const warnings = disasterIntelligence?.official_warnings ?? [];
+  const localImpact = disasterIntelligence?.local_impact ?? null;
+  const levelBasis = assessment?.level_basis;
+  const basisLabel = levelBasis === 'official_warning'
+    ? 'Official warning'
+    : levelBasis === 'both'
+      ? 'Warning + screening'
+      : levelBasis === 'screening'
+        ? 'Screening'
+        : 'Screening';
 
   return (
     <div className="w-full space-y-4 animate-in fade-in duration-300">
@@ -64,7 +76,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
         </div>
         <div className={`inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold ${riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
           <span className="h-2 w-2 rounded-full bg-current" />
-          {dataUnavailable ? 'DATA UNAVAILABLE' : `${riskLevel} RISK`}
+          {riskLevel === 'UNKNOWN' ? 'DATA UNAVAILABLE' : `${riskLevel} RISK`}
         </div>
       </section>
 
@@ -87,6 +99,66 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
         <Metric icon={<Map size={16} />} label="Screening zones" value={String(zones.length)} detail="Returned by disaster intelligence" />
       </div>
 
+      {(warnings.length > 0 || localImpact) && (
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900"><Radar size={16} className="text-blue-700" /> Regional warning vs local impact</h2>
+            <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs font-bold ${riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
+              Regional: {riskLevel} · {basisLabel}
+            </span>
+          </div>
+          {localImpact ? (
+            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className={`inline-flex items-center rounded-md border px-2 py-1 font-bold ${localImpact.verdict === 'inside_footprint' ? 'border-rose-200 bg-rose-50 text-rose-800' : localImpact.verdict === 'outside_footprint' ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-slate-200 bg-white text-slate-600'}`}>
+                  Local: {verdictLabel(localImpact.verdict)}
+                </span>
+                <span className="text-slate-600">Distance to footprint: {formatImpactDistance(localImpact.distance_to_footprint_km)}</span>
+                {localImpact.geometry_source && <span className="break-all text-slate-500">Source: {localImpact.geometry_source}</span>}
+              </div>
+              {(localImpact.basis ?? []).map((line, index) => (
+                <p key={`${index}-${line.slice(0, 24)}`} className="mt-1.5 text-xs leading-relaxed text-slate-600">{line}</p>
+              ))}
+              {localImpact.verdict === 'outside_footprint' && (
+                <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs leading-relaxed text-amber-900">
+                  Outside the modeled hazard footprint — this refers to the modeled footprint and does not rule out other hazards. Regional warnings still apply.
+                </p>
+              )}
+              {localImpact.verdict === 'uncertain' && (
+                <p className="mt-2 text-xs leading-relaxed text-slate-600">Precise local impact is uncertain: footprint geometry is unavailable. The regional warning level above still applies.</p>
+              )}
+            </div>
+          ) : warnings.length > 0 ? (
+            <p className="mt-3 text-xs text-slate-600">Local impact assessment is unavailable for this response. The regional warning level above still applies.</p>
+          ) : null}
+          {warnings.length > 0 && (
+            <ul className="mt-3 space-y-2">
+              {warnings.map((warning, index) => (
+                <li key={`${warning.event_id ?? warning.event_name ?? 'warning'}-${index}`} className="rounded-lg border border-slate-200 p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold ${riskTone[warning.alert_level ?? ''] ?? riskTone.UNKNOWN}`}>
+                      {warning.alert_level ?? 'Unrated'}
+                    </span>
+                    <strong className="text-sm text-slate-900">{warning.event_name ?? 'Unnamed system'}</strong>
+                    {warning.country && <span className="text-xs text-slate-500">{warning.country}</span>}
+                    {warning.footprint?.cap_severity && <span className="text-[11px] text-slate-500">CAP: {warning.footprint.cap_severity}</span>}
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                    <span>Max wind: {warning.max_wind_kmh == null ? 'Unavailable' : `${warning.max_wind_kmh.toFixed(0)} km/h`}</span>
+                    <span>Impact zone: {formatAffectedPopulation(warning.population_affected)}</span>
+                    <span>Updated: {formatWarningUpdated(warning.datemodified)}</span>
+                  </div>
+                  {warning.link && (
+                    <a href={warning.link} target="_blank" rel="noreferrer" className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 underline underline-offset-2">
+                      View official source <ExternalLink size={13} />
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm xl:col-span-8">
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
@@ -103,7 +175,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
             bounds={bounds}
             riskZones={zones}
             isLoading={isLoading}
-            emptyMessage="The API returned no facility coordinates for this region."
+            emptyMessage="The API returned no facility coordinates or verified risk zones for this region."
           />
         </section>
 
@@ -124,7 +196,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
                 <CheckCircle2 size={14} className="shrink-0" />No elevated screening factors were returned.
               </div>
             )}
-            {disasterIntelligence && disasterIntelligence.data_quality.telemetry_status !== 'AVAILABLE' && (
+            {disasterIntelligence && disasterIntelligence.data_quality.telemetry_status !== 'AVAILABLE' && !assessment?.warning_floor && (
               <div className="flex gap-2 rounded-md bg-amber-50 p-2 text-xs text-amber-900">
                 <CircleHelp size={14} className="shrink-0" />Risk factors cannot be assessed without current telemetry.
               </div>

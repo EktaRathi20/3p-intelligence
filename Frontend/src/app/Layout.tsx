@@ -72,6 +72,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         isMobileNavigationOpen={isMobileSidebarOpen}
         selectedCity={dashboard.selectedCity}
         availableCities={dashboard.availableCities}
+        isDefaultRegion={dashboard.defaultRegionKey !== null && dashboard.selectedRegionKey === dashboard.defaultRegionKey}
         onSelectCity={(city) => {
           dashboard.resetSimulation();
           dashboard.setSelectedRegionKey(city.id);
@@ -215,11 +216,12 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         </main>
       </div>
 
-      <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
+      <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} defaultRegionName={dashboard.defaultRegionKey ? dashboard.regions[dashboard.defaultRegionKey]?.name ?? dashboard.defaultRegionKey : null} />
       <EvacuationModal
         isOpen={dashboard.isEvacuationModalOpen}
         onClose={() => dashboard.setIsEvacuationModalOpen(false)}
         isLightMode
+        regionName={dashboard.selectedCity.name}
       />
       {dashboard.toastAlert && <AlertToast alert={dashboard.toastAlert} onClose={() => dashboard.setToastAlert(null)} />}
     </div>

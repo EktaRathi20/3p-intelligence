@@ -1,0 +1,80 @@
+{
+  "model_id": "GBM_1_AutoML_1_20261028_194326",
+  "algorithm": "gbm",
+  "model_path": "C:\\Ekta-Work\\3p-intelligence\\Backend\\models\\GBM_1_AutoML_1_20261028_194326",
+  "label": "P(same-storm max wind >= 118 km/h within next 24h of fixes), trained on IBTrACS North Indian basin tracks",
+  "features": [
+    "latitude",
+    "longitude",
+    "month",
+    "wind_speed_kmh",
+    "pressure_hpa"
+  ],
+  "metrics": {
+    "auc": 0.9970969298566692,
+    "logloss": 0.0510438306941617,
+    "mean_per_class_error": [
+      [
+        0.1154345797366398,
+        0.02329476070790859
+      ]
+    ]
+  },
+  "leaderboard_top5": [
+    {
+      "model_id": "GBM_1_AutoML_1_20261028_194326",
+      "auc": "0.9970969298566692",
+      "logloss": "0.0510438306941617",
+      "aucpr": "0.988138478110072",
+      "mean_per_class_error": "0.032892561428152604",
+      "rmse": "0.11906341367045008",
+      "mse": "0.014176096474860718"
+    },
+    {
+      "model_id": "GBM_3_AutoML_1_20261028_194326",
+      "auc": "0.9966503138822196",
+      "logloss": "0.05708960305192045",
+      "aucpr": "0.98679915648063",
+      "mean_per_class_error": "0.03202081372785133",
+      "rmse": "0.12363443731607542",
+      "mse": "0.015285474090462582"
+    },
+    {
+      "model_id": "GBM_2_AutoML_1_20261028_194326",
+      "auc": "0.9966229501993348",
+      "logloss": "0.05660279158161439",
+      "aucpr": "0.9862090901100196",
+      "mean_per_class_error": "0.029649677665540997",
+      "rmse": "0.12470705444797632",
+      "mse": "0.01555184942909053"
+    },
+    {
+      "model_id": "GBM_4_AutoML_1_20261028_194326",
+      "auc": "0.996560088879364",
+      "logloss": "0.05846229267741974",
+      "aucpr": "0.9866017668497932",
+      "mean_per_class_error": "0.03460988671523699",
+      "rmse": "0.12194723166124266",
+      "mse": "0.014871127309840785"
+    },
+    {
+      "model_id": "GBM_grid_1_AutoML_1_20261028_194326_model_1",
+      "auc": "0.9964074004129928",
+      "logloss": "0.05774408207253791",
+      "aucpr": "0.9860591904816018",
+      "mean_per_class_error": "0.03546704634550279",
+      "rmse": "0.1245391438906176",
+      "mse": "0.015509998361007951"
+    }
+  ],
+  "dataset_url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NI.list.v04r01.csv",
+  "trained_at": "2026-10-28T14:24:27.675853+00:00",
+  "h2o_version": "3.46.0.12",
+  "automl_settings": {
+    "max_runtime_secs": 600,
+    "max_models": 20,
+    "nfolds": 5,
+    "balance_classes": true,
+    "seed": 7
+  }
+}

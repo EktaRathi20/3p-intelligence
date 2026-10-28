@@ -8,12 +8,14 @@ interface EvacuationModalProps {
   isOpen: boolean;
   onClose: () => void;
   isLightMode?: boolean;
+  regionName?: string;
 }
 
 export const EvacuationModal: React.FC<EvacuationModalProps> = ({
   isOpen,
   onClose,
   isLightMode = true,
+  regionName,
 }) => {
   const [selectedWard, setSelectedWard] = useState('Ward 17');
   const [enableSiren, setEnableSiren] = useState(true);
@@ -53,7 +55,7 @@ export const EvacuationModal: React.FC<EvacuationModalProps> = ({
                 Issue Targeted Evacuation Order
               </h3>
               <p className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                Common Alerting Protocol (CAP) Integration
+                Common Alerting Protocol (CAP) Integration{regionName ? ` · Target region: ${regionName}` : ''}
               </p>
             </div>
           </div>

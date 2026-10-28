@@ -10,7 +10,7 @@ import {
   CalendarClock,
   ClipboardList,
   ChevronRight,
-  X,
+
 } from 'lucide-react';
 import type { OperationalMode } from '@/types/domain';
 import { getAllowedModules, SHARED_MODULES, type ModuleKey } from '@/utils/moduleAccess';

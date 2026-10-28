@@ -1,11 +1,19 @@
 import json
 from datetime import datetime, timezone
 from fastapi import HTTPException
-from google.genai import types
+from ingestion_layer import hazard_model
 from ingestion_layer.constant import REGION_DATA
 from ingestion_layer.index import run_ingestion
-from google.cloud import aiplatform #new
-import os
+from ingestion_layer.signals import (
+    build_model_features,
+    combine_levels,
+    score_to_level,
+    screen_risk,
+    summarize_active_systems,
+    summarize_warning_lines,
+    warning_floor_level,
+)
+from services.meta_client import MetaClientError
 
 async def build_disaster_intelligence(region: str, client):
     """
@@ -18,12 +26,14 @@ async def build_disaster_intelligence(region: str, client):
             ↓
         Deterministic risk screening
             ↓
-        Gemini contextual interpretation
+        H2O AutoML severity probability (when a trained model exists)
+            ↓
+        Meta Llama contextual interpretation
             ↓
         Final response
 
     IMPORTANT:
-    Gemini does not create measurements, coordinates, historical events,
+    Meta does not create measurements, coordinates, historical events,
     insurance payouts, or hazard observations.
     """
 
@@ -169,6 +179,38 @@ async def build_disaster_intelligence(region: str, client):
     pressure = safe_float(pressure)
     storm_surge = safe_float(storm_surge)
 
+    marine = unified_data.get("marine")
+
+    if not isinstance(marine, dict):
+        marine = {}
+
+    wave_height = safe_float(marine.get("wave_height_m"))
+
+    active_block = unified_data.get("active_systems")
+
+    if not isinstance(active_block, dict):
+        active_block = {}
+
+    active_systems = active_block.get("systems", [])
+
+    if not isinstance(active_systems, list):
+        active_systems = []
+
+    warnings_block = unified_data.get("warnings")
+
+    if not isinstance(warnings_block, dict):
+        warnings_block = {}
+
+    official_warnings = warnings_block.get("warnings", [])
+
+    if not isinstance(official_warnings, list):
+        official_warnings = []
+
+    local_impact = warnings_block.get("local_impact", {})
+
+    if not isinstance(local_impact, dict):
+        local_impact = {}
+
     # ---------------------------------------------------------
     # 3. DETERMINE DATA PROVENANCE
     # ---------------------------------------------------------
@@ -193,7 +235,12 @@ async def build_disaster_intelligence(region: str, client):
     if ingestion_error:
         telemetry_data_status = "UNAVAILABLE"
 
-    elif wind is not None or pressure is not None or storm_surge is not None:
+    elif (
+        wind is not None
+        or pressure is not None
+        or storm_surge is not None
+        or wave_height is not None
+    ):
         telemetry_data_status = "AVAILABLE"
 
     else:
@@ -304,154 +351,115 @@ async def build_disaster_intelligence(region: str, client):
     #
     # This is deliberately NOT an official evacuation model.
     #
-    # It is a transparent screening layer until we connect
-    # authoritative hazard grids / IMD warnings / GEE exposure
-    # layers.
+    # Screening bands are documented in ingestion_layer.constant:
+    # IMD cyclone-scale winds, screening pressure bands, and WMO
+    # sea-state wave bands.
     #
     # IMPORTANT:
-    # Missing data does NOT become zero.
+    # Missing data does NOT become zero. Active-system evidence is
+    # reported as factors but adds no score points, because IBTrACS
+    # fixes are provisional with weeks-scale latency.
     # ---------------------------------------------------------
 
-    risk_factors = []
-    risk_score = 0
+    risk_score, risk_factors = screen_risk(
+        wind=wind,
+        pressure=pressure,
+        wave_height_m=wave_height,
+    )
 
-    if wind is not None:
-
-        if wind >= 118:
-            risk_score += 45
-            risk_factors.append(
-                f"Very high wind observation: {wind:.1f} km/h"
-            )
-
-        elif wind >= 88:
-            risk_score += 35
-            risk_factors.append(
-                f"High wind observation: {wind:.1f} km/h"
-            )
-
-        elif wind >= 62:
-            risk_score += 20
-            risk_factors.append(
-                f"Strong wind observation: {wind:.1f} km/h"
-            )
-
-    if pressure is not None:
-
-        if pressure <= 980:
-            risk_score += 30
-            risk_factors.append(
-                f"Very low atmospheric pressure: {pressure:.1f} hPa"
-            )
-
-        elif pressure <= 995:
-            risk_score += 20
-            risk_factors.append(
-                f"Low atmospheric pressure: {pressure:.1f} hPa"
-            )
-
-    if storm_surge is not None:
-
-        if storm_surge >= 2.0:
-            risk_score += 35
-            risk_factors.append(
-                f"Storm surge estimate: {storm_surge:.2f} m"
-            )
-
-        elif storm_surge >= 1.2:
-            risk_score += 25
-            risk_factors.append(
-                f"Storm surge estimate: {storm_surge:.2f} m"
-            )
-
-        elif storm_surge >= 0.5:
-            risk_score += 10
-            risk_factors.append(
-                f"Storm surge estimate: {storm_surge:.2f} m"
-            )
-
-    # Cap screening score.
-    risk_score = min(risk_score, 100)
+    risk_factors.extend(summarize_active_systems(active_systems))
+    risk_factors.extend(summarize_warning_lines(official_warnings))
+    if official_warnings:
+        verdict = local_impact.get("verdict", "uncertain")
+        for line in local_impact.get("basis", []):
+            risk_factors.append(f"Local impact ({verdict}): {line}")
 
     # ---------------------------------------------------------
-    # 7.5 VERTEX AI AUTOML PREDICTION (NEW LAYER)
+    # 7.5 H2O AUTOML SEVERITY PROBABILITY
     # ---------------------------------------------------------
-    ml_prediction_result = None
+    #
+    # Scores P(same-storm winds >= 118 km/h within 24h) from a model
+    # trained on real IBTrACS fixes. Features come ONLY from measured
+    # values; anything missing (or no trained model file) reports
+    # UNAVAILABLE instead of a fabricated number.
+    # ---------------------------------------------------------
+
+    ml_probability = {
+        "status": "UNAVAILABLE",
+        "probability": None,
+        "model_id": None,
+        "features_used": None,
+        "label": hazard_model.LABEL_DESCRIPTION,
+        "reason": None,
+        "note": (
+            "Screening probability only; not an official warning or "
+            "evacuation order."
+        ),
+    }
+
     if telemetry_data_status == "AVAILABLE":
-        try:
-            # Use the endpoint details from your screenshot
-            PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") # Ensure this is set in your .env
-            ENDPOINT_ID = "3407664161163837440" 
-            LOCATION = "us-central1"
-
-            if PROJECT_ID:
-                aiplatform.init(project=PROJECT_ID, location=LOCATION)
-                endpoint = aiplatform.Endpoint(endpoint_name=f"projects/{PROJECT_ID}/locations/{LOCATION}/endpoints/{ENDPOINT_ID}")
-
-                # IMPORTANT: Update these keys to match the exact column names used in your AutoML training dataset!
-                # Format time exactly as the model expects
-                formatted_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-                # You must pass all 23 feature columns (assuming 'cyclone_status' is the target)
-                instance = {
-                    "basin": "BoB", 
-                    "cloud_cover_percent": "0.0",
-                    "country_region": "India",
-                    "distance_to_coast_km": "0.0",
-                    "elevation_m": "0.0",
-                    "humidity_percent": "0.0",
-                    "latitude": str(center_lat) if center_lat else "0.0",
-                    "longitude": str(center_lon) if center_lon else "0.0",
-                    "pressure_change_12h_hpa": "0.0",
-                    "pressure_change_3h_hpa": "0.0",
-                    "pressure_change_6h_hpa": "0.0",
-                    "pressure_hpa": str(pressure) if pressure else "1013.0",
-                    "rainfall_1h_mm": "0.0",
-                    "rainfall_24h_mm": "0.0",
-                    "rainfall_6h_mm": "0.0",
-                    "sea_level_anomaly_m": str(storm_surge) if storm_surge else "0.0",
-                    "sea_surface_temperature_c": "28.0",
-                    "temperature_c": "28.0",
-                    "timestamp": formatted_time,
-                    "water_fraction": "0.0",
-                    "wind_direction_deg": "0.0",
-                    "wind_gust_kmh": str(wind * 1.2) if wind else "0.0", # Rough estimate if gust is missing
-                    "wind_speed_kmh": str(wind) if wind else "0.0"
-                }
-
-                prediction = endpoint.predict(instances=[instance])
-                
-                if prediction.predictions:
-                    ml_prediction_result = prediction.predictions[0]
-                    # Pass the ML result into the context for Gemini to see
-                    risk_factors.append(f"AutoML Classification Result: {ml_prediction_result}")
+        features = build_model_features(
+            latitude=center_lat,
+            longitude=center_lon,
+            wind_speed_kmh=wind,
+            pressure_hpa=pressure,
+        )
+        if features is None:
+            ml_probability["reason"] = (
+                "Insufficient features: wind and pressure observations "
+                "are both required."
+            )
+        else:
+            scored = hazard_model.score(features)
+            if scored is None:
+                ml_probability["reason"] = (
+                    "Model unavailable: set H2O_MODEL_PATH to a trained "
+                    "model file (see Backend/scripts/train_risk_model.py)."
+                )
             else:
-                print("[VERTEX AI] GOOGLE_CLOUD_PROJECT not set in environment.")
-
-        except Exception as e:
-            print(f"[VERTEX AI] Prediction failed or still deploying: {e}")
+                ml_probability.update({
+                    "status": "SCORED",
+                    "probability": scored["probability"],
+                    "model_id": scored["model_id"],
+                    "features_used": scored["features_used"],
+                    "reason": None,
+                })
+                risk_factors.append(
+                    "H2O severity probability: "
+                    f"{scored['probability']:.2f} "
+                    f"({hazard_model.LABEL_DESCRIPTION})"
+                )
+    else:
+        ml_probability["reason"] = (
+            f"No current measurements (telemetry status: "
+            f"{telemetry_data_status})."
+        )
 
     # ---------------------------------------------------------
     # 8. RISK LEVEL
     # ---------------------------------------------------------
 
     if telemetry_data_status != "AVAILABLE":
-        risk_level = "UNKNOWN"
-
-    elif risk_score >= 75:
-        risk_level = "RED"
-
-    elif risk_score >= 50:
-        risk_level = "ORANGE"
-
-    elif risk_score >= 25:
-        risk_level = "YELLOW"
+        screening_level = "UNKNOWN"
 
     else:
-        risk_level = "GREEN"
+        screening_level = score_to_level(risk_score)
+
+    # Official warnings set a severity floor: a verified warning can only
+    # raise the reported level, never lower it. A missing active-system
+    # result therefore cannot override a verified official warning.
+    floor = warning_floor_level(official_warnings)
+    risk_level, level_basis = combine_levels(screening_level, floor)
 
     # ---------------------------------------------------------
     # 9. RISK ZONES
     # ---------------------------------------------------------
+    #
+    # Precise circles are drawn ONLY from verified local evidence
+    # (screening extremes observed at the anchor). A regional warning
+    # floor alone never generates city circles: the warning's own
+    # footprint polygons carry the geography instead (see
+    # official_warnings[].footprint and local_impact).
     #
     # These are screening zones around the region center.
     #
@@ -462,9 +470,15 @@ async def build_disaster_intelligence(region: str, client):
 
     risk_zones = []
 
+    zone_level = None
+    if screening_level in ("RED", "ORANGE", "YELLOW"):
+        zone_level = screening_level
+    elif screening_level == "GREEN" and floor is None:
+        zone_level = "GREEN"
+
     if center_lat is not None and center_lon is not None:
 
-        if risk_level == "RED":
+        if zone_level == "RED":
 
             risk_zones = [
                 {
@@ -494,7 +508,7 @@ async def build_disaster_intelligence(region: str, client):
                 },
             ]
 
-        elif risk_level == "ORANGE":
+        elif zone_level == "ORANGE":
 
             risk_zones = [
                 {
@@ -523,7 +537,7 @@ async def build_disaster_intelligence(region: str, client):
                 },
             ]
 
-        elif risk_level == "YELLOW":
+        elif zone_level == "YELLOW":
 
             risk_zones = [
                 {
@@ -552,7 +566,7 @@ async def build_disaster_intelligence(region: str, client):
                 },
             ]
 
-        elif risk_level == "GREEN":
+        elif zone_level == "GREEN":
 
             risk_zones = [
                 {
@@ -577,7 +591,8 @@ async def build_disaster_intelligence(region: str, client):
     # Do NOT invent payout values.
     #
     # If actual storm surge data is unavailable, the trigger
-    # cannot be evaluated.
+    # cannot be evaluated. Wave height is NOT storm surge and is
+    # never substituted here.
     # ---------------------------------------------------------
 
     trigger_threshold_m = 1.2
@@ -634,10 +649,10 @@ async def build_disaster_intelligence(region: str, client):
         }
 
     # ---------------------------------------------------------
-    # 11. GEMINI CONTEXT
+    # 11. META CONTEXT
     # ---------------------------------------------------------
     #
-    # Gemini gets verified/derived backend information.
+    # Meta gets verified/derived backend information.
     #
     # It does NOT get permission to create:
     # - weather observations
@@ -653,13 +668,23 @@ async def build_disaster_intelligence(region: str, client):
             "wind_speed_kmh": wind,
             "pressure_hpa": pressure,
             "storm_surge_meters": storm_surge,
+            "wave_height_m": wave_height,
             "timestamp": telemetry_timestamp,
             "status": telemetry_data_status,
             "source_system": system_name,
         },
-        "ml_classification_model": ml_prediction_result, # <-- Passed to Gemini
+
+        "ml_probability": ml_probability,
+
+        "active_systems": active_systems,
+
+        "official_warnings": official_warnings,
+
         "risk_assessment": {
             "level": risk_level,
+            "screening_level": screening_level,
+            "warning_floor": floor,
+            "level_basis": level_basis,
             "score": risk_score,
             "factors": risk_factors,
         },
@@ -686,7 +711,7 @@ async def build_disaster_intelligence(region: str, client):
     }
 
     # ---------------------------------------------------------
-    # 12. GEMINI = EXPLANATION / PREPARATION ASSISTANT
+    # 12. META = EXPLANATION / PREPARATION ASSISTANT
     # ---------------------------------------------------------
 
     if client is not None:
@@ -741,16 +766,10 @@ do not pretend current hazard conditions are known.
 
         try:
 
-            response = client.models.generate_content(
-                model="gemini-3.5-flash-lite",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.1,
-                ),
+            parsed_ai = client.generate_json(
+                [{"role": "user", "content": prompt}],
+                temperature=0.1,
             )
-
-            parsed_ai = json.loads(response.text)
 
             if isinstance(parsed_ai, dict):
 
@@ -790,10 +809,10 @@ do not pretend current hazard conditions are known.
                     ),
                 }
 
-        except Exception as error:
+        except (MetaClientError, RuntimeError, ValueError) as error:
 
             print(
-                f"[GEMINI] Disaster intelligence "
+                f"[META] Disaster intelligence "
                 f"analysis failed: {error}"
             )
 
@@ -817,7 +836,7 @@ do not pretend current hazard conditions are known.
         "status": "success",
 
         "region": region_key,
-        "ml_prediction": ml_prediction_result,
+        "ml_probability": ml_probability,
         "generated_at": datetime.now(
             timezone.utc
         ).isoformat(),
@@ -837,6 +856,21 @@ do not pretend current hazard conditions are known.
 
             "sources": {
                 "meteorological": system_name,
+                "marine": (
+                    marine.get("source")
+                    if isinstance(marine, dict)
+                    else None
+                ),
+                "active_systems": (
+                    active_block.get("source")
+                    if isinstance(active_block, dict)
+                    else None
+                ),
+                "warnings": (
+                    warnings_block.get("source")
+                    if isinstance(warnings_block, dict)
+                    else None
+                ),
                 "history": (
                     history.get("source")
                     if isinstance(history, dict)
@@ -854,6 +888,7 @@ do not pretend current hazard conditions are known.
             "wind_speed_kmh": wind,
             "pressure_hpa": pressure,
             "storm_surge_meters": storm_surge,
+            "wave_height_m": wave_height,
             "alert_status": telemetry_status,
         },
 
@@ -863,15 +898,28 @@ do not pretend current hazard conditions are known.
             "timestamp": forecast.get("timestamp"),
         },
 
+        "marine": marine if marine else None,
+
+        "active_systems": active_systems,
+
+        "official_warnings": official_warnings,
+
+        "local_impact": local_impact,
+
         "risk_assessment": {
             "level": risk_level,
+            "screening_level": screening_level,
+            "warning_floor": floor,
+            "level_basis": level_basis,
             "score": risk_score,
             "factors": risk_factors,
             "method": (
-                "Backend deterministic screening "
-                "from available telemetry"
+                "Deterministic screening from available telemetry "
+                "(IMD/WMO bands), raised to at least the verified "
+                "official-warning severity; H2O severity probability "
+                "reported separately when a trained model is configured"
             ),
-            "official_warning": False,
+            "official_warning": level_basis in ("official_warning", "both"),
             "note": (
                 "This screening result is not an official "
                 "evacuation order or government warning."

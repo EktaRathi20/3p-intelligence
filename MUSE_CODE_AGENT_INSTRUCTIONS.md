@@ -31,7 +31,7 @@ Known technology context:
 - Frontend: React, TypeScript, Vite, Tailwind CSS, existing API/service modules.
 - Realtime features may use Socket.IO.
 - Backend persistence uses JSON files in `database/`; no database credentials are needed.
-- Meta Model API is intended for generative AI functionality.
+- Meta Llama API (via `services/meta_client.py`) provides generative AI; H2O AutoML provides severity probability.
 
 Treat these as clues, not a substitute for inspecting the repository. Confirm current dependencies, entry points, routes, and service implementations.
 
@@ -45,7 +45,7 @@ When working on Region Management, use this geographic order:
 6. Applicable Hazards
 
 ### Form behavior
-- Country is a searchable dropdown populated from the existing countries API/Firestore.
+- Country is a searchable dropdown populated from the existing countries API.
 - State/province options depend on the selected country.
 - Changing country clears the selected state and loads the new state list.
 - Region name is a normal text input.
@@ -60,7 +60,7 @@ Where supported by the current schema, persist:
 - `name`, `code`, `type`, `parentRegionId`, `active`, `hazardIds`
 - Existing timestamps and other required fields
 
-Update create and edit flows together. Editing must prepopulate saved values. Existing Firestore documents without geographic fields must continue to load safely.
+Update create and edit flows together. Editing must prepopulate saved values. Existing region records without geographic fields must continue to load safely.
 
 ### State data
 - Prefer a reliable, documented geographic dataset/provider.
@@ -129,7 +129,7 @@ If requested:
 - Never print secret values in logs, summaries, or documentation.
 - Follow existing `.env` conventions; use placeholders only in example files.
 - If a key is missing, report the variable name, not a guessed value.
-- Do not change production credentials or Firebase project configuration without explicit authorization.
+- Do not change production credentials or hosted-project configuration without explicit authorization.
 
 ## 9. Testing Checklist
 Before declaring completion, verify what the repository permits:

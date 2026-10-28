@@ -1,14 +1,15 @@
 import json
 
-from google.genai import types
-
 from ingestion_layer.index import run_ingestion
 from services.ai_client import client
+from services.meta_client import MetaClientError
 
 
 async def create_dispatch_response(query: str, region: str) -> dict:
     if client is None:
-        raise RuntimeError("GEMINI_API_KEY is not configured")
+        raise RuntimeError(
+            "META_API_KEY, META_API_URL, and META_MODEL must all be configured"
+        )
 
     places_data = []
     try:
@@ -56,12 +57,16 @@ async def create_dispatch_response(query: str, region: str) -> dict:
     }}
     """
 
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
+    try:
+        parsed = client.generate_json(
+            [{"role": "user", "content": prompt}],
             temperature=0.2,
-        ),
-    )
-    return json.loads(response.text)
+        )
+    except MetaClientError as error:
+        raise RuntimeError(f"Meta dispatch generation failed: {error}") from error
+
+    if not isinstance(parsed.get("verifiedRoute"), dict) or not isinstance(
+        parsed.get("text"), str
+    ):
+        raise RuntimeError("Meta dispatch reply had an unexpected structure.")
+    return parsed

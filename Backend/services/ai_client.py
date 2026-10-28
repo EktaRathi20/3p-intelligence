@@ -1,7 +1,12 @@
-import os
+"""Shared reasoning client for the 3P Intelligence backend.
 
-from google import genai
+Meta Llama (via ``services.meta_client``) provides text reasoning,
+summaries, and explanations. ``client`` is None unless ``META_API_KEY``,
+``META_API_URL``, and ``META_MODEL`` are all configured; callers must
+treat a None client (or a ``MetaClientError``) as "AI unavailable" and
+fall back to deterministic output.
+"""
 
+from services.meta_client import MetaClient
 
-api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key) if api_key else None
+client = MetaClient.from_env()

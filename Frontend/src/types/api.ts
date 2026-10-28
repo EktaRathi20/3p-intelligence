@@ -115,6 +115,54 @@ export interface DisasterRiskZone {
   basis?: string[];
 }
 
+export interface DisasterWarningFootprint {
+  polygons: number[][][];
+  circles: Array<{ center: [number, number]; radius_km: number }>;
+  cap_severity?: string | null;
+  cap_urgency?: string | null;
+  cap_certainty?: string | null;
+  cap_headline?: string | null;
+  cap_sent?: string | null;
+  simplified?: boolean;
+  source_url?: string | null;
+}
+
+export interface DisasterOfficialWarning {
+  event_id?: string | null;
+  episode_id?: string | null;
+  event_name?: string | null;
+  event_type?: string | null;
+  title?: string | null;
+  description?: string | null;
+  alert_level?: string | null;
+  episode_alert_level?: string | null;
+  severity_text?: string | null;
+  max_wind_kmh?: number | null;
+  population_affected?: number | null;
+  vulnerability?: string | null;
+  iso3?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  bbox?: { lonmin: number; lonmax: number; latmin: number; latmax: number } | null;
+  fromdate?: string | null;
+  todate?: string | null;
+  datemodified?: string | null;
+  is_current?: boolean;
+  link?: string | null;
+  cap_url?: string | null;
+  glide?: string | null;
+  matched_region?: string;
+  footprint?: DisasterWarningFootprint | null;
+}
+
+export interface DisasterLocalImpact {
+  verdict: 'inside_footprint' | 'outside_footprint' | 'uncertain' | string;
+  basis: string[];
+  distance_to_footprint_km: number | null;
+  geometry_source: string | null;
+}
+
 export interface DisasterInsuranceSummary {
   status: 'UNAVAILABLE' | 'EVALUATED';
   trigger_met: boolean | null;
@@ -175,6 +223,7 @@ export interface DisasterIntelligenceResponse {
     wind_speed_kmh: number | null;
     pressure_hpa: number | null;
     storm_surge_meters: number | null;
+    wave_height_m?: number | null;
     alert_status: string;
   };
   risk_assessment: {
@@ -183,9 +232,14 @@ export interface DisasterIntelligenceResponse {
     factors: string[];
     method: string;
     official_warning: boolean;
+    screening_level?: string;
+    warning_floor?: string | null;
+    level_basis?: string;
     note: string;
   };
   risk_zones: DisasterRiskZone[];
+  official_warnings?: DisasterOfficialWarning[];
+  local_impact?: DisasterLocalImpact;
   historical_context: {
     primary_analog: string | null;
     historical_analogs: Array<Record<string, unknown>>;

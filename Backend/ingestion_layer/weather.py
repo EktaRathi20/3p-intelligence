@@ -9,12 +9,22 @@ load_dotenv()
 
 TELEMETRY_CACHE_TTL = timedelta(minutes=10)
 FORECAST_CACHE_TTL = timedelta(hours=6)
+MARINE_CACHE_TTL = timedelta(hours=1)
+
+MARINE_API_URL = "https://marine-api.open-meteo.com/v1/marine"
 
 
 def _description_text(description):
     if isinstance(description, dict):
         return description.get("text") or "Unknown"
     return description if isinstance(description, str) and description else "Unknown"
+
+
+def _to_float(value):
+    try:
+        return float(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
 
 
 def _weather_code_description(code):
@@ -272,3 +282,124 @@ def fetch_7_day_forecast(region_key="vizag"):
         metadata={"region_target": region_key},
     )
     return forecast_data
+
+
+def _marine_request(latitude, longitude, **params):
+    """Query the free Open-Meteo Marine API (no key required)."""
+    response = requests.get(
+        MARINE_API_URL,
+        params={
+            "latitude": latitude,
+            "longitude": longitude,
+            "timezone": "UTC",
+            **params,
+        },
+        timeout=20,
+    )
+    if not response.ok:
+        raise RuntimeError(
+            f"Open-Meteo Marine returned HTTP {response.status_code}: "
+            f"{response.reason}"
+        )
+    return response.json()
+
+
+def fetch_marine_conditions(region_key="vizag"):
+    """Fetch real-time marine conditions for coastal hazard evidence.
+
+    Returns measured/forecast wave height, sea-surface temperature, sea
+    level, and currents from the Open-Meteo Marine API (CMEMS/GLOFAS
+    based, free for non-commercial use). Each variable group is fetched
+    independently so one unsupported variable cannot wipe out the core
+    measurements; per-group failures are recorded in ``source_errors``
+    and missing values stay ``None`` (never zero-filled).
+    """
+    cache_filename = f"marine_{region_key}.json"
+    cached_data = load_json_cache(
+        cache_filename, MARINE_CACHE_TTL, region_key=region_key
+    )
+    if cached_data is not None:
+        return cached_data
+
+    coords = get_region_coords(region_key)
+    result = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "region_target": region_key,
+        "latitude": coords["lat"],
+        "longitude": coords["lon"],
+        "wave_height_m": None,
+        "wave_direction_deg": None,
+        "wave_period_s": None,
+        "ocean_current_velocity_ms": None,
+        "sea_surface_temperature_c": None,
+        "sea_level_msl_m": None,
+        "forecast_wave_height_max_7d": [],
+        "source": "Open-Meteo Marine API",
+        "source_url": MARINE_API_URL,
+        "source_errors": {},
+    }
+
+    try:
+        core = _marine_request(
+            coords["lat"],
+            coords["lon"],
+            current="wave_height,sea_surface_temperature",
+        ).get("current", {})
+        result["wave_height_m"] = _to_float(core.get("wave_height"))
+        result["sea_surface_temperature_c"] = _to_float(
+            core.get("sea_surface_temperature")
+        )
+    except (requests.RequestException, RuntimeError, ValueError) as error:
+        result["source_errors"]["core"] = str(error)
+
+    try:
+        daily = _marine_request(
+            coords["lat"],
+            coords["lon"],
+            daily="wave_height_max",
+            forecast_days=7,
+        ).get("daily", {})
+        times = daily.get("time", [])
+        maxima = daily.get("wave_height_max", [])
+        result["forecast_wave_height_max_7d"] = [
+            {"date": date, "wave_height_max_m": _to_float(maxima[index])}
+            for index, date in enumerate(times[:7])
+            if index < len(maxima)
+        ]
+    except (requests.RequestException, RuntimeError, ValueError) as error:
+        result["source_errors"]["forecast"] = str(error)
+
+    try:
+        extended = _marine_request(
+            coords["lat"],
+            coords["lon"],
+            current=(
+                "wave_direction,wave_period,"
+                "ocean_current_velocity,sea_level_height_msl"
+            ),
+        ).get("current", {})
+        result["wave_direction_deg"] = _to_float(extended.get("wave_direction"))
+        result["wave_period_s"] = _to_float(extended.get("wave_period"))
+        result["ocean_current_velocity_ms"] = _to_float(
+            extended.get("ocean_current_velocity")
+        )
+        result["sea_level_msl_m"] = _to_float(
+            extended.get("sea_level_height_msl")
+        )
+    except (requests.RequestException, RuntimeError, ValueError) as error:
+        result["source_errors"]["extended"] = str(error)
+
+    has_measurements = any(
+        result[key] is not None
+        for key in (
+            "wave_height_m",
+            "wave_direction_deg",
+            "wave_period_s",
+            "ocean_current_velocity_ms",
+            "sea_surface_temperature_c",
+            "sea_level_msl_m",
+        )
+    ) or bool(result["forecast_wave_height_max_7d"])
+    if has_measurements:
+        save_json_cache(cache_filename, result)
+    return result

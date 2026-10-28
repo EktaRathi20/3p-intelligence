@@ -30,12 +30,13 @@ interface HeaderProps {
   onOpenMobileNavigation: () => void;
   onOpenRegionPage?: () => void;
   isMobileNavigationOpen: boolean;
+  isDefaultRegion?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   selectedCity,
-  availableCities,
-  onSelectCity,
+
+
   onOpenNotifications,
   onOpenSettings,
   onOpenHistoricalDisasters,
@@ -45,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileNavigation,
   isMobileNavigationOpen,
   onOpenRegionPage,
+  isDefaultRegion = false,
 }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -135,6 +137,11 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:max-w-md sm:flex-none">
             <div className="flex min-w-0 flex-1 items-center gap-2 border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-800">
               <MapPin size={15} className="shrink-0 text-[#234d77]" />
+              {isDefaultRegion && (
+                <span className="shrink-0 border border-[#18365b] bg-[#18365b] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                  Default
+                </span>
+              )}
               <span className="min-w-0 truncate font-semibold">
                 {selectedCity.name}, {selectedCity.region}, {selectedCity.country}
               </span>

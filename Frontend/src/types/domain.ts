@@ -47,6 +47,15 @@ export interface CityLocation {
     title: string;
     validity: string;
     details: string;
+    levelBasis?: string;
+    screeningLevel?: string;
+    warningFloor?: string | null;
+  };
+  localImpact?: {
+    verdict: string;
+    distanceKm: number | null;
+    geometrySource: string | null;
+    basis: string[];
   };
   operationalRisk: {
     score: number;

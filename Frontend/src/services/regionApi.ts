@@ -119,13 +119,37 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+const REGION_API_TIMEOUT_MS = 60000;
+
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const callerSignal = init.signal;
+  const timeoutController = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => {
+    timeoutController.abort(new DOMException('Request timed out.', 'TimeoutError'));
+  }, REGION_API_TIMEOUT_MS);
+  const onCallerAbort = () => timeoutController.abort(
+    callerSignal instanceof AbortSignal ? callerSignal.reason : undefined,
+  );
+  if (callerSignal?.aborted) {
+    onCallerAbort();
+  } else {
+    callerSignal?.addEventListener('abort', onCallerAbort, { once: true });
+  }
+  try {
+    return await fetch(url, { ...init, signal: timeoutController.signal });
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+    callerSignal?.removeEventListener('abort', onCallerAbort);
+  }
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    response = await fetchWithTimeout(`${API_BASE}${path}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -134,7 +158,7 @@ async function request<T>(
       },
     });
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (error instanceof DOMException && (error.name === "AbortError" || error.name === "TimeoutError")) {
       throw error;
     }
     throw new Error(

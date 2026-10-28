@@ -20,6 +20,7 @@ export interface DashboardOutletData {
   regions: Record<string, ApiRegion>;
   selectedRegionKey: string;
   setSelectedRegionKey: Dispatch<SetStateAction<string>>;
+  defaultRegionKey: string | null;
   selectedRegion: ApiRegion | undefined;
   selectedCity: CityLocation | null;
   availableCities: CityLocation[];

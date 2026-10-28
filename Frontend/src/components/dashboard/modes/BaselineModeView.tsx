@@ -101,8 +101,8 @@ export const BaselineModeView: React.FC<BaselineModeViewProps> = ({
 
   const currentRoleObj = roles.find((r) => r.id === activeRole) || roles[0];
 
-  const cityName = city?.name || 'Visakhapatnam & Coastal Basin';
-  const coordinates = city?.coordinatesFormatted || '17.68° N, 83.21° E';
+  const cityName = city?.name || 'Unknown region';
+  const coordinates = city?.coordinatesFormatted || 'Coordinates unavailable';
 
   return (
     <div className="space-y-6">

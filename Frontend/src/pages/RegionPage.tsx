@@ -181,6 +181,7 @@ export default function RegionPage({
         defaultRegionId,
       });
 
+      window.dispatchEvent(new CustomEvent("region-default-changed"));
       setMessage("Default region saved successfully.");
     } catch (err) {
       setError(

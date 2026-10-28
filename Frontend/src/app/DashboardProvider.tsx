@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { regionApi } from '../services/regionApi';
+import { resolveDefaultRegionKey } from '../utils/regionDefault';
 import { Outlet, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 import type { ApiRegion, DisasterIntelligenceResponse, RegionResponses } from '../types/api';
@@ -32,6 +35,27 @@ const routeModes = {
   '/simulator': 'simulator',
 } as const;
 
+const applyConfiguredDefault = async (
+  data: Record<string, ApiRegion>,
+  signal: AbortSignal,
+  setDefaultRegionKey: (key: string) => void,
+  applySelection: (key: string) => void,
+) => {
+  try {
+    const config = await regionApi.getConfiguration();
+    if (signal.aborted || !config.defaultRegionId) return;
+    const record = await regionApi.getRegion(config.defaultRegionId, signal);
+    if (signal.aborted) return;
+    const resolved = resolveDefaultRegionKey([record], config.defaultRegionId, Object.keys(data));
+    if (resolved) {
+      setDefaultRegionKey(resolved);
+      applySelection(resolved);
+    }
+  } catch {
+    // Region configuration is optional; keep the current selection.
+  }
+};
+
 export default function DashboardProvider() {
   const location = useLocation();
   const mode = routeModes[location.pathname as keyof typeof routeModes] ?? 'threat';
@@ -49,6 +73,10 @@ export default function DashboardProvider() {
 
   const [regions, setRegions] = useState<Record<string, ApiRegion>>({});
   const [selectedRegionKey, setSelectedRegionKey] = useState('vizag');
+  const [defaultRegionKey, setDefaultRegionKey] = useState<string | null>(null);
+  const userTouchedRegionRef = useRef(false);
+  const regionsRef = useRef(regions);
+  regionsRef.current = regions;
   const [regionResponses, setRegionResponses] = useState<RegionResponses | null>(null);
   const [simulationTier, setSimulationTier] = useState<SimulationTier | null>(null);
   const [simulatedIntelligence, setSimulatedIntelligence] = useState<DisasterIntelligenceResponse | null>(null);
@@ -62,6 +90,10 @@ export default function DashboardProvider() {
   const [showHistoricalLayer, setShowHistoricalLayer] = useState(false);
   const [isEvacuationModalOpen, setIsEvacuationModalOpen] = useState(false);
 
+  const setSelectedRegionKeyTracked: Dispatch<SetStateAction<string>> = (value) => {
+    userTouchedRegionRef.current = true;
+    setSelectedRegionKey(value);
+  };
   const selectedRegion = regions[selectedRegionKey];
   const activeIntelligence = mode === 'simulator'
     ? simulatedIntelligence ?? regionResponses?.disasterIntelligence ?? null
@@ -89,6 +121,29 @@ export default function DashboardProvider() {
   };
 
   useEffect(() => {
+    const onDefaultChanged = () => {
+      const controller = new AbortController();
+      void api.getRegions(controller.signal)
+        .then((data) => {
+          if (controller.signal.aborted || Object.keys(data).length === 0) return;
+          regionsRef.current = data;
+          setRegions(data);
+          void applyConfiguredDefault(data, controller.signal, setDefaultRegionKey, (key) => {
+            setSelectedRegionKey(key);
+            setSimulatedIntelligence(null);
+            setSimulationTier(null);
+          });
+        })
+        .catch((error: unknown) => {
+          if (!isAbortError(error)) {
+            setRegionError('Region information is temporarily unavailable.');
+          }
+        });
+    };
+    window.addEventListener('region-default-changed', onDefaultChanged);
+    return () => window.removeEventListener('region-default-changed', onDefaultChanged);
+  }, []);
+  useEffect(() => {
     if (!latestLiveAlert) return;
     setToastAlert(latestLiveAlert);
   }, [latestLiveAlert]);
@@ -111,6 +166,9 @@ export default function DashboardProvider() {
           return;
         }
         setRegions(data);
+        void applyConfiguredDefault(data, controller.signal, setDefaultRegionKey, (key) => {
+          if (!userTouchedRegionRef.current) setSelectedRegionKey(key);
+        });
         if (!data[selectedRegionKey]) setSelectedRegionKey(Object.keys(data)[0] ?? '');
       })
       .catch((error: unknown) => {
@@ -171,7 +229,8 @@ export default function DashboardProvider() {
     markAllRead,
     regions,
     selectedRegionKey,
-    setSelectedRegionKey,
+    setSelectedRegionKey: setSelectedRegionKeyTracked,
+    defaultRegionKey,
     selectedRegion,
     selectedCity,
     availableCities,
