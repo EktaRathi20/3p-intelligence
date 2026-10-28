@@ -1,0 +1,15 @@
+{
+  "geoSync": {
+    "attribution": "Geographic data by Countries States Cities Database (https://github.com/dr5hn/countries-states-cities-database) | ODbL v1.0",
+    "cities": 152378,
+    "countries": 250,
+    "datasetRef": "master",
+    "states": 5327,
+    "syncedAt": "2026-10-28T11:43:08.800126+00:00",
+    "updatedAt": "2026-10-28T11:43:08.800147+00:00"
+  },
+  "regionManagement": {
+    "defaultRegionId": "ZgBKsWS852zsFoAE1Tpf",
+    "updatedAt": "2026-10-28T11:44:40.432322+00:00"
+  }
+}

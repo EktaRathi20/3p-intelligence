@@ -1,14 +1,24 @@
+"""Seed default hazard types into the local JSON database.
+
+Run from the repository root::
+
+    python Backend/scripts/seed_hazards.py
+
+Writes merge per record, so reruns are safe and unrelated fields on
+existing records are preserved.
+"""
+
+from __future__ import annotations
+
+import sys
 from pathlib import Path
 
-import firebase_admin
-from firebase_admin import credentials, firestore
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
+from services import json_store  # noqa: E402
 
-# Firebase authentication
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
-
-db = firestore.client()
 
 # --------------------------------------------------
 # Default hazard types
@@ -68,13 +78,10 @@ HAZARDS = [
 
 
 # --------------------------------------------------
-# Seed Firestore
+# Seed the JSON database
 # --------------------------------------------------
 
 def seed_hazards():
-    collection = db.collection("hazardTypes")
-    batch = db.batch()
-
     for hazard in HAZARDS:
         hazard_id = hazard["id"]
         document_data = {
@@ -83,15 +90,14 @@ def seed_hazards():
             if key != "id"
         }
 
-        document_data["updatedAt"] = firestore.SERVER_TIMESTAMP
+        document_data["updatedAt"] = json_store.utcnow_iso()
 
-        batch.set(
-            collection.document(hazard_id),
+        json_store.set_document(
+            "hazards",
+            hazard_id,
             document_data,
             merge=True,
         )
-
-    batch.commit()
 
     print(f"Successfully seeded {len(HAZARDS)} hazard types.")
 

@@ -27,10 +27,10 @@ After editing:
 
 ## 2. Project Context
 Known technology context:
-- Backend: Python, FastAPI, Firebase Admin SDK, Firestore, `requests`, ingestion/intelligence services.
+- Backend: Python, FastAPI, local JSON database (`database/` via `services/json_store.py`), `requests`, ingestion/intelligence services.
 - Frontend: React, TypeScript, Vite, Tailwind CSS, existing API/service modules.
 - Realtime features may use Socket.IO.
-- Backend Firestore integration uses Firebase service-account credentials.
+- Backend persistence uses JSON files in `database/`; no database credentials are needed.
 - Meta Model API is intended for generative AI functionality.
 
 Treat these as clues, not a substitute for inspecting the repository. Confirm current dependencies, entry points, routes, and service implementations.
@@ -89,7 +89,7 @@ If requested:
 - Use appropriate HTTP status codes and non-sensitive error messages.
 - Preserve `HTTPException` responses instead of masking them with broad exception handlers.
 - Do not leak stack traces, credentials, or service-account details.
-- Preserve unrelated Firestore fields during updates.
+- Preserve unrelated record fields during updates.
 - Keep collection/document naming consistent.
 - Use environment configuration for URLs, keys, and model names where appropriate.
 - Follow the existing Vite proxy/API-base configuration; avoid hardcoded localhost URLs.
@@ -125,7 +125,7 @@ If requested:
 - Do not remove safety labels or source limitations without explicit instruction.
 
 ## 8. Secrets and Local Configuration
-- Never commit `serviceAccountKey.json`, API keys, tokens, or other secrets.
+- Never commit API keys, tokens, or other secrets.
 - Never print secret values in logs, summaries, or documentation.
 - Follow existing `.env` conventions; use placeholders only in example files.
 - If a key is missing, report the variable name, not a guessed value.

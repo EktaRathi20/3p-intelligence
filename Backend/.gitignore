@@ -8,7 +8,7 @@ __pycache__/
 .coverage
 htmlcov/
 ingestion_layer/__pycache__/
-
+data/
 # Virtual environments and packaging output
 .venv/
 venv/
@@ -27,6 +27,11 @@ credentials.json
 token.json
 *service-account*.json
 serviceAccountKey.json
+
+# Synchronized geographic dataset (see Backend/docs/GEO_DATA_SETUP.md)
+data/geo/*.db*
+data/geo/*.json
+data/geo/*.gz
 
 # Logs and OS files
 *.log

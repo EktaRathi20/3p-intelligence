@@ -1,21 +1,13 @@
-from pathlib import Path
-import firebase_admin
-from firebase_admin import credentials, firestore
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+"""Role and user lookup endpoints backed by the local JSON database."""
 
-BACKEND_DIR = Path(__file__).resolve().parents[2]
-KEY_PATH = BACKEND_DIR / "firebase" / "serviceAccountKey.json"
+from typing import Any
 
-if not firebase_admin._apps:
-    cred = credentials.Certificate(str(KEY_PATH))
-    firebase_admin.initialize_app(cred)
+from fastapi import APIRouter, HTTPException
 
-db = firestore.client()
+from services import json_store
 
-def serialize_document(doc) -> dict[str, Any]:
-    data = doc.to_dict() or {}
-    data["id"] = doc.id
-    return data
+USERS_COLLECTION = "users"
+ROLES_COLLECTION = "roles"
 
 router = APIRouter()
 # ---------------- ROLES APIs ----------------
@@ -24,8 +16,7 @@ router = APIRouter()
 def get_roles() -> dict[str, Any]:
     """Fetch all role definitions."""
     try:
-        docs = db.collection("dm_roles").stream()
-        roles = [serialize_document(doc) for doc in docs]
+        roles = json_store.list_documents(ROLES_COLLECTION)
         roles.sort(key=lambda role: role.get("level", 999))
 
         return {
@@ -44,14 +35,14 @@ def get_roles() -> dict[str, Any]:
 def get_role(role_id: str) -> dict[str, Any]:
     """Fetch one role by document ID."""
     try:
-        doc = db.collection("dm_roles").document(role_id).get()
+        role = json_store.get_document(ROLES_COLLECTION, role_id)
 
-        if not doc.exists:
+        if role is None:
             raise HTTPException(status_code=404, detail="Role not found")
 
         return {
             "success": True,
-            "role": serialize_document(doc),
+            "role": role,
         }
     except HTTPException:
         raise
@@ -68,8 +59,7 @@ def get_role(role_id: str) -> dict[str, Any]:
 def get_users() -> dict[str, Any]:
     """Fetch users. Protect this endpoint before production deployment."""
     try:
-        docs = db.collection("dm_users").stream()
-        users = [serialize_document(doc) for doc in docs]
+        users = json_store.list_documents(USERS_COLLECTION)
 
         return {
             "success": True,
@@ -85,16 +75,16 @@ def get_users() -> dict[str, Any]:
 
 @router.get("/api/users/{user_id}")
 def get_user(user_id: str) -> dict[str, Any]:
-    """Fetch one user by Firestore document ID."""
+    """Fetch one user by document ID."""
     try:
-        doc = db.collection("dm_users").document(user_id).get()
+        user = json_store.get_document(USERS_COLLECTION, user_id)
 
-        if not doc.exists:
+        if user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
         return {
             "success": True,
-            "user": serialize_document(doc),
+            "user": user,
         }
     except HTTPException:
         raise

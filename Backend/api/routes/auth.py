@@ -1,25 +1,17 @@
 
 import os
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 import jwt
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
-from firebase_admin import firestore, initialize_app, get_app
-from firebase_admin import credentials
+
+from services import json_store
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
-# Initialize Firebase only once.
-try:
-    get_app()
-except ValueError:
-    backend_dir = Path(__file__).resolve().parents[2]
-    key_path = backend_dir / "firebase" / "serviceAccountKey.json"
-    initialize_app(credentials.Certificate(str(key_path)))
-
-db = firestore.client()
+USERS_COLLECTION = "users"
+ROLES_COLLECTION = "roles"
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 DEMO_LOGIN_PIN = os.getenv("DEMO_LOGIN_PIN")
@@ -34,11 +26,10 @@ class LoginRequest(BaseModel):
 
 
 def get_active_user_and_role(user_id: str):
-    user_doc = db.collection("dm_users").document(user_id).get()
-    if not user_doc.exists:
+    user = json_store.get_document(USERS_COLLECTION, user_id)
+    if user is None:
         raise HTTPException(status_code=401, detail="Invalid login")
 
-    user = user_doc.to_dict() or {}
     if not user.get("isActive", False):
         raise HTTPException(status_code=403, detail="Account is inactive")
 
@@ -46,11 +37,10 @@ def get_active_user_and_role(user_id: str):
     if not role_id:
         raise HTTPException(status_code=403, detail="No role assigned")
 
-    role_doc = db.collection("dm_roles").document(role_id).get()
-    if not role_doc.exists:
+    role = json_store.get_document(ROLES_COLLECTION, role_id)
+    if role is None:
         raise HTTPException(status_code=403, detail="Assigned role not found")
 
-    role = role_doc.to_dict() or {}
     if not role.get("isActive", False):
         raise HTTPException(status_code=403, detail="Role is inactive")
 
@@ -58,7 +48,7 @@ def get_active_user_and_role(user_id: str):
 
 @router.post("/login")
 def login(payload: LoginRequest):
-    # Verify the selected user and their active role in Firestore.
+    # Verify the selected user and their active role in the local database.
     user, role, role_id = get_active_user_and_role(payload.user_id)
 
     now = datetime.now(timezone.utc)
@@ -89,7 +79,7 @@ def login(payload: LoginRequest):
 
 def require_current_user(authorization: str = Header(default="")):
     if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing bearer token")
+        raise HTTPException(status_code=401, detail="Missing Bearer [REDACTED]")
 
     token = authorization.removeprefix("Bearer ").strip()
 
@@ -106,7 +96,7 @@ def require_current_user(authorization: str = Header(default="")):
 
     user, role, role_id = get_active_user_and_role(user_id)
 
-    # Return current Firestore role data, not just the token's role claim.
+    # Return current role data, not just the token's role claim.
     return {
         "id": user_id,
         "name": user.get("name", ""),

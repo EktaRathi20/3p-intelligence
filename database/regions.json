@@ -1,0 +1,43 @@
+{
+  "XCs7mKgbRmlgNNGgKJZ6": {
+    "active": true,
+    "cityId": "132286",
+    "cityName": "Jodhpur",
+    "code": "IN-RJ-JDH",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-28T11:43:56.892127+00:00",
+    "hazardIds": [
+      "drought",
+      "earthquake",
+      "heatwave"
+    ],
+    "name": "Jodhpur",
+    "parentRegionId": null,
+    "stateCode": "RJ",
+    "stateName": "Rajasthan",
+    "type": "city",
+    "updatedAt": "2026-10-28T11:43:56.892177+00:00"
+  },
+  "ZgBKsWS852zsFoAE1Tpf": {
+    "active": true,
+    "cityId": "57704",
+    "cityName": "Angul",
+    "code": "IN-OR-NGL",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-28T11:44:31.086580+00:00",
+    "hazardIds": [
+      "cyclone",
+      "landslide",
+      "earthquake",
+      "flood"
+    ],
+    "name": "Angul",
+    "parentRegionId": null,
+    "stateCode": "OR",
+    "stateName": "Odisha",
+    "type": "city",
+    "updatedAt": "2026-10-28T11:44:31.086598+00:00"
+  }
+}

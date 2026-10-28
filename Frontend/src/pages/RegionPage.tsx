@@ -1,51 +1,36 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
   Edit2,
   Loader2,
-  MapPin,
   Plus,
   RefreshCw,
   Save,
+  Search,
   Trash2,
   X,
 } from "lucide-react";
 
 import { regionApi } from "../services/regionApi";
 import type {
-  Region as ApiRegion,
   Hazard,
+  Region,
   RegionConfiguration,
 } from "../services/regionApi";
+import { formatGeoBreadcrumb } from "../utils/regionGeo";
+import ConfirmDialog from "../components/regions/ConfirmDialog";
+import RegionForm from "../components/regions/RegionForm";
 
 interface RegionPageProps {
   currentUserRole?: string;
   initialDefaultRegionId?: string;
 }
 
-interface Region extends ApiRegion {
-  hazardIds?: string[];
-}
-
-interface RegionForm {
-  name: string;
-  code: string;
-  parentRegionId: string;
-  hazardIds: string[];
-}
-
 const isRoleOne = (role?: string) =>
   ["role_1", "1", "level_1"].includes(
     (role || "").toLowerCase().trim()
   );
-
-const emptyForm: RegionForm = {
-  name: "",
-  code: "",
-  parentRegionId: "",
-  hazardIds: [],
-};
 
 const inputClass =
   "mt-1 w-full border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#18365b] focus:ring-1 focus:ring-[#18365b]";
@@ -62,9 +47,10 @@ export default function RegionPage({
     initialDefaultRegionId ?? null
   );
 
-  const [form, setForm] = useState<RegionForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Region | null>(null);
+  const [listSearch, setListSearch] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -75,6 +61,28 @@ export default function RegionPage({
   const selectedDefault = regions.find(
     (region) => region.id === defaultRegionId
   );
+  const editingRegion =
+    regions.find((region) => region.id === editingId) ?? null;
+
+  const hazardName = useCallback(
+    (hazardId: string) =>
+      hazards.find((hazard) => hazard.id === hazardId)?.name || hazardId,
+    [hazards]
+  );
+
+  const filteredRegions = regions.filter((region) => {
+    const needle = listSearch.trim().toLowerCase();
+    if (!needle) return true;
+    const haystack = [
+      region.name,
+      region.code ?? "",
+      formatGeoBreadcrumb(region),
+      (region.hazardIds ?? []).map(hazardName).join(" "),
+    ]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(needle);
+  });
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -87,7 +95,7 @@ export default function RegionPage({
         regionApi.getConfiguration(),
       ]);
 
-      setRegions(regionResult.items as Region[]);
+      setRegions(regionResult.items);
       setHazards(hazardResult.items);
 
       setDefaultRegionId(
@@ -107,7 +115,6 @@ export default function RegionPage({
   }, [loadData]);
 
   const resetForm = () => {
-    setForm(emptyForm);
     setEditingId(null);
     setShowForm(false);
   };
@@ -115,7 +122,6 @@ export default function RegionPage({
   const openCreateForm = () => {
     setError("");
     setMessage("");
-    setForm(emptyForm);
     setEditingId(null);
     setShowForm(true);
   };
@@ -123,90 +129,18 @@ export default function RegionPage({
   const openEditForm = (region: Region) => {
     setError("");
     setMessage("");
-    setForm({
-      name: region.name || "",
-      code: region.code || "",
-      parentRegionId: region.parentRegionId || "",
-      hazardIds: region.hazardIds || [],
-    });
     setEditingId(region.id);
     setShowForm(true);
   };
 
-  const toggleHazard = (hazardId: string) => {
-    setForm((current) => ({
-      ...current,
-      hazardIds: current.hazardIds.includes(hazardId)
-        ? current.hazardIds.filter((id) => id !== hazardId)
-        : [...current.hazardIds, hazardId],
-    }));
-  };
-
-  const saveRegion = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!canManage) return;
-
-    if (!form.name.trim()) {
-      setError("Region name is required.");
-      return;
-    }
-
-    if (form.hazardIds.length === 0) {
-      setError("Please select at least one hazard.");
-      return;
-    }
-
-    if (editingId && form.parentRegionId === editingId) {
-      setError("A region cannot be its own parent.");
-      return;
-    }
-
-    setSaving(true);
-    setError("");
-    setMessage("");
-
-    try {
-      const payload = {
-        name: form.name.trim(),
-        code: form.code.trim() || null,
-        parentRegionId: form.parentRegionId || null,
-        type: editingId
-          ? regions.find((region) => region.id === editingId)?.type || "district"
-          : "district",
-        active: editingId
-          ? regions.find((region) => region.id === editingId)?.active !== false
-          : true,
-        hazardIds: form.hazardIds,
-      };
-
-      if (editingId) {
-        await regionApi.updateRegion(editingId, payload);
-        setMessage("Region updated successfully.");
-      } else {
-        await regionApi.createRegion(payload);
-        setMessage("Region created successfully.");
-      }
-
-      resetForm();
-      await loadData();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to save region."
-      );
-    } finally {
-      setSaving(false);
-    }
+  const handleSaved = async (savedMessage: string) => {
+    resetForm();
+    setMessage(savedMessage);
+    await loadData();
   };
 
   const deleteRegion = async (region: Region) => {
     if (!canManage) return;
-
-    const confirmed = window.confirm(
-      `Delete region "${region.name}"? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
 
     setSaving(true);
     setError("");
@@ -224,6 +158,7 @@ export default function RegionPage({
         err instanceof Error ? err.message : "Failed to delete region."
       );
     } finally {
+      setPendingDelete(null);
       setSaving(false);
     }
   };
@@ -373,219 +308,130 @@ export default function RegionPage({
             {/* Create/Edit form */}
 
             {showForm && (
-              <form onSubmit={saveRegion} className="space-y-4 border-b border-slate-300 bg-slate-50 p-4">
-                <h3 className="font-bold">
-                  {editingId ? "Edit Region" : "Create Region"}
-                </h3>
+              <RegionForm
+                key={editingId ?? "new"}
+                initial={editingRegion}
+                hazards={hazards}
+                onSaved={(savedMessage) => void handleSaved(savedMessage)}
+                onCancel={resetForm}
+                onError={(messageText) => setError(messageText)}
+              />
+            )}
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="block text-sm font-medium">
-                    Region Name *
-                    <input
-                      required
-                      value={form.name}
-                      onChange={(event) =>
-                        setForm((current) => ({
-                          ...current,
-                          name: event.target.value,
-                        }))
-                      }
-                      placeholder="e.g. Jodhpur"
-                      className={inputClass}
-                    />
-                  </label>
+            {/* Region search */}
 
-                  <label className="block text-sm font-medium">
-                    Region Code
-                    <input
-                      value={form.code}
-                      onChange={(event) =>
-                        setForm((current) => ({
-                          ...current,
-                          code: event.target.value,
-                        }))
-                      }
-                      placeholder="e.g. JDH"
-                      className={inputClass}
-                    />
-                  </label>
-
-                  <label className="block text-sm font-medium sm:col-span-2">
-                    Parent Region
-                    <select
-                      value={form.parentRegionId}
-                      onChange={(event) =>
-                        setForm((current) => ({
-                          ...current,
-                          parentRegionId: event.target.value,
-                        }))
-                      }
-                      className={inputClass}
-                    >
-                      <option value="">No parent region</option>
-                      {activeRegions
-                        .filter((region) => region.id !== editingId)
-                        .map((region) => (
-                          <option key={region.id} value={region.id}>
-                            {region.name}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                </div>
-
-                {/* Hazards belong to this region */}
-
-                <div className="border border-slate-300 bg-white p-3">
-                  <h4 className="text-sm font-semibold">
-                    Applicable Hazards *
-                  </h4>
-
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {hazards.map((hazard) => (
-                      <label
-                        key={hazard.id}
-                        className="flex cursor-pointer items-center gap-2 border border-slate-200 p-3 hover:bg-slate-50"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={form.hazardIds.includes(hazard.id)}
-                          onChange={() => {
-                            setForm((current) => ({
-                              ...current,
-                              hazardIds: current.hazardIds.includes(hazard.id)
-                                ? current.hazardIds.filter(
-                                    (id) => id !== hazard.id
-                                  )
-                                : [...current.hazardIds, hazard.id],
-                            }));
-                          }}
-                          className="h-4 w-4 accent-[#18365b]"
-                        />
-                        <span className="text-sm">{hazard.name}</span>
-                      </label>
-                    ))}
-                  </div>
-
-                  {hazards.length === 0 && (
-                    <p className="mt-2 text-sm text-amber-700">
-                      No hazards found. Check the hazard API.
-                    </p>
-                  )}
-
-                  <p className="mt-2 text-xs text-slate-500">
-                    {form.hazardIds.length} hazard(s) selected
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-2">
+            <div className="border-b border-slate-200 p-4">
+              <div className="flex items-center gap-2 border border-slate-300 bg-white px-3">
+                <Search size={15} className="shrink-0 text-slate-400" />
+                <input
+                  value={listSearch}
+                  onChange={(event) => setListSearch(event.target.value)}
+                  placeholder="Search regions by name, code, geography, or hazard..."
+                  aria-label="Search regions"
+                  className="w-full py-2.5 text-sm outline-none"
+                />
+                {listSearch && (
                   <button
                     type="button"
-                    onClick={resetForm}
-                    className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold"
+                    aria-label="Clear search"
+                    onClick={() => setListSearch("")}
                   >
-                    Cancel
+                    <X size={15} className="text-slate-400" />
                   </button>
-
-                  <button
-                    type="submit"
-                    disabled={saving || hazards.length === 0}
-                    className="inline-flex items-center gap-2 bg-[#18365b] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    {saving && (
-                      <Loader2 size={16} className="animate-spin" />
-                    )}
-                    {editingId ? "Update Region" : "Create Region"}
-                  </button>
-                </div>
-              </form>
-            )}
+                )}
+              </div>
+            </div>
 
             {/* Region list */}
 
             <div className="divide-y divide-slate-200">
-              {regions.map((region) => (
-                <div
-                  key={region.id}
-                  className="flex flex-wrap items-center justify-between gap-3 p-4"
-                >
-                  <div className="min-w-0">
-                    <p className="font-semibold text-slate-900">
-                      {region.name}
-                      {region.id === defaultRegionId && (
-                        <span className="ml-2 text-xs font-medium text-green-700">
-                          Default
+              {filteredRegions.map((region) => {
+                const breadcrumb = formatGeoBreadcrumb(region);
+                return (
+                  <div
+                    key={region.id}
+                    className="flex flex-wrap items-center justify-between gap-3 p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="flex flex-wrap items-center gap-2 font-semibold text-slate-900">
+                        {region.name}
+                        <span
+                          className={`text-xs font-semibold ${
+                            region.active !== false
+                              ? "text-green-700"
+                              : "text-slate-500"
+                          }`}
+                        >
+                          {region.active !== false ? "Active" : "Inactive"}
                         </span>
-                      )}
-                    </p>
+                        {region.id === defaultRegionId && (
+                          <span className="text-xs font-medium text-green-700">
+                            Default
+                          </span>
+                        )}
+                      </p>
 
-                    <p className="mt-1 text-xs text-slate-500">
-                      Code: {region.code || "—"} · Parent:{" "}
-                      {region.parentName ||
-                        regions.find(
-                          (item) => item.id === region.parentRegionId
-                        )?.name ||
-                        "—"}
-                    </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {breadcrumb || "No geography set"}
+                        {" · "}Code: {region.code || "—"} · Parent:{" "}
+                        {region.parentName ||
+                          regions.find(
+                            (item) => item.id === region.parentRegionId
+                          )?.name ||
+                          "—"}
+                      </p>
 
-                    <p className="mt-1 text-xs text-slate-500">
-                      Hazards:{" "}
-                      {region.hazardIds?.length
-                        ? region.hazardIds
-                            .map(
-                              (id) =>
-                                hazards.find((hazard) => hazard.id === id)
-                                  ?.name || id
-                            )
-                            .join(", ")
-                        : "Not assigned"}
-                    </p>
-                  </div>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Hazards:{" "}
+                        {region.hazardIds?.length
+                          ? region.hazardIds.map(hazardName).join(", ")
+                          : "Not assigned"}
+                      </p>
+                    </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openEditForm(region)}
-                      className="inline-flex items-center gap-1 border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#18365b] hover:bg-slate-50"
-                    >
-                      <Edit2 size={14} />
-                      Edit
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            `Delete region "${region.name}"?`
-                          )
-                        ) {
-                          void deleteRegion(region);
-                        }
-                      }}
-                      className="inline-flex items-center gap-1 border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
-                    >
-                      <Trash2 size={14} />
-                      Delete
-                    </button>
-
-                    {region.id !== defaultRegionId && (
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setDefaultRegionId(region.id)}
-                        className="border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                        onClick={() => openEditForm(region)}
+                        className="inline-flex items-center gap-1 border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#18365b] hover:bg-slate-50"
                       >
-                        Select Default
+                        <Edit2 size={14} />
+                        Edit
                       </button>
-                    )}
+
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => setPendingDelete(region)}
+                        className="inline-flex items-center gap-1 border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </button>
+
+                      {region.id !== defaultRegionId && (
+                        <button
+                          type="button"
+                          onClick={() => setDefaultRegionId(region.id)}
+                          className="border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                        >
+                          Select Default
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {regions.length === 0 && (
                 <p className="p-8 text-center text-sm text-slate-500">
                   No regions available. Create your first region.
+                </p>
+              )}
+
+              {regions.length > 0 && filteredRegions.length === 0 && (
+                <p className="p-8 text-center text-sm text-slate-500">
+                  No regions match this search.
                 </p>
               )}
             </div>
@@ -614,6 +460,19 @@ export default function RegionPage({
             Refresh data
           </button>
         </div>
+
+        {pendingDelete && (
+          <ConfirmDialog
+            title="Delete Region"
+            message={`Delete region "${pendingDelete.name}"? This action cannot be undone.`}
+            confirmLabel="Delete Region"
+            busy={saving}
+            onConfirm={() => void deleteRegion(pendingDelete)}
+            onCancel={() => {
+              if (!saving) setPendingDelete(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
