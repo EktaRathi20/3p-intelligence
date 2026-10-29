@@ -13,6 +13,9 @@ interface HistoricalDisastersViewProps {
   onPageChange: (page: number) => void;
   searchQuery: string;
   onSearchChange: (search: string) => void;
+  hazardFilter: string;
+  onHazardFilterChange: (hazard: string) => void;
+  availableHazards: string[];
   sortBy: 'newest' | 'oldest' | 'wind' | 'distance';
   onSortChange: (sort: 'newest' | 'oldest' | 'wind' | 'distance') => void;
 }
@@ -28,6 +31,9 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
   onPageChange,
   searchQuery,
   onSearchChange,
+  hazardFilter,
+  onHazardFilterChange,
+  availableHazards,
   sortBy,
   onSortChange,
 }) => {
@@ -53,7 +59,7 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
             <History size={22} />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900">Historical Cyclone Analogs</h1>
+            <h1 className="text-lg font-bold text-slate-900">Historical Disasters</h1>
             <p className="text-xs text-slate-500 mt-1">{regionName} · Data returned by the history API</p>
           </div>
         </div>
@@ -71,7 +77,25 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
           <option value="wind">Peak wind</option>
           <option value="distance">Closest approach</option>
         </select>
+        <label className="flex items-center gap-2 text-xs text-slate-600">
+          Hazard
+          <select
+            value={hazardFilter}
+            onChange={event => onHazardFilterChange(event.target.value)}
+            className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800"
+          >
+            <option value="all">All hazards</option>
+            {availableHazards.map(hazard => (
+              <option key={hazard} value={hazard}>
+                {hazard.charAt(0).toUpperCase() + hazard.slice(1)}
+              </option>
+            ))}
+          </select>
+        </label>
       </section>
+      {history?.history_coverage && (
+        <p className="text-xs text-slate-500">{history.history_coverage.note}</p>
+      )}
 
       {isLoading ? (
         <p className="py-12 text-center text-sm text-slate-500">Loading historical analogs…</p>
@@ -85,13 +109,15 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
       ) : events.length === 0 ? (
         <p className="py-12 text-center text-sm text-slate-500">
           {history?.matching_events === 0 && searchQuery.trim()
-            ? 'No historical analogs match your search.'
-            : 'No historical analogs were returned for this region.'}
+            ? 'No historical records match your search.'
+            : hazardFilter !== 'all'
+              ? `No ${hazardFilter} historical records are available for this region.`
+              : 'No historical disaster records were returned for this region.'}
         </p>
       ) : (
         <>
           <p className="text-xs text-slate-500">
-            Showing {firstResult}–{lastResult} of {history?.matching_events} matching cyclone tracks
+            Showing {firstResult}–{lastResult} of {history?.matching_events} matching historical records
             {' '}({history?.total_historical_events_analyzed} analyzed) · {history?.source}
             {' '}· refreshed {history?.timestamp ? new Date(history.timestamp).toLocaleString() : 'unknown'}
             {' '}· <a className="text-blue-700 underline" href={history?.source_url} target="_blank" rel="noreferrer">source</a>
@@ -100,6 +126,9 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
             {events.map((event, index) => (
               <article key={`${event.matched_cyclone}-${index}`} className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
                 <h2 className="font-bold text-slate-900">{event.matched_cyclone}</h2>
+                <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-cyan-800">
+                  {event.hazard_type ?? 'Hazard type unavailable'}
+                </p>
                 <p className="text-xs text-slate-500 mt-1">
                   {event.reference_period.start_date} to {event.reference_period.end_date}
                 </p>

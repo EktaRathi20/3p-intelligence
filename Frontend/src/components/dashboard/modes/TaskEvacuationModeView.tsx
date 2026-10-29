@@ -5,7 +5,11 @@ import {
 } from 'lucide-react';
 import { MapComponent } from '@/components/dashboard/MapComponent';
 import { TaskItem, CityLocation, MapPOI } from '@/types/domain';
-import type { ApiRegion, DisasterIntelligenceResponse } from '@/types/api';
+import {
+  isAvailableDisasterIntelligence,
+  type ApiRegion,
+  type DisasterIntelligenceResult,
+} from '@/types/api';
 
 const TASK_DEADLINE_MS = 48 * 60 * 60 * 1000;
 
@@ -22,7 +26,7 @@ interface TaskEvacuationModeViewProps {
   city: CityLocation;
   bounds: ApiRegion;
   pois: MapPOI[];
-  disasterIntelligence: DisasterIntelligenceResponse | null;
+  disasterIntelligence: DisasterIntelligenceResult | null;
   isLoading: boolean;
   error: string | null;
   onOpenEvacuationModal: () => void;
@@ -39,7 +43,10 @@ export const TaskEvacuationModeView: React.FC<TaskEvacuationModeViewProps> = ({
   onOpenEvacuationModal,
   isLightMode = true,
 }) => {
-  const recommendations = disasterIntelligence?.ai_analysis.recommended_tasks;
+  const hasAssessment = isAvailableDisasterIntelligence(disasterIntelligence);
+  const riskZones = hasAssessment ? disasterIntelligence.risk_zones : [];
+  const recommendations = hasAssessment ? disasterIntelligence.ai_analysis.recommended_tasks : undefined;
+  const ingestionError = hasAssessment ? disasterIntelligence.data_quality.ingestion_error : null;
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [taskDeadlines, setTaskDeadlines] = useState<Record<string, number>>({});
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -149,7 +156,7 @@ export const TaskEvacuationModeView: React.FC<TaskEvacuationModeViewProps> = ({
 
         {/* Standard Blue Button: Issue Targeted Evacuation matching prompt */}
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          {disasterIntelligence?.risk_zones.some(zone => zone.color === 'red') && (
+          {riskZones.some(zone => zone.color === 'red') && (
             <div
               role="timer"
               aria-label={`48-hour countdown: ${formatCountdown(Math.max(0, operationalDeadline - currentTime))} remaining`}
@@ -181,30 +188,35 @@ export const TaskEvacuationModeView: React.FC<TaskEvacuationModeViewProps> = ({
         </div>
       )}
       {isLoading && <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-950"><LoaderCircle size={14} className="animate-spin" />Loading live response recommendations and mapped resources…</div>}
-      {disasterIntelligence?.data_quality.ingestion_error && (
+      {ingestionError && (
         <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          Ingestion is incomplete: {disasterIntelligence.data_quality.ingestion_error}
+          Ingestion is incomplete: {ingestionError}
+        </div>
+      )}
+      {!isLoading && disasterIntelligence && !hasAssessment && (
+        <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          {disasterIntelligence.message}
         </div>
       )}
 
       <section className={`overflow-hidden rounded-xl border shadow-sm ${isLightMode ? 'border-slate-200 bg-white' : 'border-slate-800 bg-slate-900'}`}>
         <div className={`flex items-center justify-between border-b px-4 py-3 ${isLightMode ? 'border-slate-100 bg-slate-50' : 'border-slate-800 bg-slate-950'}`}>
           <h3 className={`flex items-center gap-2 text-sm font-bold ${isLightMode ? 'text-slate-800' : 'text-white'}`}><MapPin size={15} className="text-blue-600" /> Risk zones & response resources</h3>
-          <span className={`text-[11px] ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>{disasterIntelligence?.risk_zones.length ?? 0} API zones</span>
+          <span className={`text-[11px] ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>{riskZones.length} API zones</span>
         </div>
         <MapComponent
           cityLabel={city.name}
           bounds={bounds}
           pois={pois}
-          riskZones={disasterIntelligence?.risk_zones ?? []}
+          riskZones={riskZones}
           isLoading={isLoading}
           emptyMessage="Facility locations were not returned for this region."
         />
       </section>
 
-      {disasterIntelligence?.risk_zones.length ? (
-        <section className={`grid grid-cols-1 gap-2 sm:grid-cols-2 ${disasterIntelligence.risk_zones.length > 2 ? 'xl:grid-cols-3' : ''}`} aria-label="Risk zone details">
-          {disasterIntelligence.risk_zones.map(zone => (
+      {riskZones.length ? (
+        <section className={`grid grid-cols-1 gap-2 sm:grid-cols-2 ${riskZones.length > 2 ? 'xl:grid-cols-3' : ''}`} aria-label="Risk zone details">
+          {riskZones.map(zone => (
             <div key={zone.id} className={`rounded-lg border p-3 ${zone.color === 'red' ? 'border-rose-200 bg-rose-50' : zone.color === 'orange' ? 'border-orange-200 bg-orange-50' : zone.color === 'yellow' ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
               <div className="flex items-center justify-between gap-2">
                 <strong className="text-xs text-slate-900">{zone.label}</strong>

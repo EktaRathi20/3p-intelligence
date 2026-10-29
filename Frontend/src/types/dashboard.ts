@@ -2,7 +2,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { ClimateAlert } from './alerts';
 import type {
   ApiRegion,
-  DisasterIntelligenceResponse,
+  DisasterIntelligenceCapabilities,
+  DisasterIntelligenceResult,
   RegionResponses,
 } from './api';
 import type { CityLocation } from './domain';
@@ -26,7 +27,10 @@ export interface DashboardOutletData {
   availableCities: CityLocation[];
   regionResponses: RegionResponses | null;
   displayedResponses: RegionResponses | null;
-  activeIntelligence: DisasterIntelligenceResponse | null;
+  activeIntelligence: DisasterIntelligenceResult | null;
+  hazardCapabilities: DisasterIntelligenceCapabilities | null;
+  selectedHazard: string;
+  setSelectedHazard: Dispatch<SetStateAction<string>>;
   regionLoading: boolean;
   regionError: string | null;
   regionDataError: string | null;

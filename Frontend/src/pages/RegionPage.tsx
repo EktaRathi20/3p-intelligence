@@ -137,6 +137,7 @@ export default function RegionPage({
     resetForm();
     setMessage(savedMessage);
     await loadData();
+    window.dispatchEvent(new CustomEvent("region-hazards-changed"));
   };
 
   const deleteRegion = async (region: Region) => {
@@ -153,6 +154,7 @@ export default function RegionPage({
 
       setMessage("Region deleted successfully.");
       await loadData();
+      window.dispatchEvent(new CustomEvent("region-hazards-changed"));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to delete region."

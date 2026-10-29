@@ -66,6 +66,7 @@ export interface CurrentConditionsResponse {
 
 export interface HistoricalEventResponse {
   matched_cyclone: string;
+  hazard_type?: string;
   historical_peak_wind_kmh: number | null;
   historical_surge_meters: number | null;
   closest_approach_km: number;
@@ -88,6 +89,34 @@ export interface HistoricalResponse {
   matching_events: number;
   total_pages: number;
   historical_analogs: HistoricalEventResponse[];
+  available_hazards?: string[];
+  hazards_with_records?: string[];
+  history_coverage?: {
+    complete: boolean;
+    note: string;
+  };
+}
+
+export interface HazardCapability {
+  id: string;
+  name: string;
+  code: string | null;
+  configured: boolean;
+  implemented: boolean;
+  intelligence_status: 'available' | 'not_configured' | 'not_implemented';
+}
+
+export interface DisasterIntelligenceCapabilities {
+  region: string;
+  hazards: HazardCapability[];
+  configured_hazards: string[];
+  implemented_hazards: string[];
+  not_implemented_hazards: string[];
+  historical_hazards: string[];
+  history_coverage: {
+    complete: boolean;
+    note: string;
+  };
 }
 
 export interface WhatsAppConfigurationResponse {
@@ -207,6 +236,8 @@ export interface DisasterRecommendedTask {
 export interface DisasterIntelligenceResponse {
   status: string;
   region: string;
+  hazard?: string;
+  supported?: true;
   generated_at: string;
   simulation?: {
     tier: 'YELLOW' | 'ORANGE' | 'RED';
@@ -217,6 +248,7 @@ export interface DisasterIntelligenceResponse {
     telemetry_status: 'AVAILABLE' | 'UNAVAILABLE' | 'NO_CURRENT_MEASUREMENTS' | string;
     ingestion_error: string | null;
     telemetry_timestamp: string | null;
+    source_errors?: Record<string, string>;
     sources: Record<string, string | null>;
   };
   current_conditions: {
@@ -263,12 +295,30 @@ export interface DisasterIntelligenceResponse {
   };
 }
 
+export interface UnavailableDisasterIntelligenceResponse {
+  region: string;
+  hazard: string;
+  status: 'not_configured' | 'not_implemented';
+  supported: false;
+  message: string;
+}
+
+export type DisasterIntelligenceResult =
+  | DisasterIntelligenceResponse
+  | UnavailableDisasterIntelligenceResponse;
+
+export function isAvailableDisasterIntelligence(
+  result: DisasterIntelligenceResult | null | undefined,
+): result is DisasterIntelligenceResponse {
+  return result !== null && result !== undefined && 'risk_assessment' in result;
+}
+
 export interface RegionResponses {
   population: PopulationResponse | null;
   forecast: ForecastResponse | null;
   infrastructure: InfrastructureResponse | null;
   currentConditions: CurrentConditionsResponse | null;
-  disasterIntelligence: DisasterIntelligenceResponse | null;
+  disasterIntelligence: DisasterIntelligenceResult | null;
   currentConditionsError: string | null;
   disasterIntelligenceError: string | null;
 }

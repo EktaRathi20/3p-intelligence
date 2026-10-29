@@ -28,9 +28,17 @@ export const AssessmentCards: React.FC<AssessmentCardsProps> = ({ city, infrastr
       value: city.operationalRisk.level,
       detail: city.operationalRisk.level === 'Unavailable'
         ? 'Risk assessment unavailable'
-        : `${city.riskScore}/100 screening score · not an official warning`,
+        : city.riskScore == null ? 'Risk score unavailable' : `${city.riskScore}/100 screening score · not an official warning`,
       icon: Database,
-      color: city.riskLevel === 'Red' ? 'text-rose-600' : city.riskLevel === 'Orange' ? 'text-orange-600' : city.riskLevel === 'Moderate' ? 'text-amber-600' : 'text-emerald-600',
+      color: city.riskLevel === 'Red'
+        ? 'text-rose-600'
+        : city.riskLevel === 'Orange'
+          ? 'text-orange-600'
+          : city.riskLevel === 'Moderate'
+            ? 'text-amber-600'
+            : city.riskLevel === 'Unavailable'
+              ? 'text-slate-500'
+              : 'text-emerald-600',
     },
   ];
 

@@ -39,5 +39,30 @@
     "stateName": "Odisha",
     "type": "city",
     "updatedAt": "2026-10-28T11:44:31.086598+00:00"
+  },
+  "bG2wolWQdfymKe79ihoD": {
+    "active": true,
+    "cityId": "134096",
+    "cityName": "Surat",
+    "code": "IN-GJ-SRT",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-29T04:16:21.960976+00:00",
+    "hazardIds": [
+      "drought",
+      "cyclone",
+      "flood",
+      "landslide",
+      "wildfire",
+      "heatwave",
+      "earthquake",
+      "fire"
+    ],
+    "name": "Surat",
+    "parentRegionId": null,
+    "stateCode": "GJ",
+    "stateName": "Gujarat",
+    "type": "city",
+    "updatedAt": "2026-10-29T04:16:21.961004+00:00"
   }
 }

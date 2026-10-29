@@ -6,12 +6,16 @@ import { RightColumnCards } from '@/components/dashboard/RightColumnCards';
 import { WeatherHazardChart } from '@/components/dashboard/WeatherHazardChart';
 import type { DashboardOutletData } from '../types/dashboard';
 import { buildMapPois } from '../utils/transformers';
+import { isAvailableDisasterIntelligence } from '../types/api';
 
 export default function OverviewPage() {
   const dashboard = useOutletContext<DashboardOutletData>();
   const navigate = useNavigate();
   const { selectedCity, selectedRegion, regionResponses, activeIntelligence, displayedResponses } = dashboard;
   if (!selectedCity || !selectedRegion) return null;
+  const riskZones = isAvailableDisasterIntelligence(activeIntelligence)
+    ? activeIntelligence.risk_zones
+    : [];
 
   return (
     <div className="space-y-4">
@@ -29,7 +33,7 @@ export default function OverviewPage() {
             pois={buildMapPois(displayedResponses, selectedRegion)}
             cityLabel={selectedCity.name}
             bounds={selectedRegion}
-            riskZones={activeIntelligence?.risk_zones ?? []}
+            riskZones={riskZones}
             isLoading={dashboard.regionLoading}
             emptyMessage={Object.values(regionResponses?.infrastructure?.source_errors ?? {}).join(' ') || 'The provider returned no facility coordinates for this region.'}
           />

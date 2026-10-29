@@ -39,8 +39,8 @@ export interface CityLocation {
   currentWeather: string;
   tempRangeAvg: string;
   forecastSummary: string;
-  riskScore: number;
-  riskLevel: 'Normal' | 'Moderate' | 'Orange' | 'Red';
+  riskScore: number | null;
+  riskLevel: 'Normal' | 'Moderate' | 'Orange' | 'Red' | 'Unavailable';
   officialWarning: {
     agency: string;
     level: string;
@@ -58,7 +58,7 @@ export interface CityLocation {
     basis: string[];
   };
   operationalRisk: {
-    score: number;
+    score: number | null;
     level: string;
     factors: string[];
   };

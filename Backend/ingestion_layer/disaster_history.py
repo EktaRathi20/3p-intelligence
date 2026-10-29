@@ -245,7 +245,15 @@ def _freshness_info(tracks):
 def fetch_historical_disasters(region_key="vizag"):
     get_region_coords(region_key)
     tracks = _get_cached_tracks()
-    events = tracks["storms_by_region"][region_key]
+    events = [
+        {**event, "hazard_type": "cyclone"}
+        for event in tracks["storms_by_region"][region_key]
+    ]
+    hazards_with_records = sorted({
+        event["hazard_type"]
+        for event in events
+        if event.get("hazard_type")
+    })
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "region_target": region_key,
@@ -253,6 +261,15 @@ def fetch_historical_disasters(region_key="vizag"):
         "source_url": IBTRACS_CSV_URL,
         "total_historical_events_analyzed": len(events),
         "historical_analogs": events,
+        "available_hazards": ["cyclone"],
+        "hazards_with_records": hazards_with_records,
+        "history_coverage": {
+            "complete": False,
+            "note": (
+                "Historical coverage currently uses NOAA IBTrACS cyclone "
+                "tracks only; other hazard history sources are not integrated."
+            ),
+        },
         **_freshness_info(tracks),
     }
 

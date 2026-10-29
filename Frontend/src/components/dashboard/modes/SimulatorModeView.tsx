@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Activity, Banknote, BellRing, CheckCircle2, Clock, LoaderCircle, RotateCcw, ShieldAlert, Wind, Wifi, WifiOff, X } from 'lucide-react';
 import { api } from '@/services/api';
+import { isAvailableDisasterIntelligence } from '@/types/api';
 import type {
   ApiRegion,
-  DisasterIntelligenceResponse,
+  DisasterIntelligenceResult,
   SimulatorBroadcastResponse,
   WhatsAppConfigurationResponse,
 } from '@/types/api';
@@ -19,7 +20,7 @@ interface SimulatorModeViewProps {
   regionName: string;
   bounds: ApiRegion;
   pois: MapPOI[];
-  intelligence: DisasterIntelligenceResponse | null;
+  intelligence: DisasterIntelligenceResult | null;
   tier: SimulationTier | null;
   onSimulate: (tier: SimulationTier) => void;
   onReset: () => void;
@@ -48,10 +49,13 @@ export const SimulatorModeView: React.FC<SimulatorModeViewProps> = ({
   onBroadcast,
   isLoading,
 }) => {
-  const conditions = intelligence?.current_conditions;
-  const insurance = intelligence?.insurance_summary;
-  const budget = intelligence?.preparedness_budget;
-  const locations = [...new Set((intelligence?.ai_analysis.recommended_tasks ?? []).map(task => task.location).filter(Boolean))];
+  const hasAssessment = isAvailableDisasterIntelligence(intelligence);
+  const conditions = hasAssessment ? intelligence.current_conditions : undefined;
+  const insurance = hasAssessment ? intelligence.insurance_summary : undefined;
+  const budget = hasAssessment ? intelligence.preparedness_budget : undefined;
+  const riskZones = hasAssessment ? intelligence.risk_zones : [];
+  const analysisSummary = hasAssessment ? intelligence.ai_analysis.summary : null;
+  const locations = [...new Set((hasAssessment ? intelligence.ai_analysis.recommended_tasks : []).map(task => task.location).filter(Boolean))];
   
   const [selectedWard, setSelectedWard] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -226,9 +230,9 @@ export const SimulatorModeView: React.FC<SimulatorModeViewProps> = ({
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
           <h2 className="text-sm font-bold text-slate-800">Scenario map · {regionName}</h2>
-          <span className="text-[11px] text-slate-500">{intelligence?.risk_zones.length ?? 0} zone overlays · {pois.length} mapped facilities</span>
+          <span className="text-[11px] text-slate-500">{riskZones.length} zone overlays · {pois.length} mapped facilities</span>
         </div>
-        <MapComponent cityLabel={regionName} bounds={bounds} pois={pois} riskZones={intelligence?.risk_zones ?? []} isLoading={isLoading} emptyMessage="Select a risk tier to draw simulated zones. Facility markers come from available region data." />
+        <MapComponent cityLabel={regionName} bounds={bounds} pois={pois} riskZones={riskZones} isLoading={isLoading} emptyMessage="Select a risk tier to draw simulated zones. Facility markers come from available region data." />
       </section>
 
       {insurance?.note && <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-600">{insurance.note}</p>}
@@ -241,7 +245,7 @@ export const SimulatorModeView: React.FC<SimulatorModeViewProps> = ({
                 <span className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg ${tier === 'RED' ? 'bg-rose-100 text-rose-700' : tier === 'ORANGE' ? 'bg-orange-100 text-orange-700' : 'bg-amber-100 text-amber-800'}`}><ShieldAlert size={18} /></span>
                 <div className="min-w-0">
                   <h2 id="sim-alert-title" className="break-words text-sm font-bold text-slate-900">{tier} zone exercise alert</h2>
-                  <p className="mt-1 break-words text-xs leading-relaxed text-slate-600">{intelligence?.ai_analysis.summary ?? 'Simulated zone conditions for demonstration.'}</p>
+                  <p className="mt-1 break-words text-xs leading-relaxed text-slate-600">{analysisSummary ?? 'Simulated zone conditions for demonstration.'}</p>
                 </div>
               </div>
               <button type="button" aria-label="Close alert preview" onClick={() => setIsAlertOpen(false)} className="shrink-0 rounded p-1 text-slate-500 hover:bg-slate-200 hover:text-slate-900"><X size={17} /></button>

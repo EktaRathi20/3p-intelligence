@@ -4,7 +4,12 @@ import { regionApi } from '../services/regionApi';
 import { resolveDefaultRegionKey } from '../utils/regionDefault';
 import { Outlet, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
-import type { ApiRegion, DisasterIntelligenceResponse, RegionResponses } from '../types/api';
+import type {
+  ApiRegion,
+  DisasterIntelligenceCapabilities,
+  DisasterIntelligenceResponse,
+  RegionResponses,
+} from '../types/api';
 import { ClimateAlert } from '../services/climateAlerts';
 import { useClimateAlerts } from '../hooks/useClimateAlerts';
 import { createSimulatedIntelligence, SimulationTier } from '../features/simulator/simulator';
@@ -43,6 +48,8 @@ export default function DashboardProvider() {
   const [regions, setRegions] = useState<Record<string, ApiRegion>>({});
   const [selectedRegionKey, setSelectedRegionKey] = useState('');
   const [defaultRegionKey, setDefaultRegionKey] = useState<string | null>(null);
+  const [selectedHazard, setSelectedHazard] = useState('cyclone');
+  const [hazardCapabilities, setHazardCapabilities] = useState<DisasterIntelligenceCapabilities | null>(null);
   const [regionResponses, setRegionResponses] = useState<RegionResponses | null>(null);
   const [simulationTier, setSimulationTier] = useState<SimulationTier | null>(null);
   const [simulatedIntelligence, setSimulatedIntelligence] = useState<DisasterIntelligenceResponse | null>(null);
@@ -87,8 +94,13 @@ export default function DashboardProvider() {
 
   useEffect(() => {
     const onDefaultChanged = () => setRegionsRetry(value => value + 1);
+    const onRegionHazardsChanged = () => setRegionDataRetry(value => value + 1);
     window.addEventListener('region-default-changed', onDefaultChanged);
-    return () => window.removeEventListener('region-default-changed', onDefaultChanged);
+    window.addEventListener('region-hazards-changed', onRegionHazardsChanged);
+    return () => {
+      window.removeEventListener('region-default-changed', onDefaultChanged);
+      window.removeEventListener('region-hazards-changed', onRegionHazardsChanged);
+    };
   }, []);
   useEffect(() => {
     if (!latestLiveAlert) return;
@@ -108,6 +120,7 @@ export default function DashboardProvider() {
     setRegions({});
     setSelectedRegionKey('');
     setDefaultRegionKey(null);
+    setHazardCapabilities(null);
     setRegionResponses(null);
     setSimulatedIntelligence(null);
     setSimulationTier(null);
@@ -155,8 +168,9 @@ export default function DashboardProvider() {
       api.getForecast(selectedRegionKey, controller.signal),
       api.getInfrastructure(selectedRegionKey, controller.signal),
       api.getCurrentConditions(selectedRegionKey, controller.signal),
-      api.getDisasterIntelligence(selectedRegionKey, controller.signal),
-    ]).then(([population, forecast, infrastructure, currentConditions, disasterIntelligence]) => {
+      api.getDisasterIntelligence(selectedRegionKey, selectedHazard, controller.signal),
+      api.getHazardCapabilities(selectedRegionKey, controller.signal),
+    ]).then(([population, forecast, infrastructure, currentConditions, disasterIntelligence, capabilities]) => {
       if (controller.signal.aborted) return;
       setRegionResponses({
         population: population.status === 'fulfilled' ? population.value : null,
@@ -169,14 +183,15 @@ export default function DashboardProvider() {
           ? errorMessage(disasterIntelligence.reason)
           : null,
       });
-      const hasFailedSources = [population, forecast, infrastructure, currentConditions, disasterIntelligence]
+      setHazardCapabilities(capabilities.status === 'fulfilled' ? capabilities.value : null);
+      const hasFailedSources = [population, forecast, infrastructure, currentConditions, disasterIntelligence, capabilities]
         .some(result => result.status === 'rejected');
       setRegionDataError(hasFailedSources ? 'Some dashboard information is temporarily unavailable.' : null);
     }).finally(() => {
       if (!controller.signal.aborted) setRegionLoading(false);
     });
     return () => controller.abort();
-  }, [selectedRegion, selectedRegionKey, regionDataRetry]);
+  }, [selectedRegion, selectedRegionKey, selectedHazard, regionDataRetry]);
 
   const retryRegions = () => setRegionsRetry(value => value + 1);
   const retryRegionData = () => setRegionDataRetry(value => value + 1);
@@ -200,6 +215,9 @@ export default function DashboardProvider() {
     regionResponses,
     displayedResponses,
     activeIntelligence,
+    hazardCapabilities,
+    selectedHazard,
+    setSelectedHazard,
     regionLoading,
     regionError,
     regionDataError,

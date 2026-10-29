@@ -8,6 +8,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { EvacuationModal } from '@/components/dashboard/modals/EvacuationModal';
 import { SettingsModal } from '@/components/dashboard/modals/SettingsModal';
 import type { DashboardOutletData } from '../types/dashboard';
+import { isAvailableDisasterIntelligence } from '../types/api';
 
 interface LayoutProps {
   currentUser: AuthUser;
@@ -32,6 +33,9 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const currentMode = routeModes[location.pathname as keyof typeof routeModes] ?? 'threat';
+  const simulatorIntelligence = isAvailableDisasterIntelligence(dashboard.activeIntelligence)
+    ? dashboard.activeIntelligence
+    : null;
   const isHistoricalView = location.pathname === '/history';
   const isNotificationView = location.pathname === '/alerts';
   const isRegionView = location.pathname === '/region-management';
@@ -202,12 +206,12 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
                     <div className="flex items-baseline gap-1.5">
                       <span className="font-bold text-sm font-mono text-slate-900">
                         {currentMode === 'simulator' && dashboard.simulationTier
-                          ? dashboard.activeIntelligence?.current_conditions.wind_speed_kmh == null ? 'Unavailable' : `${dashboard.activeIntelligence.current_conditions.wind_speed_kmh} km/h`
+                          ? simulatorIntelligence?.current_conditions.wind_speed_kmh == null ? 'Unavailable' : `${simulatorIntelligence.current_conditions.wind_speed_kmh} km/h`
                           : dashboard.regionResponses?.currentConditions?.temperature_c == null ? 'Unavailable' : `${dashboard.regionResponses.currentConditions.temperature_c}°C`}
                       </span>
                       <span className="max-w-48 truncate text-[11px] font-medium text-slate-600">
                         {currentMode === 'simulator' && dashboard.simulationTier
-                          ? `${dashboard.activeIntelligence?.current_conditions.pressure_hpa ?? 'Unavailable'} hPa · ${dashboard.activeIntelligence?.risk_assessment.level ?? 'UNKNOWN'} risk`
+                          ? `${simulatorIntelligence?.current_conditions.pressure_hpa ?? 'Unavailable'} hPa · ${simulatorIntelligence?.risk_assessment.level ?? 'UNKNOWN'} risk`
                           : dashboard.regionResponses?.currentConditions?.condition ?? dashboard.regionResponses?.currentConditionsError ?? 'Waiting for current weather data'}
                       </span>
                     </div>

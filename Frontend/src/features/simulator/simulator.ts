@@ -1,9 +1,11 @@
 import type {
   ApiRegion,
   DisasterIntelligenceResponse,
+  DisasterIntelligenceResult,
   PreparednessBudgetLine,
   SimulatedPreparednessBudget,
 } from '../../types/api';
+import { isAvailableDisasterIntelligence } from '../../types/api';
 
 export type SimulationTier = 'YELLOW' | 'ORANGE' | 'RED';
 
@@ -102,7 +104,7 @@ function buildPreparednessBudget(tier: SimulationTier): SimulatedPreparednessBud
 }
 
 export function createSimulatedIntelligence(
-  live: DisasterIntelligenceResponse | null,
+  live: DisasterIntelligenceResult | null,
   regionKey: string,
   bounds: ApiRegion,
   tier: SimulationTier,
@@ -129,7 +131,9 @@ export function createSimulatedIntelligence(
       ? [zone('yellow', activeRadius * 1.8, 'Yellow watch zone'), zone('orange', activeRadius, 'Orange elevated-risk zone')]
       : [zone('yellow', activeRadius, 'Yellow preparedness zone')];
 
-  const insuranceThreshold = live?.insurance_summary.trigger_threshold_m ?? 1.2;
+  const liveAssessment = isAvailableDisasterIntelligence(live) ? live : null;
+  const liveInsurance = liveAssessment?.insurance_summary ?? null;
+  const insuranceThreshold = liveInsurance?.trigger_threshold_m ?? 1.2;
   const triggerMet = scenario.surge >= insuranceThreshold;
 
   return {
@@ -159,9 +163,9 @@ export function createSimulatedIntelligence(
       note: 'Simulated scenario for demonstration only. This is not a live hazard assessment or official warning.',
     },
     risk_zones: riskZones,
-    historical_context: live?.historical_context ?? { primary_analog: null, historical_analogs: [] },
-    demography: live?.demography ?? { total_population: null },
-    critical_places: live?.critical_places ?? { hospitals: [], shelters: [] },
+    historical_context: liveAssessment?.historical_context ?? { primary_analog: null, historical_analogs: [] },
+    demography: liveAssessment?.demography ?? { total_population: null },
+    critical_places: liveAssessment?.critical_places ?? { hospitals: [], shelters: [] },
     insurance_summary: {
       status: 'EVALUATED',
       trigger_met: triggerMet,
@@ -169,7 +173,7 @@ export function createSimulatedIntelligence(
       observed_water_depth_m: scenario.surge,
       estimated_payout_cr: null,
       headline: `Simulated depth ${triggerMet ? 'reaches' : 'does not reach'} the configured ${insuranceThreshold.toFixed(1)} m threshold.`,
-      coverage_focus: live?.insurance_summary.coverage_focus ?? ['Critical infrastructure', 'Low-lying settlements'],
+      coverage_focus: liveAssessment?.insurance_summary.coverage_focus ?? ['Critical infrastructure', 'Low-lying settlements'],
       note: 'Scenario value for UI testing only. No policy, payout, or transaction is evaluated.',
     },
     preparedness_budget: buildPreparednessBudget(tier),

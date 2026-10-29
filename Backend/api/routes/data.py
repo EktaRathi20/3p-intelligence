@@ -7,6 +7,12 @@ from ingestion_layer.disaster_history import fetch_historical_disasters
 from ingestion_layer.places import fetch_critical_infrastructure
 from ingestion_layer.population import fetch_population
 from ingestion_layer.weather import fetch_7_day_forecast, fetch_meteorological_telemetry
+from services.hazard_intelligence import (
+    canonical_hazard_key,
+    normalize_key,
+    resolve_hazard,
+    resolve_region,
+)
 
 
 router = APIRouter()
@@ -63,22 +69,34 @@ def get_forecast(region: str = Query("vizag", description="Region key (vizag, od
 @router.get("/api/history")
 def get_history(
     region: str = Query("vizag", description="Region key (vizag, odisha, chennai, etc.)"),
+    hazard: str | None = Query(None, description="Optional hazard type filter"),
     page: int = Query(1, ge=1),
     page_size: int = Query(12, ge=1, le=100),
     search: str = Query("", max_length=120),
     sort_by: Literal["newest", "oldest", "wind", "distance"] = "newest",
 ):
     try:
-        result = fetch_historical_disasters(region_key=region)
+        region_key, _ = resolve_region(region)
+        hazard_record = resolve_hazard(hazard) if hazard else None
+        result = fetch_historical_disasters(region_key=region_key)
         events = list(result["historical_analogs"])
+        if hazard_record:
+            requested_hazard = canonical_hazard_key(hazard_record)
+            events = [
+                event
+                for event in events
+                if normalize_key(event.get("hazard_type")) == requested_hazard
+            ]
         total_events = len(events)
         normalized_search = search.strip().casefold()
         if normalized_search:
             events = [
                 event
                 for event in events
-                if normalized_search
-                in f"{event['matched_cyclone']} {event['reference_period']['start_date']}".casefold()
+                if normalized_search in (
+                    f"{event.get('event_name') or event.get('matched_cyclone') or event.get('name', '')} "
+                    f"{event.get('reference_period', {}).get('start_date', '')}"
+                ).casefold()
             ]
 
         if sort_by == "wind":
@@ -108,8 +126,10 @@ def get_history(
         result["matching_events"] = matching_events
         result["total_pages"] = (matching_events + page_size - 1) // page_size
         return result
+    except HTTPException:
+        raise
     except ValueError as error:
-        raise HTTPException(status_code=422, detail=str(error))
+        raise HTTPException(status_code=503, detail=str(error))
     except RuntimeError as error:
         raise HTTPException(status_code=502, detail=str(error))
     except Exception as error:

@@ -1,3 +1,4 @@
+import { isAvailableDisasterIntelligence } from '@/types/api';
 import type { ApiRegion, RegionResponses } from '@/types/api';
 import { CityLocation, MapPOI } from '@/types/domain';
 
@@ -17,8 +18,11 @@ export const buildCity = (
     ? Math.round(forecast.reduce((sum, day) => sum + day.min_temp_c, 0) / forecast.length)
     : null;
   const population = responses?.population?.total_population;
-  const assessment = responses?.disasterIntelligence?.risk_assessment;
-  const localImpact = responses?.disasterIntelligence?.local_impact;
+  const intelligence = isAvailableDisasterIntelligence(responses?.disasterIntelligence)
+    ? responses.disasterIntelligence
+    : null;
+  const assessment = intelligence?.risk_assessment;
+  const localImpact = intelligence?.local_impact;
   const level = assessment?.level?.toUpperCase();
   const cityRiskLevel: CityLocation['riskLevel'] = level === 'RED'
     ? 'Red'
@@ -26,7 +30,7 @@ export const buildCity = (
       ? 'Orange'
       : level === 'YELLOW'
         ? 'Moderate'
-        : 'Normal';
+        : assessment ? 'Normal' : 'Unavailable';
   const facilityErrors = Object.values(responses?.infrastructure?.source_errors ?? {}).join(' ');
   const sources = [
     {
@@ -61,10 +65,10 @@ export const buildCity = (
     currentWeather: responses?.currentConditions?.condition ?? 'Unavailable',
     tempRangeAvg: averageHigh === null || averageLow === null ? 'Unavailable' : `${averageHigh}° / ${averageLow}°C`,
     forecastSummary: forecast[0]?.condition ?? 'Forecast unavailable',
-    riskScore: assessment?.score ?? 0,
+    riskScore: assessment?.score ?? null,
     riskLevel: cityRiskLevel,
     officialWarning: {
-      agency: assessment?.official_warning ? 'Official external warning' : 'Risk screening',
+      agency: !assessment ? 'Unavailable' : assessment.official_warning ? 'Official external warning' : 'Risk screening',
       level: assessment?.level ?? 'Unavailable',
       title: assessment?.note ?? 'No warning or risk assessment returned by the API.',
       validity: '',
@@ -79,11 +83,11 @@ export const buildCity = (
       geometrySource: localImpact.geometry_source,
       basis: localImpact.basis ?? [],
     } : undefined,
-    operationalRisk: { score: assessment?.score ?? 0, level: assessment?.level ?? 'Unavailable', factors: assessment?.factors ?? [] },
+    operationalRisk: { score: assessment?.score ?? null, level: assessment?.level ?? 'Unavailable', factors: assessment?.factors ?? [] },
     aiPreparednessBrief: {
-      summary: responses?.disasterIntelligence?.ai_analysis.summary ?? 'AI preparedness analysis is unavailable.',
-      detailedPlan: responses?.disasterIntelligence?.ai_analysis.recommended_tasks.map(task => task.description) ?? [],
-      rationale: responses?.disasterIntelligence?.ai_analysis.reasoning_context ?? [],
+      summary: intelligence?.ai_analysis.summary ?? 'AI preparedness analysis is unavailable.',
+      detailedPlan: intelligence?.ai_analysis.recommended_tasks.map(task => task.description) ?? [],
+      rationale: intelligence?.ai_analysis.reasoning_context ?? [],
     },
     evidenceQuality: {
       rating: sources.every(source => source.available) ? 'CONNECTED' : 'PARTIAL',
@@ -94,7 +98,10 @@ export const buildCity = (
 };
 
 export const buildMapPois = (responses: RegionResponses | null, region: ApiRegion): MapPOI[] => {
-  const intelligenceResources = responses?.disasterIntelligence?.critical_places;
+  const intelligence = isAvailableDisasterIntelligence(responses?.disasterIntelligence)
+    ? responses.disasterIntelligence
+    : null;
+  const intelligenceResources = intelligence?.critical_places;
   const hasIntelligenceFacilities = (intelligenceResources?.hospitals?.length ?? 0) > 0
     || (intelligenceResources?.shelters?.length ?? 0) > 0;
   const resources = hasIntelligenceFacilities || !responses?.infrastructure

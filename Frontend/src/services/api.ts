@@ -4,7 +4,8 @@ import type {
   CurrentConditionsResponse,
   DispatchChatRequest,
   DispatchChatResponse,
-  DisasterIntelligenceResponse,
+  DisasterIntelligenceCapabilities,
+  DisasterIntelligenceResult,
   ForecastResponse,
   HistoricalResponse,
   InfrastructureResponse,
@@ -33,12 +34,13 @@ export const api = {
     httpClient.get<CurrentConditionsResponse>(`/current-conditions?region=${encodeURIComponent(region)}`, { signal, timeout: TELEMETRY_TIMEOUT_MS }),
   getHistory: (
     region: string,
-    params: { page: number; pageSize: number; search: string; sortBy: 'newest' | 'oldest' | 'wind' | 'distance' },
+    params: { page: number; pageSize: number; search: string; sortBy: 'newest' | 'oldest' | 'wind' | 'distance'; hazard?: string },
     signal?: AbortSignal,
   ) =>
     httpClient.get<HistoricalResponse>(
       `/history?region=${encodeURIComponent(region)}&page=${params.page}&page_size=${params.pageSize}`
-      + `&search=${encodeURIComponent(params.search)}&sort_by=${params.sortBy}`,
+      + `&search=${encodeURIComponent(params.search)}&sort_by=${params.sortBy}`
+      + (params.hazard ? `&hazard=${encodeURIComponent(params.hazard)}` : ''),
       { signal, timeout: HISTORY_TIMEOUT_MS },
     ),
   getWhatsAppConfiguration: (signal?: AbortSignal) =>
@@ -47,8 +49,16 @@ export const api = {
     httpClient.get<ClimateAlert[]>('/alerts', { params: { limit: 500 }, signal }),
   sendDispatchChat: (query: string, region: string) =>
     httpClient.post<DispatchChatResponse, DispatchChatRequest>('/dispatch-chat', { query, region }, { timeout: INTELLIGENCE_TIMEOUT_MS }),
-  getDisasterIntelligence: (region: string, signal?: AbortSignal) =>
-    httpClient.get<DisasterIntelligenceResponse>(`/disaster-intelligence/${encodeURIComponent(region)}`, { signal, timeout: INTELLIGENCE_TIMEOUT_MS }),
+  getDisasterIntelligence: (region: string, hazard = 'cyclone', signal?: AbortSignal) =>
+    httpClient.get<DisasterIntelligenceResult>(
+      `/disaster-intelligence/${encodeURIComponent(region)}?hazard=${encodeURIComponent(hazard)}`,
+      { signal, timeout: INTELLIGENCE_TIMEOUT_MS },
+    ),
+  getHazardCapabilities: (region: string, signal?: AbortSignal) =>
+    httpClient.get<DisasterIntelligenceCapabilities>(
+      `/disaster-intelligence/${encodeURIComponent(region)}/capabilities`,
+      { signal },
+    ),
   broadcastSimulatorAlert: (regionKey: string, tier: 'YELLOW' | 'ORANGE' | 'RED', ward: string, phone: string | null, token: string) =>
     httpClient.post<SimulatorBroadcastResponse>('/simulator/alerts', { region_key: regionKey, tier, ward, phone }, {
       headers: { 'X-Simulator-Token': token },

@@ -14,6 +14,9 @@ export default function ThreatPage() {
       bounds={selectedRegion}
       pois={buildMapPois(displayedResponses, selectedRegion)}
       disasterIntelligence={activeIntelligence}
+      hazardCapabilities={dashboard.hazardCapabilities}
+      selectedHazard={dashboard.selectedHazard}
+      onSelectHazard={dashboard.setSelectedHazard}
       isLoading={dashboard.regionLoading}
       error={regionResponses?.disasterIntelligenceError ?? null}
       showMangroveLayer={dashboard.showMangroveLayer}

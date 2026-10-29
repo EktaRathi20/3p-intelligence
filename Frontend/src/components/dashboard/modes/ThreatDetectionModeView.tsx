@@ -1,6 +1,11 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle2, CircleHelp, Clock3, LoaderCircle, Map, ShieldAlert, Wind } from 'lucide-react';
-import type { ApiRegion, DisasterIntelligenceResponse } from '@/types/api';
+import {
+  isAvailableDisasterIntelligence,
+  type ApiRegion,
+  type DisasterIntelligenceCapabilities,
+  type DisasterIntelligenceResult,
+} from '@/types/api';
 import { CityLocation, MapPOI } from '@/types/domain';
 import { MapComponent } from '@/components/dashboard/MapComponent';
 import { ExternalLink, Radar } from 'lucide-react';
@@ -10,7 +15,10 @@ interface ThreatDetectionModeViewProps {
   city: CityLocation;
   bounds: ApiRegion;
   pois: MapPOI[];
-  disasterIntelligence: DisasterIntelligenceResponse | null;
+  disasterIntelligence: DisasterIntelligenceResult | null;
+  hazardCapabilities: DisasterIntelligenceCapabilities | null;
+  selectedHazard: string;
+  onSelectHazard: (hazard: string) => void;
   isLoading: boolean;
   error: string | null;
   showMangroveLayer: boolean;
@@ -36,6 +44,9 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
   bounds,
   pois,
   disasterIntelligence,
+  hazardCapabilities,
+  selectedHazard,
+  onSelectHazard,
   isLoading,
   error,
   showMangroveLayer,
@@ -43,14 +54,22 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
   showHistoricalLayer,
   onToggleHistorical,
 }) => {
-  const assessment = disasterIntelligence?.risk_assessment;
-  const conditions = disasterIntelligence?.current_conditions;
-  const zones = disasterIntelligence?.risk_zones ?? [];
-  const analysis = disasterIntelligence?.ai_analysis;
-  const dataUnavailable = disasterIntelligence?.data_quality.telemetry_status !== 'AVAILABLE';
+  const availableIntelligence = isAvailableDisasterIntelligence(disasterIntelligence)
+    ? disasterIntelligence
+    : null;
+  const hasAssessment = availableIntelligence !== null;
+  const unavailableIntelligence = !isAvailableDisasterIntelligence(disasterIntelligence)
+    ? disasterIntelligence
+    : null;
+  const assessment = availableIntelligence?.risk_assessment;
+  const conditions = availableIntelligence?.current_conditions;
+  const zones = availableIntelligence?.risk_zones ?? [];
+  const analysis = availableIntelligence?.ai_analysis;
+  const dataQuality = availableIntelligence?.data_quality;
+  const dataUnavailable = !hasAssessment || dataQuality?.telemetry_status !== 'AVAILABLE';
   const riskLevel = assessment?.level ?? 'UNKNOWN';
-  const warnings = disasterIntelligence?.official_warnings ?? [];
-  const localImpact = disasterIntelligence?.local_impact ?? null;
+  const warnings = availableIntelligence?.official_warnings ?? [];
+  const localImpact = availableIntelligence?.local_impact ?? null;
   const levelBasis = assessment?.level_basis;
   const basisLabel = levelBasis === 'official_warning'
     ? 'Official warning'
@@ -70,19 +89,54 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
           <div>
             <h1 className="text-lg font-bold text-slate-900">Threat Detection · {city.name}</h1>
             <p className="mt-0.5 text-xs text-slate-500">
-              {isLoading ? 'Refreshing disaster intelligence…' : assessment?.note ?? 'Risk screening from current backend telemetry'}
+              {isLoading
+                ? 'Refreshing disaster intelligence…'
+                : unavailableIntelligence
+                  ? unavailableIntelligence.message
+                  : assessment?.note}
             </p>
           </div>
         </div>
         <div className={`inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold ${riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
           <span className="h-2 w-2 rounded-full bg-current" />
-          {riskLevel === 'UNKNOWN' ? 'DATA UNAVAILABLE' : `${riskLevel} RISK`}
+          {unavailableIntelligence
+            ? unavailableIntelligence.status === 'not_implemented' ? 'NOT IMPLEMENTED' : 'NOT CONFIGURED'
+            : riskLevel === 'UNKNOWN' ? 'DATA UNAVAILABLE' : `${riskLevel} RISK`}
         </div>
       </section>
 
-      {disasterIntelligence?.data_quality.ingestion_error && (
+      <label className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700">
+        Hazard intelligence
+        <select
+          value={selectedHazard}
+          onChange={event => onSelectHazard(event.target.value)}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs"
+          aria-label="Select hazard intelligence"
+        >
+          {(hazardCapabilities?.hazards ?? []).map(hazard => (
+            <option key={hazard.id} value={hazard.id}>
+              {hazard.name} · {hazard.intelligence_status.replace('_', ' ')}
+            </option>
+          ))}
+          {!hazardCapabilities?.hazards.some(hazard => hazard.id === selectedHazard) && (
+            <option value={selectedHazard}>{selectedHazard} · checking availability</option>
+          )}
+        </select>
+      </label>
+
+      {dataQuality?.ingestion_error && (
         <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          Ingestion is incomplete: {disasterIntelligence.data_quality.ingestion_error}
+          Ingestion is incomplete: {dataQuality.ingestion_error}
+        </div>
+      )}
+      {Object.entries(dataQuality?.source_errors ?? {}).map(([source, sourceError]) => (
+        <div key={source} role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          {source} data is unavailable: {sourceError}
+        </div>
+      ))}
+      {!isLoading && unavailableIntelligence && (
+        <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          {unavailableIntelligence.message}
         </div>
       )}
       {isLoading && <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-950"><LoaderCircle size={14} className="animate-spin" />Loading live telemetry, history, and response resources…</div>}
@@ -184,19 +238,19 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
           <p className="mt-1 text-xs leading-relaxed text-slate-500">{assessment?.note ?? 'Risk assessment will appear when the API responds.'}</p>
           <div className="mt-4 space-y-2">
             <Fact label="Pressure" value={formatValue(conditions?.pressure_hpa, ' hPa', 1)} />
-            <Fact label="Telemetry status" value={disasterIntelligence?.data_quality.telemetry_status ?? (isLoading ? 'Loading' : 'Unavailable')} />
-            <Fact label="Historical analog" value={disasterIntelligence?.historical_context.primary_analog ?? 'Unavailable'} />
+            <Fact label="Telemetry status" value={dataQuality?.telemetry_status ?? (isLoading ? 'Loading' : 'Unavailable')} />
+            <Fact label="Historical analog" value={availableIntelligence?.historical_context.primary_analog ?? 'Unavailable'} />
             {assessment?.factors.map((factor, index) => (
               <div key={`${factor}-${index}`} className="flex gap-2 rounded-md bg-slate-50 p-2 text-xs leading-relaxed text-slate-700">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600" />{factor}
               </div>
             ))}
-            {assessment && disasterIntelligence?.data_quality.telemetry_status === 'AVAILABLE' && assessment.factors.length === 0 && (
+            {assessment && dataQuality?.telemetry_status === 'AVAILABLE' && assessment.factors.length === 0 && (
               <div className="flex gap-2 rounded-md bg-emerald-50 p-2 text-xs text-emerald-800">
                 <CheckCircle2 size={14} className="shrink-0" />No elevated screening factors were returned.
               </div>
             )}
-            {disasterIntelligence && disasterIntelligence.data_quality.telemetry_status !== 'AVAILABLE' && !assessment?.warning_floor && (
+            {hasAssessment && dataQuality?.telemetry_status !== 'AVAILABLE' && !assessment?.warning_floor && (
               <div className="flex gap-2 rounded-md bg-amber-50 p-2 text-xs text-amber-900">
                 <CircleHelp size={14} className="shrink-0" />Risk factors cannot be assessed without current telemetry.
               </div>

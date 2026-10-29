@@ -232,6 +232,22 @@ async def build_disaster_intelligence(region: str, client):
         "Meteorological telemetry"
     )
 
+    source_errors = {}
+    for source_name, source_block in (
+        ("marine", marine),
+        ("active_systems", active_block),
+        ("warnings", warnings_block),
+        ("forecast", unified_data.get("forecast") or unified_data.get("forcast")),
+    ):
+        if not isinstance(source_block, dict):
+            continue
+        source_error = source_block.get("source_error")
+        nested_errors = source_block.get("source_errors")
+        if isinstance(nested_errors, dict):
+            source_error = source_error or nested_errors.get("ingestion")
+        if source_error:
+            source_errors[source_name] = str(source_error)
+
     if ingestion_error:
         telemetry_data_status = "UNAVAILABLE"
 
@@ -853,6 +869,8 @@ do not pretend current hazard conditions are known.
             "ingestion_error": ingestion_error,
 
             "telemetry_timestamp": telemetry_timestamp,
+
+            "source_errors": source_errors,
 
             "sources": {
                 "meteorological": system_name,

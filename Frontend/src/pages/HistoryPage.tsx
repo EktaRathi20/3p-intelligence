@@ -17,7 +17,13 @@ export default function HistoryPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<HistorySort>('newest');
+  const [hazardFilter, setHazardFilter] = useState('all');
   const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    setPage(1);
+    setHazardFilter('all');
+  }, [dashboard.selectedRegionKey]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -26,7 +32,13 @@ export default function HistoryPage() {
       setError(null);
       api.getHistory(
         dashboard.selectedRegionKey,
-        { page, pageSize: 12, search: searchQuery.trim(), sortBy },
+        {
+          page,
+          pageSize: 12,
+          search: searchQuery.trim(),
+          sortBy,
+          hazard: hazardFilter === 'all' ? undefined : hazardFilter,
+        },
         controller.signal,
       )
         .then(setHistory)
@@ -44,7 +56,7 @@ export default function HistoryPage() {
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [dashboard.selectedRegionKey, page, searchQuery, sortBy, retryCount]);
+  }, [dashboard.selectedRegionKey, page, searchQuery, sortBy, hazardFilter, retryCount]);
 
   const updateSearch = (value: string) => {
     setPage(1);
@@ -70,6 +82,12 @@ export default function HistoryPage() {
       onSearchChange={updateSearch}
       sortBy={sortBy}
       onSortChange={updateSort}
+      hazardFilter={hazardFilter}
+      onHazardFilterChange={(hazard) => {
+        setPage(1);
+        setHazardFilter(hazard);
+      }}
+      availableHazards={history?.available_hazards ?? []}
     />
   );
 }
