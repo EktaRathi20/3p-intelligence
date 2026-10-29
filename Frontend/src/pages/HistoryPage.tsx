@@ -68,6 +68,11 @@ export default function HistoryPage() {
     setSortBy(value);
   };
 
+  const recordedHazards = new Set((history?.available_hazards ?? []).map(hazard => hazard.toLowerCase()));
+  const unsupportedHazards = (dashboard.hazardCapabilities?.hazards ?? [])
+    .filter(hazard => !recordedHazards.has(hazard.id.toLowerCase()) && !recordedHazards.has(hazard.name.toLowerCase()))
+    .map(hazard => hazard.name);
+
   return (
     <HistoricalDisastersView
       history={history}
@@ -88,6 +93,7 @@ export default function HistoryPage() {
         setHazardFilter(hazard);
       }}
       availableHazards={history?.available_hazards ?? []}
+      unsupportedHazards={unsupportedHazards}
     />
   );
 }

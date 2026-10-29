@@ -30,7 +30,7 @@ export const buildCity = (
       ? 'Orange'
       : level === 'YELLOW'
         ? 'Moderate'
-        : assessment ? 'Normal' : 'Unavailable';
+        : level === 'GREEN' ? 'Normal' : 'Unavailable';
   const facilityErrors = Object.values(responses?.infrastructure?.source_errors ?? {}).join(' ');
   const sources = [
     {
@@ -73,6 +73,7 @@ export const buildCity = (
       title: assessment?.note ?? 'No warning or risk assessment returned by the API.',
       validity: '',
       details: assessment?.factors.join(' · ') ?? '',
+      officialWarningActive: assessment?.official_warning ?? false,
       levelBasis: assessment?.level_basis,
       screeningLevel: assessment?.screening_level,
       warningFloor: assessment?.warning_floor ?? null,
@@ -83,7 +84,7 @@ export const buildCity = (
       geometrySource: localImpact.geometry_source,
       basis: localImpact.basis ?? [],
     } : undefined,
-    operationalRisk: { score: assessment?.score ?? null, level: assessment?.level ?? 'Unavailable', factors: assessment?.factors ?? [] },
+    operationalRisk: { score: assessment?.score ?? null, level: !assessment || level === 'UNKNOWN' ? 'Unavailable' : assessment.level, factors: assessment?.factors ?? [] },
     aiPreparednessBrief: {
       summary: intelligence?.ai_analysis.summary ?? 'AI preparedness analysis is unavailable.',
       detailedPlan: intelligence?.ai_analysis.recommended_tasks.map(task => task.description) ?? [],

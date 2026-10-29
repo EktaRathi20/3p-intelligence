@@ -16,6 +16,7 @@ interface HistoricalDisastersViewProps {
   hazardFilter: string;
   onHazardFilterChange: (hazard: string) => void;
   availableHazards: string[];
+  unsupportedHazards: string[];
   sortBy: 'newest' | 'oldest' | 'wind' | 'distance';
   onSortChange: (sort: 'newest' | 'oldest' | 'wind' | 'distance') => void;
 }
@@ -34,6 +35,7 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
   hazardFilter,
   onHazardFilterChange,
   availableHazards,
+  unsupportedHazards,
   sortBy,
   onSortChange,
 }) => {
@@ -84,7 +86,7 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
             onChange={event => onHazardFilterChange(event.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800"
           >
-            <option value="all">All hazards</option>
+            <option value="all">All available hazards{availableHazards.length === 1 ? ` (${availableHazards[0]} only)` : ''}</option>
             {availableHazards.map(hazard => (
               <option key={hazard} value={hazard}>
                 {hazard.charAt(0).toUpperCase() + hazard.slice(1)}
@@ -93,6 +95,9 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
           </select>
         </label>
       </section>
+      {unsupportedHazards.length > 0 && (
+        <p className="text-xs text-amber-800">No historical records for: {unsupportedHazards.join(', ')}. The records on this page cover {availableHazards.length > 0 ? availableHazards.join(', ') : 'no recorded hazard types'} only.</p>
+      )}
       {history?.history_coverage && (
         <p className="text-xs text-slate-500">{history.history_coverage.note}</p>
       )}

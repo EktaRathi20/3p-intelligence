@@ -192,6 +192,16 @@ export interface DisasterLocalImpact {
   geometry_source: string | null;
 }
 
+export interface DisasterMlProbability {
+  status: 'SCORED' | 'UNAVAILABLE' | string;
+  probability: number | null;
+  model_id: string | null;
+  features_used: Record<string, number> | null;
+  label: string;
+  reason: string | null;
+  note: string;
+}
+
 export interface DisasterInsuranceSummary {
   status: 'UNAVAILABLE' | 'EVALUATED';
   trigger_met: boolean | null;
@@ -239,6 +249,7 @@ export interface DisasterIntelligenceResponse {
   hazard?: string;
   supported?: true;
   generated_at: string;
+  ml_probability?: DisasterMlProbability;
   simulation?: {
     tier: 'YELLOW' | 'ORANGE' | 'RED';
     label: string;

@@ -64,5 +64,48 @@
     "stateName": "Gujarat",
     "type": "city",
     "updatedAt": "2026-10-29T04:16:21.961004+00:00"
+  },
+  "iyVP8T2Wv1RN1WEcG6kM": {
+    "active": true,
+    "cityId": "133671",
+    "cityName": "Rajahmundry",
+    "code": "IN-AP-RJH",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-29T05:15:30.390764+00:00",
+    "hazardIds": [
+      "cyclone"
+    ],
+    "name": "Rajahmundry",
+    "parentRegionId": null,
+    "stateCode": "AP",
+    "stateName": "Andhra Pradesh",
+    "type": "city",
+    "updatedAt": "2026-10-29T05:15:30.390788+00:00"
+  },
+  "vpbX2aowe3yU3wuzE1Je": {
+    "active": true,
+    "cityId": "133024",
+    "cityName": "Mumbai",
+    "code": "IN-MH-MMB",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-29T05:12:14.940196+00:00",
+    "hazardIds": [
+      "cyclone",
+      "drought",
+      "earthquake",
+      "heatwave",
+      "flood",
+      "fire",
+      "landslide",
+      "wildfire"
+    ],
+    "name": "Mumbai",
+    "parentRegionId": null,
+    "stateCode": "MH",
+    "stateName": "Maharashtra",
+    "type": "city",
+    "updatedAt": "2026-10-29T05:12:14.940220+00:00"
   }
 }

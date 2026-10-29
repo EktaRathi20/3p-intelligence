@@ -28,7 +28,7 @@ export const AssessmentCards: React.FC<AssessmentCardsProps> = ({ city, infrastr
       value: city.operationalRisk.level,
       detail: city.operationalRisk.level === 'Unavailable'
         ? 'Risk assessment unavailable'
-        : city.riskScore == null ? 'Risk score unavailable' : `${city.riskScore}/100 screening score · not an official warning`,
+        : city.riskScore == null ? 'Screening score unavailable' : city.officialWarning.officialWarningActive ? `${city.riskScore}/100 screening score · official ${city.officialWarning.warningFloor ?? city.operationalRisk.level} warning applies` : `${city.riskScore}/100 screening score · no official warning`,
       icon: Database,
       color: city.riskLevel === 'Red'
         ? 'text-rose-600'

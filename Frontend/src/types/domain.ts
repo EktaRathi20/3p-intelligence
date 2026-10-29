@@ -47,6 +47,7 @@ export interface CityLocation {
     title: string;
     validity: string;
     details: string;
+    officialWarningActive?: boolean;
     levelBasis?: string;
     screeningLevel?: string;
     warningFloor?: string | null;

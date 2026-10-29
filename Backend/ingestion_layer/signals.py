@@ -342,6 +342,8 @@ def approx_distance_to_polygon_km(
         return None
     if not isinstance(polygon, list) or not polygon:
         return None
+    import math
+
     best: float | None = None
     for pair in polygon:
         if (
@@ -349,6 +351,8 @@ def approx_distance_to_polygon_km(
             or len(pair) != 2
             or not _is_number(pair[0])
             or not _is_number(pair[1])
+            or not math.isfinite(float(pair[0]))
+            or not math.isfinite(float(pair[1]))
         ):
             return None
         distance = haversine_km(
@@ -368,8 +372,10 @@ def assess_local_impact(
 
     Returns {"verdict", "basis", "distance_to_footprint_km",
     "geometry_source"} where verdict is "inside_footprint",
-    "outside_footprint", or "uncertain". Uncertain covers both missing
-    geometry and malformed coordinates — never silently GREEN.
+    "outside_footprint", or "uncertain". Uncertain covers missing
+    geometry, malformed geometry, and malformed coordinates — never
+    silently GREEN. Only footprints with at least one VALID circle or
+    polygon count as evaluated geometry.
     """
     no_geometry = {
         "verdict": "uncertain",
@@ -378,6 +384,10 @@ def assess_local_impact(
         "geometry_source": None,
     }
     if not _is_number(latitude) or not _is_number(longitude):
+        return no_geometry
+    import math
+
+    if not math.isfinite(float(latitude)) or not math.isfinite(float(longitude)):
         return no_geometry
     if not isinstance(footprints, list) or not footprints:
         return no_geometry
@@ -393,7 +403,6 @@ def assess_local_impact(
         has_circles = isinstance(circles, list) and len(circles) > 0
         if not has_polygons and not has_circles:
             continue
-        any_geometry = True
         for circle in circles if has_circles else []:
             if not isinstance(circle, dict):
                 continue
@@ -405,8 +414,12 @@ def assess_local_impact(
                 or not _is_number(center[0])
                 or not _is_number(center[1])
                 or not _is_number(radius)
+                or not math.isfinite(float(center[0]))
+                or not math.isfinite(float(center[1]))
+                or not math.isfinite(float(radius))
             ):
                 continue
+            any_geometry = True
             center_distance = haversine_km(
                 float(latitude), float(longitude),
                 float(center[0]), float(center[1]),
@@ -424,6 +437,14 @@ def assess_local_impact(
             if best_distance is None or outside < best_distance:
                 best_distance = outside
         for polygon in polygons if has_polygons else []:
+            # approx distance is None only for malformed polygons here
+            # (the anchor coordinates were validated above), while
+            # point_in_polygon is False for both malformed and outside
+            # inputs — so malformed polygons must be skipped first.
+            distance = approx_distance_to_polygon_km(latitude, longitude, polygon)
+            if distance is None:
+                continue
+            any_geometry = True
             if point_in_polygon(latitude, longitude, polygon):
                 return {
                     "verdict": "inside_footprint",
@@ -433,10 +454,7 @@ def assess_local_impact(
                     "distance_to_footprint_km": 0.0,
                     "geometry_source": footprint.get("source_url"),
                 }
-            distance = approx_distance_to_polygon_km(latitude, longitude, polygon)
-            if distance is not None and (
-                best_distance is None or distance < best_distance
-            ):
+            if best_distance is None or distance < best_distance:
                 best_distance = distance
 
     if not any_geometry:
