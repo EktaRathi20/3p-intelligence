@@ -52,18 +52,32 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
     };
   }, [isMobileSidebarOpen]);
 
-  if (dashboard.regionLoading && !dashboard.selectedCity) {
+  if (!dashboard.selectedCity || !dashboard.selectedRegion) {
     return (
       <div className="min-h-screen grid place-items-center bg-slate-100 p-6 text-sm text-slate-700">
-        <div role="status" className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
-          <LoaderCircle size={18} className="animate-spin text-cyan-800" />
-          <span>Connecting to the 3P API and loading regions…</span>
-        </div>
+        {dashboard.regionLoading ? (
+          <div role="status" className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
+            <LoaderCircle size={18} className="animate-spin text-cyan-800" />
+            <span>Loading the configured default region…</span>
+          </div>
+        ) : (
+          <div role="alert" className="w-full max-w-lg rounded-lg border border-amber-300 bg-white p-5 shadow-sm">
+            <h1 className="font-semibold text-slate-900">Unable to load the default region</h1>
+            <p className="mt-2 text-slate-600">
+              {dashboard.regionError ?? 'No dashboard region is available. Configure a default region in Region Management and retry.'}
+            </p>
+            <button
+              type="button"
+              onClick={dashboard.retryRegions}
+              className="mt-4 inline-flex items-center gap-1.5 font-semibold text-cyan-900 underline underline-offset-2"
+            >
+              <RotateCcw size={14} /> Retry
+            </button>
+          </div>
+        )}
       </div>
     );
   }
-
-  if (!dashboard.selectedCity || !dashboard.selectedRegion) return null;
 
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white bg-slate-100 text-slate-800" style={{overflow: 'hidden'}}>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { regionApi } from '../services/regionApi';
 import { resolveDefaultRegionKey } from '../utils/regionDefault';
@@ -15,16 +15,6 @@ import { isAbortError } from '../services/apiError';
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : 'The request failed unexpectedly.';
 
-const FALLBACK_REGIONS: Record<string, ApiRegion> = {
-  vizag: {
-    min_lon: 83.15,
-    min_lat: 17.65,
-    max_lon: 83.35,
-    max_lat: 17.75,
-    name: 'Visakhapatnam',
-  },
-};
-
 const routeModes = {
   '/overview': 'overview',
   '/baseline': 'baseline',
@@ -34,27 +24,6 @@ const routeModes = {
   '/recovery': 'recovery',
   '/simulator': 'simulator',
 } as const;
-
-const applyConfiguredDefault = async (
-  data: Record<string, ApiRegion>,
-  signal: AbortSignal,
-  setDefaultRegionKey: (key: string) => void,
-  applySelection: (key: string) => void,
-) => {
-  try {
-    const config = await regionApi.getConfiguration();
-    if (signal.aborted || !config.defaultRegionId) return;
-    const record = await regionApi.getRegion(config.defaultRegionId, signal);
-    if (signal.aborted) return;
-    const resolved = resolveDefaultRegionKey([record], config.defaultRegionId, Object.keys(data));
-    if (resolved) {
-      setDefaultRegionKey(resolved);
-      applySelection(resolved);
-    }
-  } catch {
-    // Region configuration is optional; keep the current selection.
-  }
-};
 
 export default function DashboardProvider() {
   const location = useLocation();
@@ -72,11 +41,8 @@ export default function DashboardProvider() {
   } = useClimateAlerts();
 
   const [regions, setRegions] = useState<Record<string, ApiRegion>>({});
-  const [selectedRegionKey, setSelectedRegionKey] = useState('vizag');
+  const [selectedRegionKey, setSelectedRegionKey] = useState('');
   const [defaultRegionKey, setDefaultRegionKey] = useState<string | null>(null);
-  const userTouchedRegionRef = useRef(false);
-  const regionsRef = useRef(regions);
-  regionsRef.current = regions;
   const [regionResponses, setRegionResponses] = useState<RegionResponses | null>(null);
   const [simulationTier, setSimulationTier] = useState<SimulationTier | null>(null);
   const [simulatedIntelligence, setSimulatedIntelligence] = useState<DisasterIntelligenceResponse | null>(null);
@@ -91,7 +57,6 @@ export default function DashboardProvider() {
   const [isEvacuationModalOpen, setIsEvacuationModalOpen] = useState(false);
 
   const setSelectedRegionKeyTracked: Dispatch<SetStateAction<string>> = (value) => {
-    userTouchedRegionRef.current = true;
     setSelectedRegionKey(value);
   };
   const selectedRegion = regions[selectedRegionKey];
@@ -121,25 +86,7 @@ export default function DashboardProvider() {
   };
 
   useEffect(() => {
-    const onDefaultChanged = () => {
-      const controller = new AbortController();
-      void api.getRegions(controller.signal)
-        .then((data) => {
-          if (controller.signal.aborted || Object.keys(data).length === 0) return;
-          regionsRef.current = data;
-          setRegions(data);
-          void applyConfiguredDefault(data, controller.signal, setDefaultRegionKey, (key) => {
-            setSelectedRegionKey(key);
-            setSimulatedIntelligence(null);
-            setSimulationTier(null);
-          });
-        })
-        .catch((error: unknown) => {
-          if (!isAbortError(error)) {
-            setRegionError('Region information is temporarily unavailable.');
-          }
-        });
-    };
+    const onDefaultChanged = () => setRegionsRetry(value => value + 1);
     window.addEventListener('region-default-changed', onDefaultChanged);
     return () => window.removeEventListener('region-default-changed', onDefaultChanged);
   }, []);
@@ -158,26 +105,42 @@ export default function DashboardProvider() {
     const controller = new AbortController();
     setRegionLoading(true);
     setRegionError(null);
-    api.getRegions(controller.signal)
-      .then((data) => {
-        if (Object.keys(data).length === 0) {
-          setRegionError('Region information is temporarily unavailable.');
-          setRegions(current => Object.keys(current).length ? current : FALLBACK_REGIONS);
-          return;
+    setRegions({});
+    setSelectedRegionKey('');
+    setDefaultRegionKey(null);
+    setRegionResponses(null);
+    setSimulatedIntelligence(null);
+    setSimulationTier(null);
+    const loadDefaultRegion = async () => {
+      try {
+        const config = await regionApi.getConfiguration(controller.signal);
+        if (controller.signal.aborted) return;
+        if (!config.defaultRegionId) {
+          throw new Error('No default region is configured. Set one in Region Management and retry.');
         }
+
+        const [record, data] = await Promise.all([
+          regionApi.getRegion(config.defaultRegionId, controller.signal),
+          api.getRegions(controller.signal),
+        ]);
+        if (controller.signal.aborted) return;
+        const resolvedKey = resolveDefaultRegionKey([record], config.defaultRegionId, Object.keys(data));
+        if (!resolvedKey || !data[resolvedKey]) {
+          throw new Error('The configured default region is not available in dashboard data. Update it in Region Management and retry.');
+        }
+
         setRegions(data);
-        void applyConfiguredDefault(data, controller.signal, setDefaultRegionKey, (key) => {
-          if (!userTouchedRegionRef.current) setSelectedRegionKey(key);
-        });
-        if (!data[selectedRegionKey]) setSelectedRegionKey(Object.keys(data)[0] ?? '');
-      })
-      .catch((error: unknown) => {
-        if (!isAbortError(error)) {
-          setRegionError('Region information is temporarily unavailable.');
-          setRegions(current => Object.keys(current).length ? current : FALLBACK_REGIONS);
+        setDefaultRegionKey(resolvedKey);
+        setSelectedRegionKey(resolvedKey);
+      } catch (error: unknown) {
+        if (!controller.signal.aborted && !isAbortError(error)) {
+          setRegionError(errorMessage(error));
         }
-      })
-      .finally(() => setRegionLoading(false));
+      } finally {
+        if (!controller.signal.aborted) setRegionLoading(false);
+      }
+    };
+    void loadDefaultRegion();
     return () => controller.abort();
   }, [regionsRetry]);
 

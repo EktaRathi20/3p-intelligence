@@ -327,11 +327,11 @@ export const regionApi = {
     return request<GeoStatus>("/geo/status", { signal });
   },
 
-  async getConfiguration(): Promise<RegionConfiguration> {
+  async getConfiguration(signal?: AbortSignal): Promise<RegionConfiguration> {
     const result = await request<{
       configuration?: RegionConfiguration;
       defaultRegionId?: string | null;
-    }>("/region-configuration");
+    }>("/region-configuration", { signal });
 
     return (
       result.configuration ?? {
