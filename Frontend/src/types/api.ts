@@ -192,6 +192,17 @@ export interface DisasterLocalImpact {
   geometry_source: string | null;
 }
 
+export interface DisasterLocalImpactAssessment {
+  regional_warning_level: string | null;
+  regional_warning_status: 'active' | 'expired' | 'unavailable' | 'none' | string;
+  local_impact_status: 'inside_footprint' | 'outside_footprint' | 'uncertain' | string;
+  local_impact_zone: 'RED' | 'ORANGE' | 'YELLOW' | 'GREEN' | 'UNKNOWN' | string;
+  distance_to_footprint_km: number | null;
+  reason: string;
+  source: string | null;
+  updated_at: string | null;
+}
+
 export interface DisasterMlProbability {
   status: 'SCORED' | 'UNAVAILABLE' | string;
   probability: number | null;
@@ -250,6 +261,7 @@ export interface DisasterIntelligenceResponse {
   supported?: true;
   generated_at: string;
   ml_probability?: DisasterMlProbability;
+  local_impact_assessment?: DisasterLocalImpactAssessment;
   simulation?: {
     tier: 'YELLOW' | 'ORANGE' | 'RED';
     label: string;

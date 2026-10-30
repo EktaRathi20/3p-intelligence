@@ -1,6 +1,7 @@
 import { isAvailableDisasterIntelligence } from '@/types/api';
 import type { ApiRegion, RegionResponses } from '@/types/api';
 import { CityLocation, MapPOI } from '@/types/domain';
+import { resolveLocalHeadline } from './localImpact';
 
 export const formatCoordinate = (value: number, positive: string, negative: string) =>
   `${Math.abs(value).toFixed(4)}° ${value >= 0 ? positive : negative}`;
@@ -23,6 +24,7 @@ export const buildCity = (
     : null;
   const assessment = intelligence?.risk_assessment;
   const localImpact = intelligence?.local_impact;
+  const headline = resolveLocalHeadline(responses?.disasterIntelligence);
   const level = assessment?.level?.toUpperCase();
   const cityRiskLevel: CityLocation['riskLevel'] = level === 'RED'
     ? 'Red'
@@ -78,11 +80,15 @@ export const buildCity = (
       screeningLevel: assessment?.screening_level,
       warningFloor: assessment?.warning_floor ?? null,
     },
-    localImpact: localImpact ? {
-      verdict: localImpact.verdict,
-      distanceKm: localImpact.distance_to_footprint_km,
-      geometrySource: localImpact.geometry_source,
-      basis: localImpact.basis ?? [],
+    localImpact: headline ? {
+      verdict: localImpact?.verdict ?? 'unavailable',
+      distanceKm: localImpact?.distance_to_footprint_km ?? null,
+      geometrySource: localImpact?.geometry_source ?? null,
+      basis: localImpact?.basis ?? [],
+      zone: headline.zone,
+      headline: headline.headline,
+      shortLabel: headline.shortLabel,
+      regionalText: headline.regionalText,
     } : undefined,
     operationalRisk: { score: assessment?.score ?? null, level: !assessment || level === 'UNKNOWN' ? 'Unavailable' : assessment.level, factors: assessment?.factors ?? [] },
     aiPreparednessBrief: {

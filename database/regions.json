@@ -1,4 +1,22 @@
 {
+  "EQT3ymh8EoAM6EwfupKz": {
+    "active": true,
+    "cityId": "57727",
+    "cityName": "Arambol",
+    "code": "IN-GA-RMB",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-30T05:27:28.229702+00:00",
+    "hazardIds": [
+      "cyclone"
+    ],
+    "name": "Arambol",
+    "parentRegionId": null,
+    "stateCode": "GA",
+    "stateName": "Goa",
+    "type": "city",
+    "updatedAt": "2026-10-30T05:27:28.229732+00:00"
+  },
   "XCs7mKgbRmlgNNGgKJZ6": {
     "active": true,
     "cityId": "132286",
@@ -65,6 +83,24 @@
     "type": "city",
     "updatedAt": "2026-10-29T04:16:21.961004+00:00"
   },
+  "iKYe0f40z1uHkRFYQUCz": {
+    "active": true,
+    "cityId": "132186",
+    "cityName": "Jagdalpur",
+    "code": "IN-CT-JGD",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-30T05:26:11.457046+00:00",
+    "hazardIds": [
+      "cyclone"
+    ],
+    "name": "Jagdalpur",
+    "parentRegionId": null,
+    "stateCode": "CT",
+    "stateName": "Chhattisgarh",
+    "type": "city",
+    "updatedAt": "2026-10-30T05:26:11.457083+00:00"
+  },
   "iyVP8T2Wv1RN1WEcG6kM": {
     "active": true,
     "cityId": "133671",
@@ -107,5 +143,23 @@
     "stateName": "Maharashtra",
     "type": "city",
     "updatedAt": "2026-10-29T05:12:14.940220+00:00"
+  },
+  "xT5P47eGg7BqMsqLCjqQ": {
+    "active": true,
+    "cityId": "57845",
+    "cityName": "Bandora",
+    "code": "IN-GA-BND",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-30T05:28:02.723349+00:00",
+    "hazardIds": [
+      "cyclone"
+    ],
+    "name": "Bandora",
+    "parentRegionId": null,
+    "stateCode": "GA",
+    "stateName": "Goa",
+    "type": "city",
+    "updatedAt": "2026-10-30T05:28:02.723388+00:00"
   }
 }

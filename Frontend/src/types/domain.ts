@@ -57,6 +57,10 @@ export interface CityLocation {
     distanceKm: number | null;
     geometrySource: string | null;
     basis: string[];
+    zone?: 'RED' | 'ORANGE' | 'YELLOW' | 'GREEN' | 'UNKNOWN';
+    headline?: string;
+    shortLabel?: string;
+    regionalText?: string;
   };
   operationalRisk: {
     score: number | null;

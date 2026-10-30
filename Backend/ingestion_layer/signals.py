@@ -470,3 +470,220 @@ def assess_local_impact(
         ),
         "geometry_source": "GDACS CAP polygon",
     }
+
+
+def classify_local_cyclone_impact(
+    *,
+    warnings=None,
+    inactive_warnings=None,
+    warnings_source=None,
+    warnings_timestamp=None,
+    warnings_error=None,
+    verdict=None,
+    distance_km=None,
+    geometry_source=None,
+    screening_level=None,
+    screening_score=None,
+    telemetry_status=None,
+) -> dict[str, Any]:
+    """Classify LOCAL cyclone impact separately from the regional warning.
+
+    Pure function (no I/O). The official regional warning severity is
+    preserved untouched in ``regional_warning_level``; the local zone is
+    derived only from documented evidence and never invents distance
+    thresholds (distance is reported, never classified on).
+
+    Evidence rules for ``local_impact_zone``:
+
+    1. No active warning and no source error: the zone follows local
+       screening (GREEN when calm, elevated when observed); UNKNOWN
+       without telemetry. An inside verdict with no valid warning
+       behind it is conflicting (stale) geometry and yields UNKNOWN
+       unless screening itself is elevated.
+    2. Warning source failed: elevated screening still stands on its own
+       observations, otherwise UNKNOWN (an unfetched warning cannot be
+       ruled out, so calm screening alone must not claim GREEN).
+    3. Active warning: the zone is the stronger of footprint evidence
+       (inside a verified footprint takes the warning severity) and
+       screening evidence (elevated screening always counts; GREEN
+       screening counts only when the location is verified outside).
+       Anything else is UNKNOWN.
+
+    In particular, an outside-footprint location is never assigned RED
+    merely because the regional event is RED, and an uncertain location
+    with calm screening is UNKNOWN rather than GREEN. Bounding-box
+    overlap alone is never treated as footprint intersection (callers
+    must pass a verdict computed against verified geometry).
+
+    Returns the local-assessment contract: ``regional_warning_level``,
+    ``regional_warning_status`` ("active", "expired", "unavailable", or
+    "none"), ``local_impact_status``, ``local_impact_zone``,
+    ``distance_to_footprint_km``, ``reason``, ``source``, ``updated_at``.
+    """
+    active = list(warnings) if isinstance(warnings, list) else []
+    active = [warning for warning in active if isinstance(warning, dict)]
+    inactive = (
+        list(inactive_warnings) if isinstance(inactive_warnings, list) else []
+    )
+    floor = warning_floor_level(active)
+    screening = str(screening_level or "").upper()
+    if screening not in _LEVEL_RANK:
+        screening = "UNKNOWN" if screening == "UNKNOWN" else ""
+    telemetry_ok = telemetry_status == "AVAILABLE"
+    status = str(verdict or "")
+    if status not in ("inside_footprint", "outside_footprint", "uncertain"):
+        status = "uncertain"
+
+    if warnings_error and not active:
+        regional_status = "unavailable"
+    elif active:
+        regional_status = "active"
+    elif inactive:
+        regional_status = "expired"
+    else:
+        regional_status = "none"
+
+    first_name = active[0].get("event_name") if active else None
+    warning_name = str(first_name) if first_name else "the active warning"
+    distance_text = (
+        f"approx. {float(distance_km):.0f} km"
+        if isinstance(distance_km, (int, float))
+        and not isinstance(distance_km, bool)
+        else None
+    )
+    score_text = (
+        f"{int(screening_score)}/100"
+        if isinstance(screening_score, (int, float))
+        and not isinstance(screening_score, bool)
+        else "unavailable"
+    )
+    regional_caveat = (
+        f" Regional {floor} warning {warning_name} still applies at "
+        "region level."
+        if floor
+        else " No regional warning floor is active."
+    )
+
+    zone: str
+    reason: str
+    if not active:
+        if warnings_error:
+            if telemetry_ok and screening in ("RED", "ORANGE", "YELLOW"):
+                zone = screening
+                reason = (
+                    f"Local observations show {screening}-level screening "
+                    f"signals (score {score_text}); the warning source is "
+                    "unavailable so regional status cannot be confirmed."
+                )
+            else:
+                zone = "UNKNOWN"
+                reason = (
+                    "The warning source is unavailable, so an active "
+                    "warning cannot be ruled out; direct impact cannot "
+                    "be confirmed."
+                )
+        elif status == "inside_footprint":
+            # Conflicting evidence: an inside verdict with no valid
+            # warning behind it (stale geometry). Direct observations
+            # still count on their own.
+            if telemetry_ok and screening in ("RED", "ORANGE", "YELLOW"):
+                zone = screening
+                reason = (
+                    f"Local observations show {screening}-level screening "
+                    f"signals (score {score_text}); no valid warning "
+                    "backs the inside-footprint verdict."
+                )
+            else:
+                zone = "UNKNOWN"
+                reason = (
+                    "Footprint verdict conflicts with warning validity "
+                    "(inside, but no active warning); direct impact "
+                    "cannot be confirmed."
+                )
+        elif telemetry_ok:
+            zone = screening if screening else "UNKNOWN"
+            if zone == "UNKNOWN":
+                reason = (
+                    "No active warning and no usable screening level; "
+                    "direct impact cannot be confirmed."
+                )
+            else:
+                reason = (
+                    f"No active warning; local observations show "
+                    f"{zone} screening (score {score_text})."
+                )
+        else:
+            zone = "UNKNOWN"
+            if inactive:
+                reason = (
+                    "Only expired warnings apply to this region and no "
+                    "current local observations exist; direct impact "
+                    "cannot be confirmed."
+                )
+            else:
+                reason = (
+                    "No active warning and no current local observations; "
+                    "direct impact cannot be confirmed."
+                )
+    else:
+        footprint_zone = (floor or "GREEN") if status == "inside_footprint" else None
+        screening_zone = None
+        if telemetry_ok and screening in ("RED", "ORANGE", "YELLOW"):
+            screening_zone = screening
+        elif telemetry_ok and screening == "GREEN" and status == "outside_footprint":
+            screening_zone = "GREEN"
+        candidates = [
+            candidate
+            for candidate in (footprint_zone, screening_zone)
+            if candidate is not None
+        ]
+        if not candidates:
+            zone = "UNKNOWN"
+            if status == "outside_footprint":
+                reason = (
+                    "Outside the verified footprint, but local telemetry "
+                    "is unavailable, so direct impact cannot be confirmed "
+                    "or ruled out." + regional_caveat
+                )
+            else:
+                reason = (
+                    "Cannot determine footprint intersection (no verified "
+                    "geometry); direct impact cannot be confirmed or ruled "
+                    "out." + regional_caveat
+                )
+        else:
+            zone = max(candidates, key=lambda level: _LEVEL_RANK[level])
+            if footprint_zone is not None and _LEVEL_RANK[zone] <= _LEVEL_RANK[footprint_zone]:
+                zone = footprint_zone
+                origin = geometry_source or "warning"
+                reason = (
+                    f"Inside the verified {origin} footprint of active "
+                    f"{footprint_zone} warning {warning_name}."
+                )
+            elif screening_zone == "GREEN":
+                distance_clause = (
+                    f" (nearest verified vertex {distance_text} away)"
+                    if distance_text
+                    else ""
+                )
+                reason = (
+                    "Outside all verified footprints"
+                    f"{distance_clause} with calm local observations "
+                    f"(screening {score_text} GREEN)." + regional_caveat
+                )
+            else:
+                reason = (
+                    f"Local observations show {screening}-level screening "
+                    f"signals (score {score_text})." + regional_caveat
+                )
+
+    return {
+        "regional_warning_level": floor,
+        "regional_warning_status": regional_status,
+        "local_impact_status": status,
+        "local_impact_zone": zone,
+        "distance_to_footprint_km": distance_km,
+        "reason": reason,
+        "source": warnings_source,
+        "updated_at": warnings_timestamp,
+    }

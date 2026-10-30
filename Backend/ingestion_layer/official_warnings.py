@@ -382,7 +382,10 @@ def fetch_warnings_for_region(region_key: str = "vizag",
     tropical cyclone whose country matches and whose footprint bbox
     intersects the region box. Each warning carries its verified CAP
     footprint (when retrievable), and ``local_impact`` judges the
-    region anchor against that precise geometry.
+    region anchor against that precise geometry. Geographically
+    relevant but stale or non-current events are preserved in
+    ``inactive_warnings`` with an ``exclusion_reason`` ("expired" or
+    "not_current") instead of being silently dropped.
     """
     coords = get_region_coords(region_key)
     region_box = REGION_DATA.get(region_key, {})
@@ -396,24 +399,42 @@ def fetch_warnings_for_region(region_key: str = "vizag",
             "source": PROVIDER_NAME,
             "source_url": GDACS_RSS_URL,
             "warnings": [],
+            "inactive_warnings": [],
             "local_impact": assess_local_impact(None, None, []),
             "source_error": str(error),
         }
 
     warnings: list[dict[str, Any]] = []
+    inactive_warnings: list[dict[str, Any]] = []
     for event in events:
-        if not _event_is_fresh(event, now):
-            continue
         if not _event_matches_country(event, country_hint):
             continue
         bbox = event.get("bbox")
         if not bbox or not _bbox_intersects(region_box, bbox):
+            continue
+        if not _event_is_fresh(event, now):
+            # Geographically relevant but no longer valid: preserved with
+            # its original severity so callers can report "expired"
+            # instead of silently dropping it. No CAP fetch — stale
+            # geometry must not drive local assessment.
+            exclusion = (
+                "not_current" if not event.get("is_current") else "expired"
+            )
+            inactive_warnings.append({
+                **event,
+                "matched_region": region_key,
+                "exclusion_reason": exclusion,
+            })
             continue
         warning = {**event, "matched_region": region_key}
         warning["footprint"] = fetch_footprint_for_event(event)
         warnings.append(warning)
 
     warnings.sort(
+        key=lambda warning: warning.get("datemodified") or "",
+        reverse=True,
+    )
+    inactive_warnings.sort(
         key=lambda warning: warning.get("datemodified") or "",
         reverse=True,
     )
@@ -433,5 +454,6 @@ def fetch_warnings_for_region(region_key: str = "vizag",
         "source": PROVIDER_NAME,
         "source_url": GDACS_RSS_URL,
         "warnings": warnings,
+        "inactive_warnings": inactive_warnings,
         "local_impact": local_impact,
     }

@@ -13,6 +13,30 @@ export const AssessmentCards: React.FC<AssessmentCardsProps> = ({ city, infrastr
   const cardClass = isLightMode ? 'bg-white border-slate-200/90' : 'bg-slate-900/90 border-slate-800';
   const titleClass = isLightMode ? 'text-slate-900' : 'text-slate-100';
   const mutedClass = isLightMode ? 'text-slate-500' : 'text-slate-400';
+  const localZone = city.localImpact?.zone;
+  const localColor = localZone === 'RED'
+    ? 'text-rose-600'
+    : localZone === 'ORANGE'
+      ? 'text-orange-600'
+      : localZone === 'YELLOW'
+        ? 'text-amber-600'
+        : localZone === 'GREEN'
+          ? 'text-emerald-600'
+          : localZone === 'UNKNOWN'
+            ? 'text-slate-500'
+            : null;
+  const fallbackColor = city.riskLevel === 'Red'
+    ? 'text-rose-600'
+    : city.riskLevel === 'Orange'
+      ? 'text-orange-600'
+      : city.riskLevel === 'Moderate'
+        ? 'text-amber-600'
+        : city.riskLevel === 'Unavailable'
+          ? 'text-slate-500'
+          : 'text-emerald-600';
+  const screeningText = city.riskScore == null
+    ? 'Screening score unavailable'
+    : `Screening ${city.riskScore}/100`;
   const cards = [
     { title: 'Population', value: city.populationFormatted, detail: 'Population API', icon: Users, color: 'text-blue-600' },
     { title: 'Forecast', value: city.tempRangeAvg, detail: city.forecastSummary, icon: CloudRain, color: 'text-cyan-600' },
@@ -24,21 +48,15 @@ export const AssessmentCards: React.FC<AssessmentCardsProps> = ({ city, infrastr
       color: 'text-emerald-600',
     },
     {
-      title: 'Warnings and risk',
-      value: city.operationalRisk.level,
-      detail: city.operationalRisk.level === 'Unavailable'
-        ? 'Risk assessment unavailable'
-        : city.riskScore == null ? 'Screening score unavailable' : city.officialWarning.officialWarningActive ? `${city.riskScore}/100 screening score · official ${city.officialWarning.warningFloor ?? city.operationalRisk.level} warning applies` : `${city.riskScore}/100 screening score · no official warning`,
+      title: 'Local impact',
+      value: city.localImpact?.shortLabel ?? city.operationalRisk.level,
+      detail: !city.localImpact
+        ? city.operationalRisk.level === 'Unavailable'
+          ? 'Risk assessment unavailable'
+          : screeningText
+        : `${city.localImpact.regionalText} · ${screeningText}`,
       icon: Database,
-      color: city.riskLevel === 'Red'
-        ? 'text-rose-600'
-        : city.riskLevel === 'Orange'
-          ? 'text-orange-600'
-          : city.riskLevel === 'Moderate'
-            ? 'text-amber-600'
-            : city.riskLevel === 'Unavailable'
-              ? 'text-slate-500'
-              : 'text-emerald-600',
+      color: localColor ?? fallbackColor,
     },
   ];
 

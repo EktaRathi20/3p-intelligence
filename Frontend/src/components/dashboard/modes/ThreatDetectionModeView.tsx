@@ -9,7 +9,7 @@ import {
 import { CityLocation, MapPOI } from '@/types/domain';
 import { MapComponent } from '@/components/dashboard/MapComponent';
 import { ExternalLink, Radar } from 'lucide-react';
-import { formatAffectedPopulation, formatImpactDistance, formatWarningUpdated, verdictLabel } from '@/utils/localImpact';
+import { formatAffectedPopulation, formatImpactDistance, formatWarningUpdated, resolveLocalHeadline, verdictLabel } from '@/utils/localImpact';
 
 interface ThreatDetectionModeViewProps {
   city: CityLocation;
@@ -75,20 +75,17 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
   const mlScored = mlProbability?.status === 'SCORED' && typeof mlProbability.probability === 'number';
   const warnings = availableIntelligence?.official_warnings ?? [];
   const localImpact = availableIntelligence?.local_impact ?? null;
-  const levelBasis = assessment?.level_basis;
-  const basisLabel = levelBasis === 'official_warning'
-    ? 'Official warning'
-    : levelBasis === 'both'
-      ? 'Warning + screening'
-      : levelBasis === 'screening'
-        ? 'Screening'
-        : 'Screening';
-
+  const localHeadline = resolveLocalHeadline(disasterIntelligence);
+  const localZone = localHeadline?.zone ?? 'UNKNOWN';
+  const regionalLevel = availableIntelligence?.local_impact_assessment?.regional_warning_level ?? assessment?.warning_floor ?? null;
+  const regionalStatus = availableIntelligence?.local_impact_assessment?.regional_warning_status ?? (warnings.length > 0 ? 'active' : null);
+  const regionalChipTone = regionalLevel && riskTone[regionalLevel] ? riskTone[regionalLevel] : riskTone.UNKNOWN;
+  const regionalChipText = regionalLevel ? `Regional: ${regionalLevel}` : regionalStatus ? `Regional: ${regionalStatus}` : 'Regional: none';
   return (
     <div className="w-full space-y-4 animate-in fade-in duration-300">
       <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg border ${riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
+          <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg border ${localHeadline ? riskTone[localZone] ?? riskTone.UNKNOWN : riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
             {dataUnavailable ? <CircleHelp size={21} /> : <ShieldAlert size={21} />}
           </span>
           <div>
@@ -98,15 +95,24 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
                 ? 'Refreshing disaster intelligence…'
                 : unavailableIntelligence
                   ? unavailableIntelligence.message
-                  : assessment?.note}
+                  : localHeadline?.headline ?? assessment?.note}
             </p>
           </div>
         </div>
-        <div className={`inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold ${riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
-          <span className="h-2 w-2 rounded-full bg-current" />
-          {unavailableIntelligence
-            ? unavailableIntelligence.status === 'not_implemented' ? 'NOT IMPLEMENTED' : 'NOT CONFIGURED'
-            : riskLevel === 'UNKNOWN' ? 'DATA UNAVAILABLE' : `${riskLevel} RISK`}
+        <div className="flex w-fit flex-col items-end gap-1.5">
+          <div className={`inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold ${localHeadline ? riskTone[localZone] ?? riskTone.UNKNOWN : riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
+            <span className="h-2 w-2 rounded-full bg-current" />
+            {unavailableIntelligence
+              ? unavailableIntelligence.status === 'not_implemented' ? 'NOT IMPLEMENTED' : 'NOT CONFIGURED'
+              : localHeadline
+                ? localZone === 'UNKNOWN' ? 'IMPACT UNKNOWN' : `${localZone} LOCAL IMPACT`
+                : riskLevel === 'UNKNOWN' ? 'DATA UNAVAILABLE' : `${riskLevel} RISK`}
+          </div>
+          {localHeadline && (
+            <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-[11px] font-bold ${regionalChipTone}`}>
+              {localHeadline.regionalText}
+            </span>
+          )}
         </div>
       </section>
 
@@ -152,31 +158,30 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
       )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric icon={<ShieldAlert size={16} />} label="Screening score" value={assessment ? `${assessment.score}/100` : 'Unavailable'} detail={assessment?.method ?? 'Waiting for API response'} />
+        <Metric icon={<ShieldAlert size={16} />} label="Local impact" value={localHeadline?.shortLabel ?? 'Unavailable'} detail={localHeadline?.headline ?? 'Waiting for API response'} />
         <Metric icon={<Wind size={16} />} label="Wind speed" value={formatValue(conditions?.wind_speed_kmh, ' km/h', 1, isLoading)} detail="Current observation" />
         <Metric icon={<AlertTriangle size={16} />} label="Storm surge" value={formatValue(conditions?.storm_surge_meters, ' m', 2, isLoading)} detail="Measured source value only" />
         <Metric icon={<Map size={16} />} label="Screening zones" value={String(zones.length)} detail="Returned by disaster intelligence" />
       </div>
 
-      {(warnings.length > 0 || localImpact) && (
+      {hasAssessment && localHeadline && (
         <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900"><Radar size={16} className="text-blue-700" /> Regional warning vs local impact</h2>
-            <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs font-bold ${riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
-              Regional: {riskLevel} · {basisLabel}
+            <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs font-bold ${regionalChipTone}`}>
+              {regionalChipText}
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-600">
-            Screening {screeningLevel ?? 'unavailable'}{screeningScore == null ? '' : ` (${screeningScore}/100)`} · Official warning floor {warningFloor ?? 'none'} · Combined regional level {riskLevel}
-          </p>
+          <p className="mt-2 text-xs font-semibold text-slate-700">{localHeadline.regionalText}</p>
+          {localHeadline.reason && (
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">{localHeadline.reason}</p>
+          )}
           {localImpact ? (
             <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className={`inline-flex items-center rounded-md border px-2 py-1 font-bold ${localImpact.verdict === 'inside_footprint' ? 'border-rose-200 bg-rose-50 text-rose-800' : localImpact.verdict === 'outside_footprint' ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-slate-200 bg-white text-slate-600'}`}>
                   Local: {verdictLabel(localImpact.verdict)}
                 </span>
-                <span className="text-slate-600">{localImpact.distance_to_footprint_km == null ? 'Distance to footprint: Unavailable' : `Distance to footprint: approx. ${formatImpactDistance(localImpact.distance_to_footprint_km)} (nearest verified vertex)`}</span>
-                {localImpact.geometry_source && <span className="break-all text-slate-500">Source: {localImpact.geometry_source}</span>}
               </div>
               {(localImpact.basis ?? []).map((line, index) => (
                 <p key={`${index}-${line.slice(0, 24)}`} className="mt-1.5 text-xs leading-relaxed text-slate-600">{line}</p>
@@ -208,16 +213,11 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
                     <strong className="text-sm text-slate-900">{warning.event_name ?? 'Unnamed system'}</strong>
                     {warning.country && <span className="text-xs text-slate-500">{warning.country}</span>}
                     {warning.episode_alert_level && <span className="text-[11px] text-slate-500">Episode: {warning.episode_alert_level}</span>}
-                    {warning.footprint?.cap_urgency && <span className="text-[11px] text-slate-500">Urgency: {warning.footprint.cap_urgency}</span>}
-                    {warning.footprint?.cap_certainty && <span className="text-[11px] text-slate-500">Certainty: {warning.footprint.cap_certainty}</span>}
-                    {warning.footprint?.cap_severity && <span className="text-[11px] text-slate-500">CAP: {warning.footprint.cap_severity}</span>}
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
                     <span>Max wind: {warning.max_wind_kmh == null ? 'Unavailable' : `${warning.max_wind_kmh.toFixed(0)} km/h`}</span>
                     <span>Impact zone: {formatAffectedPopulation(warning.population_affected)}</span>
                     <span>Updated: {formatWarningUpdated(warning.datemodified)}</span>
-                    <span>Active window: {formatWarningUpdated(warning.fromdate)} to {formatWarningUpdated(warning.todate)}</span>
-                    <span>Status: {warning.is_current ? 'Current' : 'Not current'}</span>
                   </div>
                   {warning.link && (
                     <a href={warning.link} target="_blank" rel="noreferrer" className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 underline underline-offset-2">
@@ -231,22 +231,64 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
         </section>
       )}
       {hasAssessment && (
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900">Model severity probability (H2O)</h2>
-          {mlScored && mlProbability?.probability != null ? (
-            <div className="mt-2">
-              <p className="text-lg font-black text-slate-900">{(mlProbability.probability * 100).toFixed(1)}%</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-600">{mlProbability.label}</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-600">Screening signal only — not an overall disaster probability and not evidence that the region is safe.{warningFloor ? ` An official ${warningFloor} warning applies regardless of this value.` : ''}</p>
-              {mlProbability.model_id && <p className="mt-1 text-[11px] text-slate-500">Model: {mlProbability.model_id}</p>}
+        <details className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <summary className="cursor-pointer text-sm font-bold text-slate-900">Technical assessment details</summary>
+          <div className="mt-3 space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-slate-800">Screening and warning floor</h3>
+              <p className="mt-1 text-xs text-slate-600">
+                Screening {screeningLevel ?? 'unavailable'}{screeningScore == null ? '' : ` (${screeningScore}/100)`} · Official warning floor {warningFloor ?? 'none'} · Combined regional level {riskLevel}
+              </p>
+              {assessment?.method && <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{assessment.method}</p>}
             </div>
-          ) : (
-            <div className="mt-2">
-              <p className="text-sm font-bold text-slate-700">Unavailable</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-600">{mlProbability?.reason ?? 'No model probability was returned for this assessment.'}</p>
+            <div className="border-t border-slate-100 pt-3">
+              <h3 className="text-xs font-bold text-slate-800">Model severity probability (H2O)</h3>
+              {mlScored && mlProbability?.probability != null ? (
+                <div className="mt-1">
+                  <p className="text-lg font-black text-slate-900">{(mlProbability.probability * 100).toFixed(1)}%</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-600">{mlProbability.label}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-600">Screening signal only — not an overall disaster probability and not evidence that the region is safe.{warningFloor ? ` An official ${warningFloor} warning applies regardless of this value.` : ''}</p>
+                  {mlProbability.model_id && <p className="mt-1 text-[11px] text-slate-500">Model: {mlProbability.model_id}</p>}
+                </div>
+              ) : (
+                <div className="mt-1">
+                  <p className="text-sm font-bold text-slate-700">Unavailable</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-600">{mlProbability?.reason ?? 'No model probability was returned for this assessment.'}</p>
+                </div>
+              )}
             </div>
-          )}
-        </section>
+            <div className="border-t border-slate-100 pt-3">
+              <h3 className="text-xs font-bold text-slate-800">Footprint geometry</h3>
+              <p className="mt-1 text-xs text-slate-600">
+                {localImpact?.distance_to_footprint_km == null
+                  ? 'Distance to footprint: Unavailable'
+                  : `Distance to footprint: approx. ${formatImpactDistance(localImpact.distance_to_footprint_km)} (nearest verified vertex)`}
+              </p>
+              {localImpact?.geometry_source && <p className="mt-1 break-all text-[11px] text-slate-500">Source: {localImpact.geometry_source}</p>}
+            </div>
+            {warnings.length > 0 && (
+              <div className="border-t border-slate-100 pt-3">
+                <h3 className="text-xs font-bold text-slate-800">Warning validity and CAP detail</h3>
+                <ul className="mt-2 space-y-2">
+                  {warnings.map((warning, index) => (
+                    <li key={`${warning.event_id ?? warning.event_name ?? 'warning'}-${index}`} className="rounded-lg border border-slate-200 p-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <strong className="text-xs text-slate-900">{warning.event_name ?? 'Unnamed system'}</strong>
+                        {warning.footprint?.cap_severity && <span className="text-[11px] text-slate-500">CAP: {warning.footprint.cap_severity}</span>}
+                        {warning.footprint?.cap_urgency && <span className="text-[11px] text-slate-500">Urgency: {warning.footprint.cap_urgency}</span>}
+                        {warning.footprint?.cap_certainty && <span className="text-[11px] text-slate-500">Certainty: {warning.footprint.cap_certainty}</span>}
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                        <span>Active window: {formatWarningUpdated(warning.fromdate)} to {formatWarningUpdated(warning.todate)}</span>
+                        <span>Status: {warning.is_current ? 'Current' : 'Not current'}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </details>
       )}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm xl:col-span-8">

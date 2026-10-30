@@ -6,6 +6,7 @@ from ingestion_layer.constant import REGION_DATA
 from ingestion_layer.index import run_ingestion
 from ingestion_layer.signals import (
     build_model_features,
+    classify_local_cyclone_impact,
     combine_levels,
     score_to_level,
     screen_risk,
@@ -210,6 +211,15 @@ async def build_disaster_intelligence(region: str, client):
 
     if not isinstance(local_impact, dict):
         local_impact = {}
+
+    inactive_warnings = warnings_block.get("inactive_warnings", [])
+
+    if not isinstance(inactive_warnings, list):
+        inactive_warnings = []
+
+    warnings_source = warnings_block.get("source")
+    warnings_timestamp = warnings_block.get("timestamp")
+    warnings_error = warnings_block.get("source_error")
 
     # ---------------------------------------------------------
     # 3. DETERMINE DATA PROVENANCE
@@ -466,6 +476,37 @@ async def build_disaster_intelligence(region: str, client):
     # result therefore cannot override a verified official warning.
     floor = warning_floor_level(official_warnings)
     risk_level, level_basis = combine_levels(screening_level, floor)
+
+    # ---------------------------------------------------------
+    # 8.5 LOCAL CYCLONE IMPACT (separate from regional warning)
+    # ---------------------------------------------------------
+    #
+    # The combined level above stays regional: a RED official warning
+    # keeps the REGION at RED however far the anchor lies from the
+    # verified footprint. The local assessment below answers the
+    # distinct question "is THIS location directly impacted", using
+    # only the evidence rules documented in
+    # classify_local_cyclone_impact.
+    # ---------------------------------------------------------
+
+    local_assessment = classify_local_cyclone_impact(
+        warnings=official_warnings,
+        inactive_warnings=inactive_warnings,
+        warnings_source=warnings_source if isinstance(warnings_source, str) else None,
+        warnings_timestamp=warnings_timestamp if isinstance(warnings_timestamp, str) else None,
+        warnings_error=str(warnings_error) if warnings_error else None,
+        verdict=local_impact.get("verdict"),
+        distance_km=local_impact.get("distance_to_footprint_km"),
+        geometry_source=local_impact.get("geometry_source"),
+        screening_level=screening_level,
+        screening_score=risk_score,
+        telemetry_status=telemetry_data_status,
+    )
+    risk_factors.append(
+        f"Local cyclone impact: {local_assessment['local_impact_zone']} "
+        f"({local_assessment['local_impact_status']}) - "
+        f"{local_assessment['reason']}"
+    )
 
     # ---------------------------------------------------------
     # 9. RISK ZONES
@@ -923,6 +964,8 @@ do not pretend current hazard conditions are known.
         "official_warnings": official_warnings,
 
         "local_impact": local_impact,
+
+        "local_impact_assessment": local_assessment,
 
         "risk_assessment": {
             "level": risk_level,
