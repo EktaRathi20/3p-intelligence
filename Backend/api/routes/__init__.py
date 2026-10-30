@@ -1,4 +1,7 @@
 from fastapi import APIRouter
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from api.routes.alerts import router as alerts_router
 from api.routes.data import router as data_router
@@ -8,9 +11,6 @@ from api.routes.regions import router as regions_router
 from api.routes.whatsapp import router as whatsapp_router
 from api.routes.roles_users import router as roles_users_router
 from api.routes.auth import router as auth_router
-
-from dotenv import load_dotenv
-load_dotenv()
 
 router = APIRouter()
 router.include_router(data_router)
