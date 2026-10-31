@@ -101,6 +101,24 @@
     "type": "city",
     "updatedAt": "2026-10-30T05:26:11.457083+00:00"
   },
+  "iSkaQfX2idDx3P4ONXaK": {
+    "active": true,
+    "cityId": "134425",
+    "cityName": "Yanam",
+    "code": "IN-PY-YNM",
+    "countryCode": "IN",
+    "countryName": "India",
+    "createdAt": "2026-10-31T06:56:25.952786+00:00",
+    "hazardIds": [
+      "cyclone"
+    ],
+    "name": "Yanam",
+    "parentRegionId": null,
+    "stateCode": "PY",
+    "stateName": "Puducherry",
+    "type": "city",
+    "updatedAt": "2026-10-31T06:56:25.952799+00:00"
+  },
   "iyVP8T2Wv1RN1WEcG6kM": {
     "active": true,
     "cityId": "133671",

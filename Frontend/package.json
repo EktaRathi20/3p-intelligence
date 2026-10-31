@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test:labels": "node --test src/utils/localImpact.test.ts"
+    "test:labels": "node --test src/utils/localImpact.test.ts",
+    "test:review": "node --test src/utils/taskReview.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

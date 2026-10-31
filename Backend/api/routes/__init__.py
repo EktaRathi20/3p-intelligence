@@ -11,6 +11,8 @@ from api.routes.regions import router as regions_router
 from api.routes.whatsapp import router as whatsapp_router
 from api.routes.roles_users import router as roles_users_router
 from api.routes.auth import router as auth_router
+from api.routes.tasks import router as tasks_router
+from api.routes.notifications import router as notifications_router
 
 router = APIRouter()
 router.include_router(data_router)
@@ -21,3 +23,5 @@ router.include_router(whatsapp_router)
 router.include_router(intelligence_router)
 router.include_router(roles_users_router)
 router.include_router(auth_router)
+router.include_router(tasks_router)
+router.include_router(notifications_router)

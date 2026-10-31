@@ -16,7 +16,6 @@ export default function TasksPage() {
       disasterIntelligence={activeIntelligence}
       isLoading={dashboard.regionLoading}
       error={regionResponses?.disasterIntelligenceError ?? null}
-      onOpenEvacuationModal={() => dashboard.setIsEvacuationModalOpen(true)}
       isLightMode
     />
   );

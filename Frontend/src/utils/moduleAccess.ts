@@ -9,7 +9,7 @@ export const SHARED_MODULES: ModuleKey[] = ['overview', 'history', 'alerts'];
 const ROLE_MODULES: Record<RoleKey, ModuleKey[]> = {
   assessment: [...SHARED_MODULES, 'threat', 'tasks', 'fieldOps', 'landfall', 'recovery'],
   planner: [...SHARED_MODULES, 'threat', 'tasks'],
-  field: [...SHARED_MODULES, 'tasks', 'fieldOps'],
+  field: [...SHARED_MODULES, 'fieldOps'],
   recovery: [...SHARED_MODULES, 'recovery'],
   rescue: [...SHARED_MODULES, 'tasks', 'landfall'],
   unknown: SHARED_MODULES,

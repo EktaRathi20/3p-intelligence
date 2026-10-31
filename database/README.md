@@ -14,6 +14,8 @@ id; the backend injects `id` on read, matching the previous API shapes).
 | `states.json` | states | States/provinces keyed by dataset provider id |
 | `cities.json` | cities | Cities keyed by dataset provider id (large, generated) |
 | `settings.json` | settings | `regionManagement` and `geoSync` records |
+| `tasks.json` | tasks | Operational tasks assigned by Role 2 to Role 3 (created via the API) |
+| `notifications.json` | notifications | Operational notifications from Role 2 to field teams (created via the API) |
 
 ## Notes
 

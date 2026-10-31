@@ -40,6 +40,8 @@ COLLECTION_FILES = {
     "states": "states.json",
     "cities": "cities.json",
     "settings": "settings.json",
+    "tasks": "tasks.json",
+    "notifications": "notifications.json",
 }
 
 _ID_ALPHABET = string.ascii_letters + string.digits
