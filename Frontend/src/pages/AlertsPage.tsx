@@ -81,7 +81,7 @@ export default function AlertsPage() {
             <div>
               <h1 className="text-base font-bold text-slate-900">Field task notifications</h1>
               <p className="text-xs text-slate-500">
-                Assignments and alerts from the Operations Planner
+                Task assignments and field updates
                 {opsUnread > 0 ? ` · ${opsUnread} unread` : ''}
               </p>
             </div>
@@ -110,7 +110,7 @@ export default function AlertsPage() {
           <div className="rounded-md border border-dashed border-slate-300 px-4 py-8 text-center">
             <BellRing size={22} className="mx-auto text-slate-400" />
             <p className="mt-2 text-sm font-medium text-slate-700">No task notifications yet</p>
-            <p className="mt-1 text-xs text-slate-500">New assignments from Role 2 will appear here.</p>
+            <p className="mt-1 text-xs text-slate-500">New task assignments and field updates will appear here.</p>
           </div>
         ) : (
           <ul className="space-y-2">

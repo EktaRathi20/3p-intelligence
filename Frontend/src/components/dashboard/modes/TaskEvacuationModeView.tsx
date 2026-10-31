@@ -977,6 +977,7 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
         source: 'ai',
         sourceRef: label,
         regionKey,
+        notifyAssignee: assignDraft.notifyTeam,
       };
       // Backend-only: the assignment is stored in the task backend first, and
       // the local record is created only after the server confirms — so the
@@ -992,6 +993,7 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
           instructions: taskInput.instructions,
           deadline: deadlineIso,
           assigneeUserId: assignee.id,
+          notifyAssignee: assignDraft.notifyTeam,
         });
         if (!updated.persisted) {
           setAssignError(`Backend save failed: ${updated.note} The assignment was not recorded — retry.`);
@@ -1033,37 +1035,41 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
         },
       }));
       if (assignDraft.notifyTeam) {
-        const message = `Task ${label} assigned: ${assignDraft.description.trim()} (${assignDraft.location.trim()}, due ${formatDateTime(deadlineIso)}).`;
-        const dispatch = await dispatchAlertToBackend({
-          recipientUserId: assignee.id,
-          message,
-          priority: assignDraft.priority,
-          taskId: backendId,
-          regionKey,
-        });
-        setAlertRecords((current) => [
-          {
-            id: dispatch.id ?? `alert-${Date.now()}`,
-            createdAt: now,
-            createdBy: userName,
-            recipientTeam: assignee.name,
-            message,
-            priority: assignDraft.priority,
-            status: dispatch.sent ? 'sent' : 'not_sent',
-            statusNote: dispatch.note,
-          },
-          ...current,
-        ]);
+        // The backend auto-creates the in-app notification on assignment, so
+        // no separate dispatch is needed here (that would deliver it twice).
+        // Pull the confirmed record so the alert history shows it immediately.
+        try {
+          const sent = await notificationsApi.list('sent');
+          const match = sent.notifications.find((item) => item.taskId === backendId);
+          if (match) {
+            setAlertRecords((current) => {
+              if (current.some((alert) => alert.id === match.id)) return current;
+              return [
+                {
+                  id: match.id,
+                  createdAt: match.createdAt,
+                  createdBy: match.senderName || null,
+                  recipientTeam: match.recipientName,
+                  message: match.message,
+                  priority: match.priority,
+                  status: 'sent' as const,
+                  statusNote: 'Delivered to the field officer inbox',
+                },
+                ...current,
+              ];
+            });
+          }
+        } catch {
+          // The alert history refreshes from the backend on the next visit.
+        }
         showFeedback(
-          dispatch.sent ? 'success' : 'warning',
-          dispatch.sent
-            ? `${label} assigned to ${assignee.name} and confirmed by the backend. The alert is visible in the field officer inbox.`
-            : `${label} assigned to ${assignee.name} and confirmed by the backend. Alert could not be sent: ${dispatch.note}`,
+          'success',
+          `${label} assigned to ${assignee.name} and confirmed by the backend. The officer was notified in-app and the task is visible on the Field Operations page.`,
         );
       } else {
         showFeedback(
           'success',
-          `${label} assigned to ${assignee.name} and confirmed by the backend. It is now visible on the Field Operations page.`,
+          `${label} assigned to ${assignee.name} and confirmed by the backend. It is now visible on the Field Operations page (no notification was sent).`,
         );
       }
       setAssignIndex(null);
@@ -1173,7 +1179,7 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
     assigneeId: '',
     instructions: '',
     deadline: '',
-    notifyTeam: false,
+    notifyTeam: true,
   });
 
   const openCreate = () => {
@@ -1197,7 +1203,7 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
       assigneeId: task.assigneeUserId ?? '',
       instructions: task.instructions,
       deadline: toDatetimeLocalValue(task.deadline),
-      notifyTeam: false,
+      notifyTeam: true,
     });
     setCreateError(null);
     setCreateOpen(true);
@@ -1210,43 +1216,37 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
     return `M-${String(counter).padStart(2, '0')}`;
   };
 
-  const resolveManualAssignee = (officerName: string, teamName: string) => {
-    const trimmedOfficer = officerName.trim();
-    if (trimmedOfficer) {
-      const match = officers.find((officer) => officer.name === trimmedOfficer);
-      if (match) return match;
-    }
-    // Fall back to the default Role 3 officer when a team/department is set.
-    if (teamName.trim() && role3Officer) return role3Officer;
-    return null;
-  };
-
   const confirmCreate = async () => {
     if (!createDraft || !requireWriter()) return;
     if (!createDraft.description.trim() || !createDraft.department.trim() || !createDraft.location.trim()) {
       setCreateError('Task description, department, and location are required.');
       return;
     }
-    const assignee = resolveManualAssignee(createDraft.officer, createDraft.team);
+    const editingTask = editingManualId ? manualTasks.find((task) => task.id === editingManualId) : undefined;
+    // Auto-send: manual tasks always go to Role 3. Edits keep the previously
+    // assigned officer when they are still on the roster.
+    const preserved = editingTask?.assigneeUserId
+      ? (officers.find((officer) => officer.id === editingTask.assigneeUserId) ?? null)
+      : null;
+    const assignee = preserved ?? role3Officer;
     if (createDraft.notifyTeam && !assignee) {
-      setCreateError('Select a Role 3 officer before requesting a notification, or turn the notification off.');
+      setCreateError(officersError ?? 'The Role 3 roster is still loading. Wait a moment and retry.');
       return;
     }
     setCreateSaving(true);
     try {
       const now = new Date().toISOString();
-      const team = createDraft.team.trim() ? createDraft.team.trim() : assignee?.name ?? null;
-      const officerName = createDraft.officer.trim() ? createDraft.officer.trim() : assignee?.name ?? null;
+      const team = assignee?.name ?? editingTask?.team ?? null;
+      const officerName = assignee?.name ?? editingTask?.officer ?? null;
       const deadlineIso = createDraft.deadline ? new Date(createDraft.deadline).toISOString() : null;
-      const editingTask = editingManualId ? manualTasks.find((task) => task.id === editingManualId) : undefined;
       let backendId: string | null = editingTask?.backendId ?? null;
       // Backend-only once an officer is assigned: store first, record locally
-      // only after the server confirms. Unassigned drafts stay local until
-      // an officer is chosen.
+      // only after the server confirms. Drafts stay local only while the
+      // Role 3 roster is unavailable.
       const backendState: 'confirmed' | 'local' = assignee ? 'confirmed' : 'local';
       const backendNote: string | null = assignee
         ? null
-        : 'Awaiting assignment: select a Role 3 officer to sync this task to the backend.';
+        : 'Awaiting auto-send: the Role 3 roster is unavailable right now.';
       if (assignee) {
         if (backendId) {
           const updated = await updateTaskOnBackend(backendId, {
@@ -1257,6 +1257,7 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
             instructions: createDraft.instructions.trim(),
             deadline: deadlineIso,
             assigneeUserId: assignee.id,
+            notifyAssignee: createDraft.notifyTeam,
           });
           if (!updated.persisted) {
             setCreateError(`Backend save failed: ${updated.note} The task was not recorded — retry.`);
@@ -1274,6 +1275,7 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
             source: 'manual',
             sourceRef: null,
             regionKey,
+            notifyAssignee: createDraft.notifyTeam,
           });
           if (!persistence.persisted || !persistence.id) {
             setCreateError(`Backend save failed: ${persistence.note} The task was not recorded — retry.`);
@@ -1339,28 +1341,33 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
             : `${id} created as a local draft (${backendNote ?? 'awaiting assignment'}).`,
         );
       }
-      if (createDraft.notifyTeam && assignee) {
-        const message = `New emergency task: ${createDraft.description.trim()} (${createDraft.location.trim()}).`;
-        const dispatch = await dispatchAlertToBackend({
-          recipientUserId: assignee.id,
-          message,
-          priority: createDraft.priority,
-          taskId: backendId,
-          regionKey,
-        });
-        setAlertRecords((current) => [
-          {
-            id: dispatch.id ?? `alert-${Date.now()}`,
-            createdAt: now,
-            createdBy: userName,
-            recipientTeam: assignee.name,
-            message,
-            priority: createDraft.priority,
-            status: dispatch.sent ? 'sent' : 'not_sent',
-            statusNote: dispatch.note,
-          },
-          ...current,
-        ]);
+      if (createDraft.notifyTeam && assignee && backendId) {
+        // The backend auto-creates the in-app notification on assignment;
+        // refresh the confirmed record instead of dispatching a duplicate.
+        try {
+          const sent = await notificationsApi.list('sent');
+          const match = sent.notifications.find((item) => item.taskId === backendId);
+          if (match) {
+            setAlertRecords((current) => {
+              if (current.some((alert) => alert.id === match.id)) return current;
+              return [
+                {
+                  id: match.id,
+                  createdAt: match.createdAt,
+                  createdBy: match.senderName || null,
+                  recipientTeam: match.recipientName,
+                  message: match.message,
+                  priority: match.priority,
+                  status: 'sent' as const,
+                  statusNote: 'Delivered to the field officer inbox',
+                },
+                ...current,
+              ];
+            });
+          }
+        } catch {
+          // The alert history refreshes from the backend on the next visit.
+        }
       }
       setCreateOpen(false);
       setCreateDraft(null);
@@ -2149,7 +2156,8 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
                 className="mt-0.5 accent-[#18365b]"
               />
               <span>
-                Send operational alert to the assigned team{' '}
+                Send in-app notification to the assigned officer{' '}
+                <span className="text-slate-500">(appears in their notification page)</span>
               </span>
             </label>
             {assignError && (
@@ -2381,46 +2389,12 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Assigned Role 3 team" hint="Leave as Assign later to keep it awaiting assignment.">
-                <select
-                  value={createDraft.team}
-                  onChange={(event) => setCreateDraft({ ...createDraft, team: event.target.value })}
-                  className={inputClass}
-                >
-                  <option value="">Assign later</option>
-                  {DEPARTMENTS.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field
-                label="Assigned officer (Role 3)"
-                hint={officersError ?? (officers.length === 0 ? 'No active Role 3 officers returned; type a name.' : `${officers.length} active Role 3 officer(s) loaded.`)}
-              >
-                {officers.length > 0 ? (
-                  <select
-                    value={createDraft.officer}
-                    onChange={(event) => setCreateDraft({ ...createDraft, officer: event.target.value })}
-                    className={inputClass}
-                  >
-                    <option value="">Unassigned</option>
-                    {officers.map((officer) => (
-                      <option key={officer.id} value={officer.name}>
-                        {officer.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    value={createDraft.officer}
-                    onChange={(event) => setCreateDraft({ ...createDraft, officer: event.target.value })}
-                    placeholder="Officer name (optional)"
-                    className={inputClass}
-                  />
-                )}
-              </Field>
+            </div>
+            <div className="border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Assigned to (Role 3) · auto-send</p>
+              <p className="mt-0.5 font-semibold text-slate-800">
+                {role3OfficerName ?? (officersError ? 'Role 3 roster unavailable' : 'Loading Role 3 roster…')}
+              </p>
             </div>
             <Field label="Instructions for the field team">
               <textarea
@@ -2439,8 +2413,8 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
                 className="mt-0.5 accent-[#18365b]"
               />
               <span>
-                Send notification to the assigned team{' '}
-                <span className="text-slate-500">(delivered to the field officer inbox)</span>
+                Send in-app notification to the assigned officer{' '}
+                <span className="text-slate-500">(appears in their notification page)</span>
               </span>
             </label>
             {createError && (

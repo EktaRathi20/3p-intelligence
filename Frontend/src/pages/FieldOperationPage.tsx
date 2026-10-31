@@ -18,10 +18,25 @@ import {
   tasksApi,
   type BackendTask,
   type OperationalTaskStatus,
+  type ReportPhoto,
 } from '@/services/operationalApi';
 import type { TaskPriority } from '@/utils/taskReview';
 
 type TaskStatus = OperationalTaskStatus;
+
+const MAX_PHOTOS = 5;
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+type SelectedPhoto = ReportPhoto;
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ''));
+    reader.onerror = () => reject(new Error('Unable to read the selected file.'));
+    reader.readAsDataURL(file);
+  });
+}
 
 interface FieldTask {
   backendId: string;
@@ -105,6 +120,9 @@ export default function FieldOperationsPage() {
   const [reportText, setReportText] = useState('');
   const [peopleAssisted, setPeopleAssisted] = useState('');
   const [locationNote, setLocationNote] = useState('');
+  const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [readingPhotos, setReadingPhotos] = useState(false);
   const [notice, setNotice] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -156,18 +174,58 @@ export default function FieldOperationsPage() {
     if (!selectedTask || saving) return;
     setSaving(true);
     try {
-      const updated = await tasksApi.update(selectedTask.backendId, { status });
+      // Start / Update moves the bar to 50%; Mark Submitted completes it at 100%.
+      const progress = status === 'In Progress' ? 50 : status === 'Submitted' ? 100 : undefined;
+      const updated = await tasksApi.update(selectedTask.backendId, { status, progress });
       setTasks((current) => current.map((task) =>
         task.backendId === selectedTask.backendId ? mapBackendTask(updated) : task,
       ));
       setNotice(status === 'Submitted'
-        ? 'Field report marked as submitted and confirmed by the backend.'
-        : `Task status updated to ${status}.`);
+        ? 'Field report marked as submitted and confirmed by the backend. The Operations Planner has been notified.'
+        : `Task started — progress set to 50%.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Unable to update the task status.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handlePhotoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
+    if (files.length === 0) return;
+    setPhotoError(null);
+    const accepted = files.filter((file) => file.type.startsWith('image/'));
+    if (accepted.length < files.length) {
+      setPhotoError('Only image files can be attached as photo evidence.');
+    }
+    const oversized = accepted.filter((file) => file.size > MAX_PHOTO_BYTES);
+    if (oversized.length > 0) {
+      setPhotoError(`Each photo must be ${MAX_PHOTO_BYTES / (1024 * 1024)} MB or smaller.`);
+      return;
+    }
+    if (photos.length + accepted.length > MAX_PHOTOS) {
+      setPhotoError(`You can attach up to ${MAX_PHOTOS} photos per report.`);
+      return;
+    }
+    setReadingPhotos(true);
+    try {
+      const loaded = await Promise.all(accepted.map(async (file) => ({
+        filename: file.name,
+        mimeType: file.type || 'image/jpeg',
+        size: file.size,
+        dataUrl: await readFileAsDataUrl(file),
+      })));
+      setPhotos((current) => [...current, ...loaded].slice(0, MAX_PHOTOS));
+    } catch (error) {
+      setPhotoError(error instanceof Error ? error.message : 'Unable to read the selected photos.');
+    } finally {
+      setReadingPhotos(false);
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((current) => current.filter((_, position) => position !== index));
   };
 
   const submitReport = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -189,15 +247,18 @@ export default function FieldOperationsPage() {
           text: reportText.trim(),
           peopleAssisted: assisted,
           locationNote: locationNote.trim() || null,
+          photos,
         },
       });
       setTasks((current) => current.map((task) =>
         task.backendId === selectedTask.backendId ? mapBackendTask(updated) : task,
       ));
-      setNotice('Field report submitted and confirmed by the backend.');
+      setNotice('Field report submitted and confirmed by the backend. The Operations Planner has been notified.');
       setReportText('');
       setPeopleAssisted('');
       setLocationNote('');
+      setPhotos([]);
+      setPhotoError(null);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Unable to submit the field report.');
     } finally {
@@ -311,11 +372,15 @@ export default function FieldOperationsPage() {
                   <div className="h-2 bg-slate-100"><div className="h-2 bg-[#18365b]" style={{ width: `${selectedTask.progress}%` }} /></div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={() => updateStatus('In Progress')} disabled={saving}
+                  <button type="button" onClick={() => updateStatus('In Progress')}
+                    disabled={saving || selectedTask.status !== 'Assigned'}
+                    title={selectedTask.status === 'Assigned' ? 'Start the task and set progress to 50%' : 'Task already started'}
                     className="inline-flex items-center gap-2 border border-[#18365b] px-3 py-2 text-xs font-semibold text-[#18365b] hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50">
                     <ArrowUpRight size={14} /> {saving ? 'Saving…' : 'Start / Update'}
                   </button>
-                  <button type="button" onClick={() => updateStatus('Submitted')} disabled={saving}
+                  <button type="button" onClick={() => updateStatus('Submitted')}
+                    disabled={saving || selectedTask.status === 'Submitted'}
+                    title={selectedTask.status === 'Submitted' ? 'Task already submitted' : 'Mark the task submitted at 100%'}
                     className="inline-flex items-center gap-2 bg-[#18365b] px-3 py-2 text-xs font-semibold text-white hover:bg-[#102744] disabled:cursor-not-allowed disabled:opacity-50">
                     <CheckCircle2 size={14} /> Mark Submitted
                   </button>
@@ -347,10 +412,69 @@ export default function FieldOperationsPage() {
                       placeholder="Ward, road or landmark" className="mt-1.5 block w-full border border-slate-300 px-3 py-2 text-sm font-normal outline-none focus:border-[#18365b]" />
                   </label>
                 </div>
-                <div className="flex flex-wrap items-center justify-between gap-2 border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
-                  <span className="flex items-center gap-2 text-xs text-slate-600"><Paperclip size={14} /> Photo evidence upload can be connected here</span>
-                  <span className="text-[10px] text-slate-400">UI placeholder</span>
-                </div>
+<div className="border border-dashed border-slate-300 bg-slate-50 px-3 py-3">
+  <div className="flex flex-wrap items-center justify-between gap-2">
+    <div>
+      <p className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+        <Paperclip size={14} /> Photo evidence (optional)
+      </p>
+      <p className="mt-1 text-[10px] text-slate-500">
+        Up to {MAX_PHOTOS} images · {MAX_PHOTO_BYTES / (1024 * 1024)} MB each
+      </p>
+    </div>
+
+    <label
+      htmlFor="field-report-photos"
+      className={`inline-flex cursor-pointer items-center gap-1.5 border border-[#18365b] bg-white px-3 py-1.5 text-xs font-semibold text-[#18365b] hover:bg-blue-50 ${
+        saving || readingPhotos ? 'pointer-events-none opacity-50' : ''
+      }`}
+    >
+      {readingPhotos ? 'Reading…' : 'Choose photos'}
+    </label>
+
+    <input
+      id="field-report-photos"
+      type="file"
+      accept="image/*"
+      multiple
+      onChange={handlePhotoSelect}
+      disabled={saving || readingPhotos}
+      className="hidden"
+      aria-label="Attach photo evidence"
+    />
+  </div>
+
+  {photoError && (
+    <p role="alert" className="mt-2 text-xs text-red-700">
+      {photoError}
+    </p>
+  )}
+
+  {photos.length > 0 && (
+    <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5">
+      {photos.map((photo, index) => (
+        <li
+          key={`${photo.filename}-${index}`}
+          className="relative border border-slate-300 bg-white"
+        >
+          <img
+            src={photo.dataUrl}
+            alt={photo.filename}
+            className="h-16 w-full object-cover"
+          />
+          <button
+            type="button"
+            onClick={() => removePhoto(index)}
+            aria-label={`Remove ${photo.filename}`}
+            className="absolute right-0.5 top-0.5 bg-slate-900/70 p-0.5 text-white hover:bg-slate-900"
+          >
+            <X size={12} />
+          </button>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
                 <button type="submit" disabled={saving} className="inline-flex w-full items-center justify-center gap-2 bg-[#18365b] px-4 py-3 text-sm font-semibold text-white hover:bg-[#102744] disabled:cursor-not-allowed disabled:opacity-50">
                   <Send size={15} /> {saving ? 'Submitting…' : 'Submit Field Report'}
                 </button>
@@ -371,6 +495,17 @@ export default function FieldOperationsPage() {
                         {report.peopleAssisted !== null && report.peopleAssisted !== undefined ? ` · assisted ${report.peopleAssisted}` : ''}
                         {report.locationNote ? ` · ${report.locationNote}` : ''}
                       </p>
+                      {(report.photos ?? []).length > 0 && (
+                        <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                          {(report.photos ?? []).map((photo, photoIndex) => (
+                            <li key={`${photo.filename}-${photoIndex}`} className="border border-slate-200">
+                              <a href={photo.dataUrl} target="_blank" rel="noreferrer" title={photo.filename}>
+                                <img src={photo.dataUrl} alt={photo.filename} className="h-16 w-full object-cover" loading="lazy" />
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))}
                 </ul>

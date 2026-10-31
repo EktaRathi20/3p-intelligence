@@ -115,7 +115,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
          onOpenRegionPage={() => navigate("/region-management")}
       />
 
-      <div className="flex min-w-0 flex-1 flex-row" style={{maxHeight: '80vh'}}>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-row" style={{maxHeight: '80vh'}}>
         <Sidebar
           isMobileOpen={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
@@ -155,7 +155,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
           roleLevel={currentUser.roleLevel}
         />
 
-        <main className="min-w-0 flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden max-w-[1600px] w-full mx-auto" style={{ maxHeight: '80vh' }}>
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 lg:p-6 max-w-[1600px] w-full mx-auto" style={{ maxHeight: '80vh' }}>
           {(dashboard.regionError || dashboard.regionDataError) && (
             <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
               <span>

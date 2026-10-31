@@ -10,14 +10,14 @@
     "instructions": "",
     "location": "Yanam",
     "priority": "Medium",
-    "progress": 0,
+    "progress": 100,
     "regionKey": "in-py-ynm",
     "reports": [],
     "source": "ai",
     "sourceRef": "AI-01",
-    "status": "Assigned",
+    "status": "Submitted",
     "title": "Prepare for forecast Scattered thunderstorms on 2026-11-01 and Thunderstorm to Heavy thunderstorm on 2026-11-02 to 2026-11-04 by clearing drains and securing loose items; routine readiness only as risk is GREEN and no official warning exists.",
-    "updatedAt": "2026-10-31T07:12:37.240720+00:00"
+    "updatedAt": "2026-10-31T13:10:29.833008+00:00"
   },
   "C6lBHEsk6YIjexobJkUf": {
     "assigneeName": "Rahul Singh",
@@ -57,6 +57,6 @@
     "sourceRef": "AI-02",
     "status": "Submitted",
     "title": "Verify routine contact and readiness at listed facilities including Jipmer Hospital Yanam and Government General Hospital for a population of 225375, consistent with GREEN screening and calm current winds.",
-    "updatedAt": "2026-10-31T07:16:46.198838+00:00"
+    "updatedAt": "2026-10-31T07:34:33.365388+00:00"
   }
 }

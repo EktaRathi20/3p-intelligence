@@ -81,7 +81,7 @@ export function pendingReviewRecord(): ReviewRecord {
     officer: null,
     deadline: null,
     instructions: null,
-    notifyRequested: false,
+    notifyRequested: true,
     backendState: 'local',
     backendNote: null,
   };

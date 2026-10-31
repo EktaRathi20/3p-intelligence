@@ -1,14 +1,38 @@
 {
+  "gch2pIjqMew1gSvIOjMq": {
+    "createdAt": "2026-10-31T07:34:33.371309+00:00",
+    "message": "Field report submitted for 'Verify routine contact and readiness at listed facilities including Jipmer Hospital Yanam and Government General Hospital for a population of 225375, consistent with GREEN screening and calm current winds.' at Yanam by Rahul Singh. Please review it.",
+    "priority": "Low",
+    "read": false,
+    "recipientName": "Priya Verma",
+    "recipientUserId": "user_2",
+    "regionKey": "in-py-ynm",
+    "senderId": "user_3",
+    "senderName": "Rahul Singh",
+    "taskId": "QzRzjOLuXYGIGXxjjWfd"
+  },
   "hhPTIIhH1fynzRuIPrvI": {
     "createdAt": "2026-10-31T07:12:43.077193+00:00",
     "message": "Task AI-02 assigned: Verify routine contact and readiness at listed facilities including Jipmer Hospital Yanam and Government General Hospital for a population of 225375, consistent with GREEN screening and calm current winds. (Yanam, due 01 Nov 2026, 12:42 pm).",
     "priority": "Low",
-    "read": false,
+    "read": true,
     "recipientName": "Rahul Singh",
     "recipientUserId": "user_3",
     "regionKey": "in-py-ynm",
     "senderId": "user_2",
     "senderName": "Priya Verma",
     "taskId": "QzRzjOLuXYGIGXxjjWfd"
+  },
+  "uVQtWjstDdrh6ini7HXx": {
+    "createdAt": "2026-10-31T13:10:29.843798+00:00",
+    "message": "Field report submitted for 'Prepare for forecast Scattered thunderstorms on 2026-11-01 and Thunderstorm to Heavy thunderstorm on 2026-11-02 to 2026-11-04 by clearing drains and securing loose items; routine readiness only as risk is GREEN and no official warning exists.' at Yanam by Rahul Singh. Please review it.",
+    "priority": "Medium",
+    "read": false,
+    "recipientName": "Priya Verma",
+    "recipientUserId": "user_2",
+    "regionKey": "in-py-ynm",
+    "senderId": "user_3",
+    "senderName": "Rahul Singh",
+    "taskId": "2EtMWIGYziAU9Xnsjd9o"
   }
 }

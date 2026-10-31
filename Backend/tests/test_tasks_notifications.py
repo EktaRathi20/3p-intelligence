@@ -208,6 +208,148 @@ class OperationalFlowTest(unittest.TestCase):
         }, headers=self.role3)
         self.assertEqual(response.status_code, 403)
 
+    def test_assignment_auto_notifies_role3_inbox(self):
+        created = self.client.post("/api/tasks", json={
+            "title": "Clear blocked drain on Main Road",
+            "department": "Municipal Corp",
+            "location": "Ward 05",
+            "priority": "High",
+            "assigneeUserId": "user_3",
+            "regionKey": "surat",
+        }, headers=self.role2)
+        self.assertEqual(created.status_code, 201, created.text)
+        task_id = created.json()["task"]["id"]
+
+        inbox = self.client.get("/api/notifications?box=inbox", headers=self.role3)
+        self.assertEqual(inbox.status_code, 200)
+        body = inbox.json()
+        self.assertEqual(body["count"], 1)
+        self.assertEqual(body["unread"], 1)
+        notification = body["notifications"][0]
+        self.assertEqual(notification["recipientUserId"], "user_3")
+        self.assertEqual(notification["taskId"], task_id)
+        self.assertIn("assigned", notification["message"].lower())
+
+    def test_assignment_without_notify_skips_notification(self):
+        created = self.client.post("/api/tasks", json={
+            "title": "Silent task without notification",
+            "department": "NDRF",
+            "location": "Ward 06",
+            "assigneeUserId": "user_3",
+            "notifyAssignee": False,
+        }, headers=self.role2)
+        self.assertEqual(created.status_code, 201, created.text)
+
+        inbox = self.client.get("/api/notifications?box=inbox", headers=self.role3)
+        self.assertEqual(inbox.json()["count"], 0)
+
+    def test_start_sets_progress_50_and_submit_sets_100(self):
+        created = self.client.post("/api/tasks", json={
+            "title": "Inspect shelter readiness",
+            "department": "Revenue Department",
+            "location": "Ward 07",
+            "assigneeUserId": "user_3",
+        }, headers=self.role2)
+        task_id = created.json()["task"]["id"]
+
+        started = self.client.patch(
+            f"/api/tasks/{task_id}",
+            json={"status": "In Progress", "progress": 50},
+            headers=self.role3,
+        )
+        self.assertEqual(started.status_code, 200)
+        self.assertEqual(started.json()["task"]["progress"], 50)
+
+        submitted = self.client.patch(
+            f"/api/tasks/{task_id}", json={"status": "Submitted"},
+            headers=self.role3,
+        )
+        self.assertEqual(submitted.status_code, 200)
+        updated = submitted.json()["task"]
+        self.assertEqual(updated["status"], "Submitted")
+        self.assertEqual(updated["progress"], 100)
+
+    def test_start_without_progress_defaults_to_50(self):
+        created = self.client.post("/api/tasks", json={
+            "title": "Check waterlogging near station",
+            "department": "PWD Water Supply",
+            "location": "Ward 09",
+            "assigneeUserId": "user_3",
+        }, headers=self.role2)
+        task_id = created.json()["task"]["id"]
+
+        started = self.client.patch(
+            f"/api/tasks/{task_id}", json={"status": "In Progress"},
+            headers=self.role3,
+        )
+        self.assertEqual(started.status_code, 200)
+        self.assertEqual(started.json()["task"]["progress"], 50)
+
+    def test_field_report_with_photos_notifies_role2(self):
+        created = self.client.post("/api/tasks", json={
+            "title": "Document damage on Bridge Road",
+            "department": "PWD Water Supply",
+            "location": "Ward 11",
+            "priority": "Critical",
+            "assigneeUserId": "user_3",
+        }, headers=self.role2)
+        task_id = created.json()["task"]["id"]
+
+        reported = self.client.patch(
+            f"/api/tasks/{task_id}",
+            json={"report": {
+                "text": "Crack across the carriageway, needs barricading",
+                "peopleAssisted": 4,
+                "locationNote": "Bridge Road junction",
+                "photos": [{
+                    "filename": "crack.jpg",
+                    "mimeType": "image/jpeg",
+                    "size": 1234,
+                    "dataUrl": "data:image/jpeg;base64,/9j/4AAQ",
+                }],
+            }},
+            headers=self.role3,
+        )
+        self.assertEqual(reported.status_code, 200, reported.text)
+        updated = reported.json()["task"]
+        self.assertEqual(updated["status"], "Submitted")
+        self.assertEqual(updated["progress"], 100)
+        self.assertEqual(len(updated["reports"]), 1)
+        self.assertEqual(len(updated["reports"][0]["photos"]), 1)
+        self.assertEqual(updated["reports"][0]["photos"][0]["filename"], "crack.jpg")
+
+        inbox = self.client.get("/api/notifications?box=inbox", headers=self.role2)
+        self.assertEqual(inbox.status_code, 200)
+        body = inbox.json()
+        self.assertEqual(body["count"], 1)
+        self.assertEqual(body["notifications"][0]["recipientUserId"], "user_2")
+        self.assertEqual(body["notifications"][0]["taskId"], task_id)
+        self.assertIn("submitted", body["notifications"][0]["message"].lower())
+
+    def test_report_rejects_non_image_evidence(self):
+        created = self.client.post("/api/tasks", json={
+            "title": "Task with bad attachment",
+            "department": "NDRF",
+            "location": "Ward 12",
+            "assigneeUserId": "user_3",
+        }, headers=self.role2)
+        task_id = created.json()["task"]["id"]
+
+        response = self.client.patch(
+            f"/api/tasks/{task_id}",
+            json={"report": {
+                "text": "Attempt with a non-image file",
+                "photos": [{
+                    "filename": "notes.txt",
+                    "mimeType": "text/plain",
+                    "size": 10,
+                    "dataUrl": "data:text/plain;base64,aGk=",
+                }],
+            }},
+            headers=self.role3,
+        )
+        self.assertEqual(response.status_code, 422)
+
 
 if __name__ == "__main__":
     unittest.main()

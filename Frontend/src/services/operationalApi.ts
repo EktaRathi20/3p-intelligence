@@ -4,6 +4,13 @@ import type { TaskPriority } from '@/utils/taskReview';
 export type OperationalTaskStatus = 'Assigned' | 'In Progress' | 'Submitted';
 export type OperationalTaskSource = 'ai' | 'manual';
 
+export interface ReportPhoto {
+  filename: string;
+  mimeType: string;
+  size: number;
+  dataUrl: string;
+}
+
 export interface FieldReport {
   at: string;
   byId: string;
@@ -11,6 +18,7 @@ export interface FieldReport {
   text: string;
   peopleAssisted: number | null;
   locationNote: string | null;
+  photos?: ReportPhoto[];
 }
 
 export interface BackendTask {
@@ -46,6 +54,7 @@ export interface CreateTaskInput {
   source?: OperationalTaskSource;
   sourceRef?: string | null;
   regionKey?: string | null;
+  notifyAssignee?: boolean;
 }
 
 export interface UpdateTaskInput {
@@ -58,7 +67,13 @@ export interface UpdateTaskInput {
   instructions?: string;
   deadline?: string | null;
   assigneeUserId?: string;
-  report?: { text: string; peopleAssisted?: number | null; locationNote?: string | null };
+  notifyAssignee?: boolean;
+  report?: {
+    text: string;
+    peopleAssisted?: number | null;
+    locationNote?: string | null;
+    photos?: ReportPhoto[];
+  };
 }
 
 export interface OperationalNotification {
