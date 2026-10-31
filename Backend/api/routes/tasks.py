@@ -21,6 +21,7 @@ router = APIRouter()
 
 TASKS_COLLECTION = "tasks"
 USERS_COLLECTION = "users"
+ROLES_COLLECTION = "roles"
 NOTIFICATIONS_COLLECTION = "notifications"
 
 TaskStatus = Literal["Assigned", "In Progress", "Submitted"]
@@ -137,10 +138,48 @@ def _submission_message(task: dict[str, Any], submitter_name: str) -> str:
     title = str(task.get("title") or "a field task")
     location = str(task.get("location") or "")
     suffix = f" at {location}" if location else ""
+    officer = submitter_name or "the field officer"
     return (
-        f"Field report submitted for '{title}'{suffix} "
-        f"by {submitter_name or 'the field officer'}. Please review it."
+        f"Task completed — '{title}'{suffix} was marked submitted "
+        f"by {officer}. Please review it."
     )
+
+
+def _is_role2(role_id: object, role: dict[str, Any] | None) -> bool:
+    if str(role_id or "").strip().lower() == "role_2":
+        return True
+    if role is None:
+        return False
+    if role.get("level") == 2:
+        return True
+    return "operations planner" in str(role.get("name") or "").lower()
+
+
+def _role2_recipient_ids() -> list[str]:
+    """Active Role 2 (Operations Planner) user ids, for completion notices."""
+    try:
+        users = json_store.list_documents(USERS_COLLECTION)
+    except Exception:
+        return []
+    recipients: list[str] = []
+    role_cache: dict[str, dict[str, Any] | None] = {}
+    for user in users:
+        try:
+            if not user.get("isActive", False):
+                continue
+            role_id = str(user.get("roleId") or "")
+            if role_id not in role_cache:
+                try:
+                    role_cache[role_id] = json_store.get_document(
+                        ROLES_COLLECTION, role_id
+                    )
+                except Exception:
+                    role_cache[role_id] = None
+            if _is_role2(role_id, role_cache[role_id]):
+                recipients.append(str(user.get("id") or ""))
+        except Exception:
+            continue
+    return [user_id for user_id in recipients if user_id]
 
 
 @router.post("/api/tasks", status_code=201)
@@ -366,17 +405,28 @@ def update_task(
             payload.report is not None
             or (updates.get("status") == "Submitted" and previous_status != "Submitted")
         )
-        creator_id = str(task.get("createdById") or "")
-        if submitted_now and creator_id:
-            _create_inapp_notification(
-                recipient_user_id=creator_id,
-                sender_id=str(current_user["id"]),
-                sender_name=str(current_user.get("name", "")),
-                message=_submission_message(updated, str(current_user.get("name", ""))),
-                priority=str(updated.get("priority") or "Medium"),
-                task_id=str(updated.get("id") or task_id),
-                region_key=updated.get("regionKey"),
-            )
+        if submitted_now:
+            # Notify the assigning planner plus every active Role 2 officer so
+            # task completion is never missed when planners share the queue.
+            recipients: list[str] = []
+            creator_id = str(task.get("createdById") or "")
+            if creator_id:
+                recipients.append(creator_id)
+            recipients.extend(_role2_recipient_ids())
+            seen: set[str] = set()
+            for recipient_id in recipients:
+                if not recipient_id or recipient_id in seen:
+                    continue
+                seen.add(recipient_id)
+                _create_inapp_notification(
+                    recipient_user_id=recipient_id,
+                    sender_id=str(current_user["id"]),
+                    sender_name=str(current_user.get("name", "")),
+                    message=_submission_message(updated, str(current_user.get("name", ""))),
+                    priority=str(updated.get("priority") or "Medium"),
+                    task_id=str(updated.get("id") or task_id),
+                    region_key=updated.get("regionKey"),
+                )
 
         return {"success": True, "task": updated}
     except HTTPException:

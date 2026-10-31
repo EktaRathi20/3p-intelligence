@@ -4,6 +4,7 @@ import {
   BellRing,
   Building2,
   CalendarClock,
+  CheckCheck,
   CheckCircle2,
   ClipboardList,
   Clock3,
@@ -38,6 +39,7 @@ import {
   type BackendTask,
   type CreateNotificationInput,
   type CreateTaskInput,
+  type OperationalNotification,
 } from '@/services/operationalApi';
 import type { AuthUser, OfficerUser } from '@/types';
 import type { ClimateAlert } from '@/types/alerts';
@@ -463,6 +465,14 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
   const [alertRecords, setAlertRecords] = useState<AlertRecord[]>([]);
   const [hydratedFor, setHydratedFor] = useState<string | null>(null);
 
+  // Field completion updates: Role 3 submissions notified to this Role 2 inbox.
+  const [completionNotices, setCompletionNotices] = useState<OperationalNotification[]>([]);
+  const [completionTasks, setCompletionTasks] = useState<BackendTask[]>([]);
+  const [completionLoading, setCompletionLoading] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
+  const [completionRefresh, setCompletionRefresh] = useState(0);
+  const [markingNoticeId, setMarkingNoticeId] = useState<string | null>(null);
+
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [userError, setUserError] = useState<string | null>(null);
@@ -647,6 +657,61 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
       cancelled = true;
     };
   }, [hydratedFor, regionKey]);
+
+  // Field completion updates: tasks Role 3 marked submitted, plus the inbox
+  // notices the backend addressed to this Role 2 officer.
+  useEffect(() => {
+    if (hydratedFor !== regionKey) return;
+    let cancelled = false;
+    setCompletionLoading(true);
+    setCompletionError(null);
+    Promise.all([
+      notificationsApi.list('inbox').catch(() => null),
+      tasksApi.list({ regionKey }).catch(() => [] as BackendTask[]),
+    ])
+      .then(([inbox, backendTasks]) => {
+        if (cancelled) return;
+        const notices = (inbox?.notifications ?? []).filter(
+          (item) => item.taskId && (!item.regionKey || item.regionKey === regionKey),
+        );
+        setCompletionNotices(notices);
+        setCompletionTasks(
+          (backendTasks ?? []).filter((task) => task.status === 'Submitted'),
+        );
+        if (inbox === null && (backendTasks ?? []).length === 0) {
+          setCompletionError('Completion updates are unavailable right now.');
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setCompletionNotices([]);
+          setCompletionTasks([]);
+          setCompletionError(
+            error instanceof Error ? error.message : 'Completion updates are unavailable right now.',
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setCompletionLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hydratedFor, regionKey, completionRefresh]);
+
+  const markCompletionNoticeRead = async (id: string) => {
+    setMarkingNoticeId(id);
+    try {
+      await notificationsApi.markRead(id);
+      setCompletionNotices((current) =>
+        current.map((item) => (item.id === id ? { ...item, read: true } : item)),
+      );
+    } catch {
+      // Keep the item unread; the next refresh will retry the state.
+    } finally {
+      setMarkingNoticeId(null);
+    }
+  };
 
   // One-way repair: push local-only accepted records to the backend so the
   // assigned Role 3 officer actually sees them. Covers assignments made
@@ -1565,6 +1630,131 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
           hint={`${alertRecords.filter((alert) => alert.status === 'not_sent').length} draft(s) held · visible in field inbox`}
         />
       </div>
+
+      <section className="border border-slate-300 bg-white shadow-sm" aria-label="Field completion updates">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <div>
+            <h3 className="flex items-center gap-2 text-sm font-bold text-[#18365b]">
+              <CheckCircle2 size={15} /> Field completion updates
+              {completionNotices.filter((notice) => !notice.read).length > 0 && (
+                <span className="bg-[#18365b] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+                  {completionNotices.filter((notice) => !notice.read).length} new
+                </span>
+              )}
+            </h3>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Tasks Role 3 marked submitted ({completionTasks.length} completed) and the
+              completion notices sent to your inbox.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCompletionRefresh((value) => value + 1)}
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#18365b] underline underline-offset-2"
+          >
+            <RotateCcw size={12} /> Refresh
+          </button>
+        </div>
+        <div className="p-4">
+          {completionLoading ? (
+            <p role="status" className="flex items-center gap-2 border border-slate-200 px-3 py-4 text-xs text-slate-600">
+              <LoaderCircle size={14} className="animate-spin" /> Loading completion updates…
+            </p>
+          ) : completionError ? (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-2 border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              <span>{completionError}</span>
+              <button type="button" onClick={() => setCompletionRefresh((value) => value + 1)} className="inline-flex shrink-0 items-center gap-1.5 font-semibold underline underline-offset-2">
+                <RotateCcw size={13} /> Retry
+              </button>
+            </div>
+          ) : completionTasks.length === 0 && completionNotices.length === 0 ? (
+            <p className="border border-dashed border-slate-300 px-3 py-6 text-center text-xs text-slate-600">
+              No completed tasks yet. When a field officer marks a task submitted, it will
+              appear here and in your notification inbox.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div>
+                <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-600">
+                  Completed tasks ({completionTasks.length})
+                </h4>
+                {completionTasks.length === 0 ? (
+                  <p className="border border-slate-200 px-3 py-4 text-xs text-slate-600">
+                    No submitted tasks for this region yet.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-slate-200 border border-slate-200">
+                    {completionTasks.map((task) => {
+                      const latestReport = (task.reports ?? [])[(task.reports ?? []).length - 1];
+                      return (
+                        <li key={task.id} className="px-3 py-2.5 text-xs">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <PriorityBadge priority={task.priority} />
+                            <span className="inline-flex items-center gap-1 border border-emerald-700 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-800">
+                              <CheckCircle2 size={11} /> Completed
+                            </span>
+                            <time className="ml-auto text-[10px] text-slate-500">{formatDateTime(task.updatedAt)}</time>
+                          </div>
+                          <p className="mt-1 font-semibold leading-5 text-slate-900">{task.title}</p>
+                          <p className="mt-0.5 text-[11px] text-slate-500">
+                            {task.assigneeName || 'Field officer'} · {task.location}
+                            {(task.reports ?? []).length > 0 ? ` · ${(task.reports ?? []).length} report(s)` : ' · no written report'}
+                          </p>
+                          {latestReport && (
+                            <p className="mt-1 line-clamp-2 border-l-2 border-emerald-600 bg-emerald-50/50 px-2 py-1 text-[11px] leading-4 text-slate-700">
+                              {latestReport.text}
+                            </p>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-600">
+                  Completion notices ({completionNotices.filter((notice) => !notice.read).length} unread)
+                </h4>
+                {completionNotices.length === 0 ? (
+                  <p className="border border-slate-200 px-3 py-4 text-xs text-slate-600">
+                    No completion notices in your inbox for this region.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-slate-200 border border-slate-200">
+                    {completionNotices.map((notice) => (
+                      <li key={notice.id} className={`px-3 py-2.5 text-xs ${notice.read ? '' : 'bg-blue-50/50'}`}>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <PriorityBadge priority={notice.priority} />
+                          {!notice.read && (
+                            <span className="bg-[#18365b] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+                              New
+                            </span>
+                          )}
+                          <time className="ml-auto text-[10px] text-slate-500">{formatDateTime(notice.createdAt)}</time>
+                        </div>
+                        <p className="mt-1 leading-5 text-slate-700">{notice.message}</p>
+                        <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-[10px] text-slate-500">From {notice.senderName || 'field officer'}</p>
+                          {!notice.read && (
+                            <button
+                              type="button"
+                              disabled={markingNoticeId === notice.id}
+                              onClick={() => markCompletionNoticeRead(notice.id)}
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#18365b] underline underline-offset-2 disabled:opacity-50"
+                            >
+                              <CheckCheck size={13} /> {markingNoticeId === notice.id ? 'Saving…' : 'Mark read'}
+                            </button>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
 
       <section className="border border-slate-300 bg-white shadow-sm" aria-label="Risk zones and response resources">

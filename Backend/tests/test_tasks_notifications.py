@@ -326,6 +326,65 @@ class OperationalFlowTest(unittest.TestCase):
         self.assertEqual(body["notifications"][0]["taskId"], task_id)
         self.assertIn("submitted", body["notifications"][0]["message"].lower())
 
+    def test_mark_submitted_without_report_notifies_role2(self):
+        created = self.client.post("/api/tasks", json={
+            "title": "Clear debris from service lane",
+            "department": "Municipal Corp",
+            "location": "Ward 13",
+            "priority": "High",
+            "assigneeUserId": "user_3",
+        }, headers=self.role2)
+        self.assertEqual(created.status_code, 201, created.text)
+        task_id = created.json()["task"]["id"]
+
+        submitted = self.client.patch(
+            f"/api/tasks/{task_id}", json={"status": "Submitted"},
+            headers=self.role3,
+        )
+        self.assertEqual(submitted.status_code, 200, submitted.text)
+        self.assertEqual(submitted.json()["task"]["status"], "Submitted")
+
+        inbox = self.client.get("/api/notifications?box=inbox", headers=self.role2)
+        self.assertEqual(inbox.status_code, 200)
+        body = inbox.json()
+        self.assertEqual(body["count"], 1)
+        self.assertEqual(body["notifications"][0]["recipientUserId"], "user_2")
+        self.assertEqual(body["notifications"][0]["taskId"], task_id)
+        message = body["notifications"][0]["message"].lower()
+        self.assertIn("submitted", message)
+        self.assertTrue(
+            "complet" in message or "done" in message,
+            f"Role 2 completion notice should say the task is done: {message}",
+        )
+
+    def test_completion_notifies_all_role2_officers(self):
+        json_store.set_document("users", "user_2b", {
+            "name": "Second Planner", "email": "planner2.demo@example.com",
+            "roleId": "role_2", "isActive": True,
+        })
+        role2b = self._login("user_2b")
+
+        created = self.client.post("/api/tasks", json={
+            "title": "Restore power to shelter",
+            "department": "Power Utility",
+            "location": "Ward 14",
+            "assigneeUserId": "user_3",
+        }, headers=self.role2)
+        task_id = created.json()["task"]["id"]
+
+        submitted = self.client.patch(
+            f"/api/tasks/{task_id}", json={"status": "Submitted"},
+            headers=self.role3,
+        )
+        self.assertEqual(submitted.status_code, 200, submitted.text)
+
+        for headers, user_id in ((self.role2, "user_2"), (role2b, "user_2b")):
+            inbox = self.client.get("/api/notifications?box=inbox", headers=headers)
+            self.assertEqual(inbox.status_code, 200)
+            body = inbox.json()
+            self.assertEqual(body["count"], 1, f"expected Role 2 inbox for {user_id}")
+            self.assertEqual(body["notifications"][0]["taskId"], task_id)
+
     def test_report_rejects_non_image_evidence(self):
         created = self.client.post("/api/tasks", json={
             "title": "Task with bad attachment",
