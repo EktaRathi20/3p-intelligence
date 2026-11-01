@@ -72,19 +72,7 @@ export const BottomRowCards: React.FC<BottomRowCardsProps> = ({
         )}
       </section>
 
-      {/* Card 2: Evacuation Routes */}
-      <section className={`flex flex-col border p-4 shadow-sm ${cardClass}`}>
-        <div className="mb-3 flex items-center gap-2">
-          <Info size={16} className="text-amber-600" />
-          <h3 className={`text-sm font-bold ${textClass}`}>Evacuation Routes</h3>
-        </div>
-
-        <div className={`flex flex-1 items-center justify-center border border-dashed p-8 text-center ${isLightMode ? 'bg-slate-50/50 border-slate-200' : 'bg-slate-950/50 border-slate-700'}`}>
-          <p className={`max-w-[220px] text-sm leading-relaxed ${mutedClass}`}>
-            Route data is not currently exposed by the backend API. No route status or safety recommendation is shown.
-          </p>
-        </div>
-      </section>
+      
 
     </div>
   );

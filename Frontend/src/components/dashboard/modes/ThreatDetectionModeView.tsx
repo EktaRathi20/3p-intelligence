@@ -83,14 +83,14 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
   const regionalChipText = regionalLevel ? `Regional: ${regionalLevel}` : regionalStatus ? `Regional: ${regionalStatus}` : 'Regional: none';
   return (
     <div className="w-full space-y-4 animate-in fade-in duration-300">
-      <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-4 border-b-4 border-[#e5a044] bg-[#18365b] text-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg border ${localHeadline ? riskTone[localZone] ?? riskTone.UNKNOWN : riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
+          <span className={`grid h-11 w-11 shrink-0 place-items-center  border ${localHeadline ? riskTone[localZone] ?? riskTone.UNKNOWN : riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
             {dataUnavailable ? <CircleHelp size={21} /> : <ShieldAlert size={21} />}
           </span>
           <div>
-            <h1 className="text-lg font-bold text-slate-900">Threat Detection · {city.name}</h1>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <h1 className="text-lg font-bold text-slate-200">Threat Detection · {city.name}</h1>
+            <p className="mt-0.5 text-xs text-slate-200">
               {isLoading
                 ? 'Refreshing disaster intelligence…'
                 : unavailableIntelligence
@@ -100,19 +100,15 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
           </div>
         </div>
         <div className="flex w-fit flex-col items-end gap-1.5">
-          <div className={`inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold ${localHeadline ? riskTone[localZone] ?? riskTone.UNKNOWN : riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
-            <span className="h-2 w-2 rounded-full bg-current" />
+          <div className={`inline-flex w-fit items-center gap-2  border px-3 py-2 text-xs font-bold ${localHeadline ? riskTone[localZone] ?? riskTone.UNKNOWN : riskTone[riskLevel] ?? riskTone.UNKNOWN}`}>
+            <span className="h-2 w-2 bg-current" />
             {unavailableIntelligence
               ? unavailableIntelligence.status === 'not_implemented' ? 'NOT IMPLEMENTED' : 'NOT CONFIGURED'
               : localHeadline
                 ? localZone === 'UNKNOWN' ? 'IMPACT UNKNOWN' : `${localZone} LOCAL IMPACT`
                 : riskLevel === 'UNKNOWN' ? 'DATA UNAVAILABLE' : `${riskLevel} RISK`}
           </div>
-          {localHeadline && (
-            <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-[11px] font-bold ${regionalChipTone}`}>
-              {localHeadline.regionalText}
-            </span>
-          )}
+          
         </div>
       </section>
 
@@ -121,7 +117,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
         <select
           value={selectedHazard}
           onChange={event => onSelectHazard(event.target.value)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs"
+          className=" border border-slate-300 bg-white px-3 py-2 text-xs"
           aria-label="Select hazard intelligence"
         >
           {(hazardCapabilities?.hazards ?? []).map(hazard => (
@@ -136,23 +132,23 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
       </label>
 
       {dataQuality?.ingestion_error && (
-        <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <div role="status" className=" border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           Ingestion is incomplete: {dataQuality.ingestion_error}
         </div>
       )}
       {Object.entries(dataQuality?.source_errors ?? {}).map(([source, sourceError]) => (
-        <div key={source} role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <div key={source} role="status" className=" border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           {source} data is unavailable: {sourceError}
         </div>
       ))}
       {!isLoading && unavailableIntelligence && (
-        <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <div role="status" className=" border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           {unavailableIntelligence.message}
         </div>
       )}
-      {isLoading && <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-950"><LoaderCircle size={14} className="animate-spin" />Loading live telemetry, history, and response resources…</div>}
+      {isLoading && <div role="status" aria-live="polite" className="flex items-center gap-2  border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-950"><LoaderCircle size={14} className="animate-spin" />Loading live telemetry, history, and response resources…</div>}
       {error && !disasterIntelligence && (
-        <div role="status" className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
+        <div role="status" className=" border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
           Data is temporarily unavailable. Retry after sometime.
         </div>
       )}
@@ -165,10 +161,10 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
       </div>
 
       {hasAssessment && localHeadline && (
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className=" border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900"><Radar size={16} className="text-blue-700" /> Regional warning vs local impact</h2>
-            <span className={`inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs font-bold ${regionalChipTone}`}>
+            <span className={`inline-flex items-center gap-2  border px-2.5 py-1 text-xs font-bold ${regionalChipTone}`}>
               {regionalChipText}
             </span>
           </div>
@@ -177,9 +173,9 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
             <p className="mt-1 text-xs leading-relaxed text-slate-600">{localHeadline.reason}</p>
           )}
           {localImpact ? (
-            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div className="mt-3  border border-slate-200 bg-slate-50 p-3">
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className={`inline-flex items-center rounded-md border px-2 py-1 font-bold ${localImpact.verdict === 'inside_footprint' ? 'border-rose-200 bg-rose-50 text-rose-800' : localImpact.verdict === 'outside_footprint' ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-slate-200 bg-white text-slate-600'}`}>
+                <span className={`inline-flex items-center  border px-2 py-1 font-bold ${localImpact.verdict === 'inside_footprint' ? 'border-rose-200 bg-rose-50 text-rose-800' : localImpact.verdict === 'outside_footprint' ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-slate-200 bg-white text-slate-600'}`}>
                   Local: {verdictLabel(localImpact.verdict)}
                 </span>
               </div>
@@ -187,7 +183,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
                 <p key={`${index}-${line.slice(0, 24)}`} className="mt-1.5 text-xs leading-relaxed text-slate-600">{line}</p>
               ))}
               {localImpact.verdict === 'outside_footprint' && (
-                <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs leading-relaxed text-amber-900">
+                <p className="mt-2  border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs leading-relaxed text-amber-900">
                   Outside the modeled hazard footprint — this refers to the modeled footprint and does not rule out other hazards. Regional warnings still apply.
                 </p>
               )}
@@ -205,9 +201,9 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
           {warnings.length > 0 && (
             <ul className="mt-3 space-y-2">
               {warnings.map((warning, index) => (
-                <li key={`${warning.event_id ?? warning.event_name ?? 'warning'}-${index}`} className="rounded-lg border border-slate-200 p-3">
+                <li key={`${warning.event_id ?? warning.event_name ?? 'warning'}-${index}`} className=" border border-slate-200 p-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold ${riskTone[warning.alert_level ?? ''] ?? riskTone.UNKNOWN}`}>
+                    <span className={`inline-flex items-center  border px-2 py-0.5 text-[11px] font-bold ${riskTone[warning.alert_level ?? ''] ?? riskTone.UNKNOWN}`}>
                       {warning.alert_level ?? 'Unrated'}
                     </span>
                     <strong className="text-sm text-slate-900">{warning.event_name ?? 'Unnamed system'}</strong>
@@ -231,7 +227,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
         </section>
       )}
       {hasAssessment && (
-        <details className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <details className=" border border-slate-200 bg-white p-4 shadow-sm">
           <summary className="cursor-pointer text-sm font-bold text-slate-900">Technical assessment details</summary>
           <div className="mt-3 space-y-4">
             <div>
@@ -271,7 +267,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
                 <h3 className="text-xs font-bold text-slate-800">Warning validity and CAP detail</h3>
                 <ul className="mt-2 space-y-2">
                   {warnings.map((warning, index) => (
-                    <li key={`${warning.event_id ?? warning.event_name ?? 'warning'}-${index}`} className="rounded-lg border border-slate-200 p-3">
+                    <li key={`${warning.event_id ?? warning.event_name ?? 'warning'}-${index}`} className=" border border-slate-200 p-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <strong className="text-xs text-slate-900">{warning.event_name ?? 'Unnamed system'}</strong>
                         {warning.footprint?.cap_severity && <span className="text-[11px] text-slate-500">CAP: {warning.footprint.cap_severity}</span>}
@@ -290,8 +286,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
           </div>
         </details>
       )}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm xl:col-span-8">
+        <section className="overflow-hidden  border border-slate-200 bg-white shadow-sm xl:col-span-8">
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
             <h2 className="flex items-center gap-2 text-sm font-bold text-slate-800"><Map size={16} className="text-blue-700" /> Response risk zones</h2>
             <span className="text-[11px] text-slate-500">{zones.length} mapped</span>
@@ -310,7 +305,7 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
           />
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm xl:col-span-4">
+        <section className=" border border-slate-200 bg-white p-4 shadow-sm xl:col-span-4">
           <h2 className="text-sm font-bold text-slate-900">Assessment details</h2>
           <p className="mt-1 text-xs leading-relaxed text-slate-500">{assessment?.note ?? 'Risk assessment will appear when the API responds.'}</p>
           <div className="mt-4 space-y-2">
@@ -318,17 +313,17 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
             <Fact label="Telemetry status" value={dataQuality?.telemetry_status ?? (isLoading ? 'Loading' : 'Unavailable')} />
             <Fact label="Historical analog" value={availableIntelligence?.historical_context.primary_analog ?? 'Unavailable'} />
             {assessment?.factors.map((factor, index) => (
-              <div key={`${factor}-${index}`} className="flex gap-2 rounded-md bg-slate-50 p-2 text-xs leading-relaxed text-slate-700">
+              <div key={`${factor}-${index}`} className="flex gap-2  bg-slate-50 p-2 text-xs leading-relaxed text-slate-700">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600" />{factor}
               </div>
             ))}
             {assessment && dataQuality?.telemetry_status === 'AVAILABLE' && assessment.factors.length === 0 && (
-              <div className="flex gap-2 rounded-md bg-emerald-50 p-2 text-xs text-emerald-800">
+              <div className="flex gap-2  bg-emerald-50 p-2 text-xs text-emerald-800">
                 <CheckCircle2 size={14} className="shrink-0" />No elevated screening factors were returned.
               </div>
             )}
             {hasAssessment && dataQuality?.telemetry_status !== 'AVAILABLE' && !assessment?.warning_floor && (
-              <div className="flex gap-2 rounded-md bg-amber-50 p-2 text-xs text-amber-900">
+              <div className="flex gap-2  bg-amber-50 p-2 text-xs text-amber-900">
                 <CircleHelp size={14} className="shrink-0" />Risk factors cannot be assessed without current telemetry.
               </div>
             )}
@@ -339,14 +334,13 @@ export const ThreatDetectionModeView: React.FC<ThreatDetectionModeViewProps> = (
             {analysis?.reasoning_context.length ? <p className="mt-2 text-[11px] text-slate-500">Evidence: {analysis.reasoning_context.join(' · ')}</p> : null}
           </div>
         </section>
-      </div>
     </div>
   );
 };
 
 function Metric({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: string; detail: string }) {
   return (
-    <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+    <div className="min-w-0  border border-slate-200 bg-white p-3 shadow-sm">
       <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-500">{icon}{label}</div>
       <div className="mt-2 truncate text-lg font-black text-slate-900">{value}</div>
       <div className="mt-1 truncate text-[10px] text-slate-500" title={detail}>{detail}</div>

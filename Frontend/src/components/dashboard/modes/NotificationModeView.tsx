@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowLeft, MapPin, Radio, RotateCcw, Search, Wifi, WifiOff } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, BellRing, MapPin, Radio, RotateCcw, Search, Wifi, WifiOff } from 'lucide-react';
 import { AlertConnectionState, ClimateAlert } from '@/services/climateAlerts';
 
 interface NotificationProps {
@@ -63,11 +63,11 @@ export function Notification({
   const selectedAlert = filteredAlerts.find((alert) => alert.id === selectedId) ?? null;
 
   return (
-    <section className="space-y-4" aria-label="Climate alerts">
+    <section className="space-y-4 " aria-label="Climate alerts">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50" aria-label="Back to dashboard">
-            <ArrowLeft size={17} />
+          <button  className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50" aria-label="Back to dashboard">
+            <BellRing size={17} />
           </button>
           <div>
             <h1 className="text-lg font-bold text-slate-900">Climate alerts</h1>

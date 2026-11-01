@@ -50,30 +50,9 @@ export const HistoricalDisastersView: React.FC<HistoricalDisastersViewProps> = (
 
   return (
     <div className="space-y-4">
-      {onBackToOverview && (
-        <button
-          type="button"
-          onClick={onBackToOverview}
-          className="inline-flex items-center gap-1.5 border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
-        >
-          <ArrowLeft size={14} className="text-[#18365b]" /> Back to overview
-        </button>
-      )}
+     
 
-      <section className="border border-slate-300 bg-[#18365b] px-4 py-3 text-white shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/30 bg-white/10">
-            <History size={20} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-200">
-              Past incidents and records
-            </p>
-            <h1 className="mt-0.5 text-lg font-bold leading-6 sm:text-xl">Historical Disasters</h1>
-            <p className="mt-1 text-xs text-blue-100">{regionName} · Data returned by the history API</p>
-          </div>
-        </div>
-      </section>
+      
 
       <section aria-label="History filters" className="border border-slate-300 bg-white px-4 py-3 shadow-sm">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">

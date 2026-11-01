@@ -185,9 +185,9 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
             </div>
           )}
           {isOverviewMode && (
-            <section className="bg-white border border-slate-200/90 rounded-2xl p-4 mb-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <section className="bg-white border border-slate-200/90  p-4 mb-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="w-10 h-10 rounded-xl border bg-blue-50 border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10  border bg-blue-50 border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
                   <MapPin size={22} />
                 </div>
                 <div className="min-w-0">
@@ -200,7 +200,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
                 </div>
               </div>
               <div className="flex w-full min-w-0 flex-col gap-2 text-xs md:w-auto md:flex-row md:gap-3 shrink-0 self-start md:self-center">
-                <div className="flex min-w-0 items-center gap-2.5 px-3 py-1.5 rounded-xl border bg-slate-50 border-slate-200">
+                <div className="flex min-w-0 items-center gap-2.5 px-3 py-1.5  border bg-slate-50 border-slate-200">
                   <CloudRain size={20} className="text-blue-600 shrink-0" />
                   <div>
                     <div className="text-[10px] text-slate-500 font-medium">{currentMode === 'simulator' && dashboard.simulationTier ? 'Scenario Telemetry' : 'Current Conditions'}</div>
@@ -218,7 +218,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
                     </div>
                   </div>
                 </div>
-                <div className="flex min-w-0 items-center gap-2.5 px-3 py-1.5 rounded-xl border bg-slate-50 border-slate-200">
+                <div className="flex min-w-0 items-center gap-2.5 px-3 py-1.5  border bg-slate-50 border-slate-200">
                   <CloudRain size={20} className="text-cyan-600 shrink-0" />
                   <div>
                     <div className="text-[10px] text-slate-500 font-medium">Next 7 Days (avg.)</div>
