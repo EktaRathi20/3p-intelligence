@@ -7,3 +7,4 @@ python-socketio
 twilio
 pyjwt
 h2o
+reportlab

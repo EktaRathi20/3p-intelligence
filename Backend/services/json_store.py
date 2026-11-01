@@ -42,6 +42,11 @@ COLLECTION_FILES = {
     "settings": "settings.json",
     "tasks": "tasks.json",
     "notifications": "notifications.json",
+    "assessments": "assessments.json",
+    "assessment_feedback": "assessment_feedback.json",
+    "damage_assessments": "damage_assessments.json",
+    "expenses": "expenses.json",
+    "evidence_attachments": "evidence_attachments.json",
 }
 
 _ID_ALPHABET = string.ascii_letters + string.digits

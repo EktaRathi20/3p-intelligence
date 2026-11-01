@@ -1,0 +1,1526 @@
+{
+  "2rO185tKDUCbaw8wk0Rl": {
+    "aiAssessment": {
+      "affectedAreas": [
+        "Jagdalpur, Chhattisgarh",
+        "32Q2+C53, MPM Hospital Rd, Housing Board Colony, Dharampura-01, Jagdalpur, Chhattisgarh 494001, India"
+      ],
+      "disclaimer": "Preliminary planning estimates generated from available local data with stated assumptions. Not an official approval, eligibility decision, insurance decision, or payment instruction. A Role 4 officer must review and decide.",
+      "engineVersion": "assess-engine/1.0",
+      "evidenceExcerpts": [],
+      "evidenceSummary": {
+        "gaps": [
+          "No field reports exist for this region yet."
+        ],
+        "peopleAssistedSum": 0,
+        "reportCount": 0,
+        "submittedTaskCount": 1,
+        "taskCount": 1,
+        "verifiedFeedbackCount": 0
+      },
+      "figures": [
+        {
+          "assumptions": [],
+          "calculation": "No household observation and no field-report assisted counts; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide householdsAffected or collect field reports to enable this estimate.",
+          "key": "affected_people",
+          "label": "Estimated affected people",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "people",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No housesDamaged/housesDestroyed observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide house damage counts to enable this estimate.",
+          "key": "housing_loss_inr",
+          "label": "Housing damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No cropHectares observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide affected crop hectares to enable this estimate.",
+          "key": "crop_loss_inr",
+          "label": "Crop damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No livestockLost observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide livestock losses to enable this estimate.",
+          "key": "livestock_loss_inr",
+          "label": "Livestock loss",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No infraSites/roadsKm observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide damaged sites/road length to enable this estimate.",
+          "key": "infrastructure_loss_inr",
+          "label": "Infrastructure damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Excludes damage lines with unknown values; true total may be higher.",
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use."
+          ],
+          "calculation": "Housing damage unknown + Crop damage unknown + Livestock loss unknown + Infrastructure damage unknown (nothing to sum).",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Arithmetic sum of the damage lines above; inherits their uncertainties.",
+          "key": "total_damage_inr",
+          "label": "Total estimated damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes one task-day of effort per submitted task."
+          ],
+          "calculation": "1 submitted task(s) x Rs.25,000/task-day = Rs.25,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "A rough activity proxy. Officer-observed spend should replace it.",
+          "key": "preparation_cost_inr",
+          "label": "Preparation expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": 25000.0
+        },
+        {
+          "assumptions": [],
+          "calculation": "Damage total unknown and no observed spend; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide damage inputs or observed spend.",
+          "key": "recovery_cost_inr",
+          "label": "Recovery expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "NOT an eligibility decision."
+          ],
+          "calculation": "Damage total unknown; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide damage inputs to enable this envelope.",
+          "key": "indicative_relief_inr",
+          "label": "Indicative relief envelope (planning only)",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        }
+      ],
+      "generatedAt": "2026-10-31T17:28:02.864315+00:00",
+      "hazardId": "cyclone",
+      "hazardName": "Cyclone",
+      "insuranceNotes": "No insurance policy, payout, or transaction ledger is connected to this system. Parametric trigger status must be evaluated separately from disaster intelligence for this region and hazard, and any claim requires authorized insurer review. This assessment makes no insurance decision.",
+      "narrative": "Preliminary assessment for Cyclone affecting Jagdalpur (region key IN-CT-JGD). Estimated affected people: unknown. Total estimated damage: unknown. Evidence: 1 task(s), 0 field report(s). Gaps: No field reports exist for this region yet. All figures are planning estimates with stated assumptions; none are official decisions.",
+      "narrativeSource": "deterministic-template (AI unavailable)",
+      "observedInputs": {},
+      "officerNotes": "",
+      "overallConfidence": "Low",
+      "reasoning": [
+        "Affected people unknown: no household observation and no assisted counts.",
+        "Housing loss unknown: no house damage observation.",
+        "Crop loss unknown: no crop-hectare observation.",
+        "Livestock loss unknown: no observation.",
+        "Infrastructure loss unknown: no observation.",
+        "Total damage sums 0 of 4 damage lines. Missing: Housing damage, Crop damage, Livestock loss, Infrastructure damage.",
+        "Preparation cost modelled from 1 submitted task(s).",
+        "Recovery cost unknown: damage total unknown.",
+        "Relief envelope unknown: damage total unknown."
+      ],
+      "regionDetail": {
+        "code": "IN-CT-JGD",
+        "country": "India",
+        "state": "Chhattisgarh"
+      },
+      "regionKey": "IN-CT-JGD",
+      "regionName": "Jagdalpur"
+    },
+    "approvalHistory": [
+      {
+        "action": "generated",
+        "at": "2026-10-31T17:28:02.864426+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "AI assessment generated for officer review.",
+        "version": 1
+      },
+      {
+        "action": "accepted",
+        "at": "2026-10-31T17:53:25.755152+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "Test",
+        "version": 1
+      },
+      {
+        "action": "report_generated",
+        "at": "2026-10-31T17:53:28.071867+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "First official report generated on download.",
+        "version": 1
+      }
+    ],
+    "approvedSnapshot": {
+      "approvedAt": "2026-10-31T17:53:25.755152+00:00",
+      "figures": [
+        {
+          "assumptions": [],
+          "calculation": "No household observation and no field-report assisted counts; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Provide householdsAffected or collect field reports to enable this estimate.",
+          "key": "affected_people",
+          "label": "Estimated affected people",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "people",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No housesDamaged/housesDestroyed observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Provide house damage counts to enable this estimate.",
+          "key": "housing_loss_inr",
+          "label": "Housing damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No cropHectares observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Provide affected crop hectares to enable this estimate.",
+          "key": "crop_loss_inr",
+          "label": "Crop damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No livestockLost observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Provide livestock losses to enable this estimate.",
+          "key": "livestock_loss_inr",
+          "label": "Livestock loss",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No infraSites/roadsKm observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Provide damaged sites/road length to enable this estimate.",
+          "key": "infrastructure_loss_inr",
+          "label": "Infrastructure damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Excludes damage lines with unknown values; true total may be higher.",
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use."
+          ],
+          "calculation": "Housing damage unknown + Crop damage unknown + Livestock loss unknown + Infrastructure damage unknown (nothing to sum).",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Arithmetic sum of the damage lines above; inherits their uncertainties.",
+          "key": "total_damage_inr",
+          "label": "Total estimated damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes one task-day of effort per submitted task."
+          ],
+          "calculation": "1 submitted task(s) x Rs.25,000/task-day = Rs.25,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 25000.0,
+          "edited": false,
+          "explanation": "A rough activity proxy. Officer-observed spend should replace it.",
+          "key": "preparation_cost_inr",
+          "label": "Preparation expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": 25000.0
+        },
+        {
+          "assumptions": [],
+          "calculation": "Damage total unknown and no observed spend; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Provide damage inputs or observed spend.",
+          "key": "recovery_cost_inr",
+          "label": "Recovery expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "NOT an eligibility decision."
+          ],
+          "calculation": "Damage total unknown; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "Provide damage inputs to enable this envelope.",
+          "key": "indicative_relief_inr",
+          "label": "Indicative relief envelope (planning only)",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-CT-JGD'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "1 task(s) in region, 1 submitted",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:27:49.087890+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        }
+      ],
+      "overridden": [],
+      "totals": {
+        "affectedPeople": null,
+        "damageTotalDerived": null,
+        "damageTotalInr": null,
+        "damageTotalOverride": false,
+        "grandTotalInr": 25000.0,
+        "preparationInr": 25000.0,
+        "recoveryInr": null,
+        "reliefEnvelopeInr": null
+      },
+      "version": 1
+    },
+    "createdAt": "2026-10-31T17:28:02.864426+00:00",
+    "createdById": "user_4",
+    "createdByName": "Ananya Patel",
+    "decision": {
+      "action": "accepted",
+      "at": "2026-10-31T17:53:25.755152+00:00",
+      "byId": "user_4",
+      "byName": "Ananya Patel",
+      "reason": "Test",
+      "version": 1
+    },
+    "officialEdits": [],
+    "publicId": "ASM-20261031-56RF",
+    "reportVersions": [
+      {
+        "assessmentVersion": 1,
+        "byteSize": 10126,
+        "filename": "ASM-20261031-56RF_report_v1.pdf",
+        "generatedAt": "2026-10-31T17:53:28.071867+00:00",
+        "generatedById": "user_4",
+        "generatedByName": "Ananya Patel",
+        "reason": "First official report generated on download.",
+        "sha256": "84b2297f542038aa1702326872496f0eb19a98b641e19217111381571e2a61e9",
+        "version": 1
+      }
+    ],
+    "status": "approved",
+    "updatedAt": "2026-10-31T17:53:28.071867+00:00",
+    "version": 1,
+    "versions": [
+      {
+        "action": "generated",
+        "at": "2026-10-31T17:28:02.864426+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "AI assessment generated for officer review.",
+        "version": 1
+      }
+    ]
+  },
+  "2yyeaCkgMoNTLdYDIgmb": {
+    "aiAssessment": {
+      "affectedAreas": [
+        "Angul, Odisha"
+      ],
+      "disclaimer": "Preliminary planning estimates generated from available local data with stated assumptions. Not an official approval, eligibility decision, insurance decision, or payment instruction. A Role 4 officer must review and decide.",
+      "engineVersion": "assess-engine/1.0",
+      "evidenceExcerpts": [],
+      "evidenceSummary": {
+        "gaps": [
+          "No operational tasks exist for this region yet.",
+          "No field reports exist for this region yet."
+        ],
+        "peopleAssistedSum": 0,
+        "reportCount": 0,
+        "submittedTaskCount": 0,
+        "taskCount": 0,
+        "verifiedFeedbackCount": 0
+      },
+      "figures": [
+        {
+          "assumptions": [],
+          "calculation": "No household observation and no field-report assisted counts; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide householdsAffected or collect field reports to enable this estimate.",
+          "key": "affected_people",
+          "label": "Estimated affected people",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "people",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No housesDamaged/housesDestroyed observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide house damage counts to enable this estimate.",
+          "key": "housing_loss_inr",
+          "label": "Housing damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No cropHectares observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide affected crop hectares to enable this estimate.",
+          "key": "crop_loss_inr",
+          "label": "Crop damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No livestockLost observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide livestock losses to enable this estimate.",
+          "key": "livestock_loss_inr",
+          "label": "Livestock loss",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "No infraSites/roadsKm observation; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide damaged sites/road length to enable this estimate.",
+          "key": "infrastructure_loss_inr",
+          "label": "Infrastructure damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Excludes damage lines with unknown values; true total may be higher.",
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use."
+          ],
+          "calculation": "Housing damage unknown + Crop damage unknown + Livestock loss unknown + Infrastructure damage unknown (nothing to sum).",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Arithmetic sum of the damage lines above; inherits their uncertainties.",
+          "key": "total_damage_inr",
+          "label": "Total estimated damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes one task-day of effort per submitted task."
+          ],
+          "calculation": "No task activity and no observed spend; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "A rough activity proxy. Officer-observed spend should replace it.",
+          "key": "preparation_cost_inr",
+          "label": "Preparation expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [],
+          "calculation": "Damage total unknown and no observed spend; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide damage inputs or observed spend.",
+          "key": "recovery_cost_inr",
+          "label": "Recovery expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "NOT an eligibility decision."
+          ],
+          "calculation": "Damage total unknown; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Provide damage inputs to enable this envelope.",
+          "key": "indicative_relief_inr",
+          "label": "Indicative relief envelope (planning only)",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total",
+              "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+              "name": "field reports"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        }
+      ],
+      "generatedAt": "2026-10-31T17:23:24.442101+00:00",
+      "hazardId": "cyclone",
+      "hazardName": "Cyclone",
+      "insuranceNotes": "No insurance policy, payout, or transaction ledger is connected to this system. Parametric trigger status must be evaluated separately from disaster intelligence for this region and hazard, and any claim requires authorized insurer review. This assessment makes no insurance decision.",
+      "narrative": "Preliminary assessment for Cyclone affecting Angul (region key IN-OR-NGL). Estimated affected people: unknown. Total estimated damage: unknown. Evidence: 0 task(s), 0 field report(s). Gaps: No operational tasks exist for this region yet. No field reports exist for this region yet. All figures are planning estimates with stated assumptions; none are official decisions.",
+      "narrativeSource": "deterministic-template (AI unavailable)",
+      "observedInputs": {},
+      "officerNotes": "",
+      "overallConfidence": "Low",
+      "reasoning": [
+        "Affected people unknown: no household observation and no assisted counts.",
+        "Housing loss unknown: no house damage observation.",
+        "Crop loss unknown: no crop-hectare observation.",
+        "Livestock loss unknown: no observation.",
+        "Infrastructure loss unknown: no observation.",
+        "Total damage sums 0 of 4 damage lines. Missing: Housing damage, Crop damage, Livestock loss, Infrastructure damage.",
+        "Preparation cost unknown: no task activity and no observation.",
+        "Recovery cost unknown: damage total unknown.",
+        "Relief envelope unknown: damage total unknown."
+      ],
+      "regionDetail": {
+        "code": "IN-OR-NGL",
+        "country": "India",
+        "state": "Odisha"
+      },
+      "regionKey": "IN-OR-NGL",
+      "regionName": "Angul"
+    },
+    "approvalHistory": [
+      {
+        "action": "generated",
+        "at": "2026-10-31T17:23:24.442170+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "AI assessment generated for officer review.",
+        "version": 1
+      },
+      {
+        "action": "edited",
+        "at": "2026-10-31T17:54:07.036036+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "test",
+        "version": 2
+      },
+      {
+        "action": "rejected",
+        "at": "2026-10-31T17:55:09.110029+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "Test fail",
+        "version": 2
+      }
+    ],
+    "approvedSnapshot": null,
+    "createdAt": "2026-10-31T17:23:24.442170+00:00",
+    "createdById": "user_4",
+    "createdByName": "Ananya Patel",
+    "decision": {
+      "action": "rejected",
+      "at": "2026-10-31T17:55:09.110029+00:00",
+      "byId": "user_4",
+      "byName": "Ananya Patel",
+      "reason": "Test fail",
+      "version": 2
+    },
+    "officialEdits": [
+      {
+        "aiValue": null,
+        "at": "2026-10-31T17:54:07.036036+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "label": "Estimated affected people",
+        "newValue": 1.0,
+        "oldValue": null,
+        "path": "figures.affected_people",
+        "reason": "test"
+      }
+    ],
+    "publicId": "ASM-20261031-1VLJ",
+    "reportVersions": [],
+    "status": "rejected",
+    "updatedAt": "2026-10-31T17:55:09.110029+00:00",
+    "version": 2,
+    "versions": [
+      {
+        "action": "generated",
+        "at": "2026-10-31T17:23:24.442170+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "AI assessment generated for officer review.",
+        "version": 1
+      },
+      {
+        "action": "edited",
+        "at": "2026-10-31T17:54:07.036036+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "figuresSnapshot": [
+          {
+            "assumptions": [],
+            "calculation": "No household observation and no field-report assisted counts; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": 1.0,
+            "edited": true,
+            "explanation": "Provide householdsAffected or collect field reports to enable this estimate.",
+            "key": "affected_people",
+            "label": "Estimated affected people",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "people",
+            "value": null
+          },
+          {
+            "assumptions": [],
+            "calculation": "No housesDamaged/housesDestroyed observation; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "Provide house damage counts to enable this estimate.",
+            "key": "housing_loss_inr",
+            "label": "Housing damage",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          },
+          {
+            "assumptions": [],
+            "calculation": "No cropHectares observation; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "Provide affected crop hectares to enable this estimate.",
+            "key": "crop_loss_inr",
+            "label": "Crop damage",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          },
+          {
+            "assumptions": [],
+            "calculation": "No livestockLost observation; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "Provide livestock losses to enable this estimate.",
+            "key": "livestock_loss_inr",
+            "label": "Livestock loss",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          },
+          {
+            "assumptions": [],
+            "calculation": "No infraSites/roadsKm observation; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "Provide damaged sites/road length to enable this estimate.",
+            "key": "infrastructure_loss_inr",
+            "label": "Infrastructure damage",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          },
+          {
+            "assumptions": [
+              "Excludes damage lines with unknown values; true total may be higher.",
+              "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use."
+            ],
+            "calculation": "Housing damage unknown + Crop damage unknown + Livestock loss unknown + Infrastructure damage unknown (nothing to sum).",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "Arithmetic sum of the damage lines above; inherits their uncertainties.",
+            "key": "total_damage_inr",
+            "label": "Total estimated damage",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          },
+          {
+            "assumptions": [
+              "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+              "Assumes one task-day of effort per submitted task."
+            ],
+            "calculation": "No task activity and no observed spend; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "A rough activity proxy. Officer-observed spend should replace it.",
+            "key": "preparation_cost_inr",
+            "label": "Preparation expenses",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          },
+          {
+            "assumptions": [],
+            "calculation": "Damage total unknown and no observed spend; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "Provide damage inputs or observed spend.",
+            "key": "recovery_cost_inr",
+            "label": "Recovery expenses",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          },
+          {
+            "assumptions": [
+              "NOT an eligibility decision."
+            ],
+            "calculation": "Damage total unknown; cannot compute.",
+            "calibratedFrom": null,
+            "confidence": "Low",
+            "currentValue": null,
+            "edited": false,
+            "explanation": "Provide damage inputs to enable this envelope.",
+            "key": "indicative_relief_inr",
+            "label": "Indicative relief envelope (planning only)",
+            "sources": [
+              {
+                "detail": "Region record for 'IN-OR-NGL'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "regions.json"
+              },
+              {
+                "detail": "Hazard record for 'cyclone'",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "hazards.json"
+              },
+              {
+                "detail": "0 task(s) in region, 0 submitted",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "tasks.json"
+              },
+              {
+                "detail": "0 report(s), 0 people assisted in total",
+                "fetchedAt": "2026-10-31T17:23:08.975020+00:00",
+                "name": "field reports"
+              }
+            ],
+            "unit": "INR",
+            "value": null
+          }
+        ],
+        "reason": "1 correction(s) by Ananya Patel.",
+        "totalsSnapshot": {
+          "affectedPeople": 1.0,
+          "damageTotalDerived": null,
+          "damageTotalInr": null,
+          "damageTotalOverride": false,
+          "grandTotalInr": null,
+          "preparationInr": null,
+          "recoveryInr": null,
+          "reliefEnvelopeInr": null
+        },
+        "version": 2
+      }
+    ]
+  }
+}

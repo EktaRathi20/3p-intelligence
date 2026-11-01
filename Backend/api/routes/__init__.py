@@ -13,6 +13,10 @@ from api.routes.roles_users import router as roles_users_router
 from api.routes.auth import router as auth_router
 from api.routes.tasks import router as tasks_router
 from api.routes.notifications import router as notifications_router
+from api.routes.assessments import router as assessments_router
+from api.routes.damage_assessments import router as damage_assessments_router
+from api.routes.expenses import router as expenses_router
+from api.routes.evidence import router as evidence_router
 
 router = APIRouter()
 router.include_router(data_router)
@@ -25,3 +29,7 @@ router.include_router(roles_users_router)
 router.include_router(auth_router)
 router.include_router(tasks_router)
 router.include_router(notifications_router)
+router.include_router(assessments_router)
+router.include_router(damage_assessments_router)
+router.include_router(expenses_router)
+router.include_router(evidence_router)

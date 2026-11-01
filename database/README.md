@@ -16,6 +16,11 @@ id; the backend injects `id` on read, matching the previous API shapes).
 | `settings.json` | settings | `regionManagement` and `geoSync` records |
 | `tasks.json` | tasks | Operational tasks assigned by Role 2 to Role 3 (created via the API) |
 | `notifications.json` | notifications | Operational notifications from Role 2 to field teams (created via the API) |
+| `assessments.json` | assessments | Role 4 disaster assessment, cost & compensation records (created via the API) |
+| `assessment_feedback.json` | assessment_feedback | Structured officer corrections used for verified learning (created via the API) |
+| `damage_assessments.json` | damage_assessments | Per-region-per-hazard observed damage counts from officers (created via the API; summed by the engine) |
+| `expenses.json` | expenses | Preparedness + recovery spend records with category/amount/receipt refs (created via the API; observed spend beats modelled proxies) |
+| `evidence_attachments.json` | evidence_attachments | Photo evidence linked to damage/task/assessment/expense records (created via the API; ≤5 images, image/* only, ≤8 MB each) |
 
 ## Notes
 

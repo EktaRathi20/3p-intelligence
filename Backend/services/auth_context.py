@@ -91,3 +91,27 @@ def is_role_3(user: dict) -> bool:
     if str(user.get("roleId") or "").strip().lower() == "role_3":
         return True
     return "field operations officer" in str(user.get("roleName") or "").lower()
+
+
+def is_role_1(user: dict) -> bool:
+    """True when the authenticated user is a Disaster Assessment Officer."""
+    if user.get("roleLevel") == 1:
+        return True
+    if str(user.get("roleId") or "").strip().lower() == "role_1":
+        return True
+    return "disaster assessment" in str(user.get("roleName") or "").lower()
+
+
+def is_role_4(user: dict) -> bool:
+    """True when the authenticated user is an Insurance Recovery Officer."""
+    if user.get("roleLevel") == 4:
+        return True
+    if str(user.get("roleId") or "").strip().lower() == "role_4":
+        return True
+    name = str(user.get("roleName") or "").lower()
+    return "insurance recovery" in name or "recovery officer" in name
+
+
+def can_review_assessments(user: dict) -> bool:
+    """Reads for Role 1 oversight and Role 4 ownership; writes are Role 4 only."""
+    return is_role_4(user) or is_role_1(user)

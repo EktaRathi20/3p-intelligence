@@ -1,0 +1,20 @@
+{
+  "hf6cvoMCav2AOeEWkJTM": {
+    "aiValue": null,
+    "assessmentId": "2yyeaCkgMoNTLdYDIgmb",
+    "assessmentPublicId": "ASM-20261031-1VLJ",
+    "at": "2026-10-31T17:54:07.036036+00:00",
+    "category": "coverage",
+    "correctedValue": 1.0,
+    "deltaPct": null,
+    "engineVersion": "assess-engine/1.0",
+    "hazardId": "cyclone",
+    "label": "Estimated affected people",
+    "officerId": "user_4",
+    "officerName": "Ananya Patel",
+    "path": "figures.affected_people",
+    "reason": "test",
+    "regionKey": "IN-OR-NGL",
+    "status": "unverified"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "HQ0vbPwBJvdr8faNDlLX": {
+    "createdAt": "2026-10-31T17:54:51.570960+00:00",
+    "createdById": "user_4",
+    "createdByName": "Ananya Patel",
+    "cropHectares": 1.0,
+    "hazardId": "cyclone",
+    "householdsAffected": 1,
+    "housesDamaged": 1,
+    "housesDestroyed": 1,
+    "infraSites": 1,
+    "livestockLost": 11,
+    "locationNote": "Test",
+    "notes": "Test",
+    "regionKey": "IN-OR-NGL",
+    "roadsKm": 1.0,
+    "updatedAt": "2026-10-31T17:54:51.570960+00:00"
+  }
+}
