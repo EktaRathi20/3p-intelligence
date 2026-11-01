@@ -1,6 +1,7 @@
 import os
 import requests
 import math
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from dotenv import load_dotenv
 from ingestion_layer.cache import load_json_cache, save_json_cache
@@ -78,7 +79,8 @@ def fetch_critical_infrastructure(region_key="vizag", radius_meters=5000):
         "X-Goog-FieldMask": "places.displayName,places.location,places.formattedAddress"
     }
 
-    def add_results(kind, url, payload):
+    def fetch_results(kind, url, payload):
+        """Query one Places endpoint; returns (items, error_message)."""
         try:
             response = requests.post(url, json=payload, headers=headers, timeout=15)
             if not response.ok:
@@ -86,12 +88,12 @@ def fetch_critical_infrastructure(region_key="vizag", radius_meters=5000):
                     provider_message = response.json().get("error", {}).get("message")
                 except (ValueError, AttributeError):
                     provider_message = None
-                facilities["source_errors"][kind] = (
+                return [], (
                     f"Google Places returned HTTP {response.status_code}: "
                     f"{provider_message or response.reason}"
                 )
-                return
 
+            items = []
             for place in response.json().get("places", []):
                 location = place.get("location", {})
                 latitude = location.get("latitude")
@@ -100,14 +102,15 @@ def fetch_critical_infrastructure(region_key="vizag", radius_meters=5000):
                     continue
                 if _distance_meters(coords["lat"], coords["lon"], latitude, longitude) > radius_meters:
                     continue
-                facilities[kind].append({
+                items.append({
                     "name": place.get("displayName", {}).get("text"),
                     "address": place.get("formattedAddress"),
                     "lat": latitude,
                     "lon": longitude,
                 })
+            return items, None
         except (requests.RequestException, ValueError) as error:
-            facilities["source_errors"][kind] = f"Google Places request failed: {error}"
+            return [], f"Google Places request failed: {error}"
 
     hospital_payload = {
         "includedTypes": ["hospital"],
@@ -119,7 +122,6 @@ def fetch_critical_infrastructure(region_key="vizag", radius_meters=5000):
             }
         },
     }
-    add_results("hospitals", "https://places.googleapis.com/v1/places:searchNearby", hospital_payload)
 
     shelter_payload = {
         "textQuery": f"cyclone emergency shelter community center near {REGION_DATA[region_key]['name']}",
@@ -131,7 +133,19 @@ def fetch_critical_infrastructure(region_key="vizag", radius_meters=5000):
         },
         "pageSize": 5,
     }
-    add_results("shelters", "https://places.googleapis.com/v1/places:searchText", shelter_payload)
+
+    # The two Places queries are independent: run them concurrently
+    # (each carries a 15s timeout) instead of serially.
+    queries = [
+        ("hospitals", "https://places.googleapis.com/v1/places:searchNearby", hospital_payload),
+        ("shelters", "https://places.googleapis.com/v1/places:searchText", shelter_payload),
+    ]
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda query: fetch_results(*query), queries))
+    for (kind, _url, _payload), (items, error) in zip(queries, results):
+        facilities[kind].extend(items)
+        if error is not None:
+            facilities["source_errors"][kind] = error
 
     _save_places(region_key, radius_meters, facilities)
     return facilities

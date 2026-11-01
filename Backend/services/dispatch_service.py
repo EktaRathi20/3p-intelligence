@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from ingestion_layer.index import run_ingestion
@@ -13,7 +14,8 @@ async def create_dispatch_response(query: str, region: str) -> dict:
 
     places_data = []
     try:
-        unified_data = run_ingestion(region)
+        # Blocking ingestion I/O must not run on the event loop.
+        unified_data = await asyncio.to_thread(run_ingestion, region)
         places = unified_data.get("places", {})
         if isinstance(places, dict):
             for place_type in ("hospitals", "shelters"):
@@ -58,7 +60,8 @@ async def create_dispatch_response(query: str, region: str) -> dict:
     """
 
     try:
-        parsed = client.generate_json(
+        parsed = await asyncio.to_thread(
+            client.generate_json,
             [{"role": "user", "content": prompt}],
             temperature=0.2,
         )

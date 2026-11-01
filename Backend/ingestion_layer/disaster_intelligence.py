@@ -1,8 +1,85 @@
+import asyncio
+import hashlib
 import json
-from datetime import datetime, timezone
+import time
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from ingestion_layer import hazard_model
+from ingestion_layer.cache import load_json_cache, save_json_cache
 from ingestion_layer.constant import REGION_DATA
+
+# AI advisory cache: identical backend evidence yields the same advisory
+# (generation temperature is near-deterministic), so a fingerprinted,
+# short-lived cache avoids a 10s-of-seconds LLM call on every request.
+AI_INSIGHTS_CACHE_TTL = timedelta(minutes=30)
+
+
+def _ai_fingerprint(ai_context):
+    """Fingerprint every evidence field the advisory is reasoned from."""
+    places = ai_context.get("places", {})
+    if not isinstance(places, dict):
+        places = {}
+    facility_names = sorted(
+        facility.get("name")
+        for group in (places.get("hospitals", []), places.get("shelters", []))
+        if isinstance(group, list)
+        for facility in group
+        if isinstance(facility, dict)
+    )
+    material = {
+        "telemetry": ai_context.get("current_telemetry"),
+        "ml_probability": (ai_context.get("ml_probability") or {}).get("probability"),
+        "active": [
+            (system.get("storm_id"), system.get("latest_observed_at"))
+            for system in ai_context.get("active_systems", [])
+            if isinstance(system, dict)
+        ],
+        "warnings": [
+            (
+                warning.get("event_id"),
+                warning.get("episode_id"),
+                warning.get("alert_level"),
+                warning.get("datemodified"),
+            )
+            for warning in ai_context.get("official_warnings", [])
+            if isinstance(warning, dict)
+        ],
+        "risk": ai_context.get("risk_assessment"),
+        "analogs": [
+            analog.get("matched_cyclone") or analog.get("event_name")
+            for analog in ai_context.get("historical_analogs", [])
+            if isinstance(analog, dict)
+        ],
+        "forecast": ai_context.get("forecast"),
+        "population": (ai_context.get("demography") or {}).get("total_population"),
+        "places": facility_names,
+    }
+    encoded = json.dumps(material, sort_keys=True, default=str)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _load_ai_insights(region_key, fingerprint):
+    return load_json_cache(
+        f"ai_insights_{region_key}.json",
+        AI_INSIGHTS_CACHE_TTL,
+        payload_key="insights",
+        region_key=region_key,
+        expected_metadata={"fingerprint": fingerprint},
+        validator=lambda insights: (
+            isinstance(insights, dict)
+            and isinstance(insights.get("recommended_tasks"), list)
+            and isinstance(insights.get("reasoning_context"), list)
+        ),
+    )
+
+
+def _save_ai_insights(region_key, fingerprint, insights):
+    save_json_cache(
+        f"ai_insights_{region_key}.json",
+        insights,
+        payload_key="insights",
+        metadata={"region_target": region_key, "fingerprint": fingerprint},
+    )
 from ingestion_layer.index import run_ingestion
 from ingestion_layer.signals import (
     build_model_features,
@@ -45,8 +122,14 @@ async def build_disaster_intelligence(region: str, client):
     # ---------------------------------------------------------
     ingestion_error = None
 
+    build_started = time.monotonic()
     try:
-        unified_data = run_ingestion(region_key)
+        # run_ingestion performs blocking network/file I/O. This coroutine
+        # runs on the server event loop, so offload it to a thread: awaiting
+        # it inline would freeze the loop and serialize every concurrent
+        # request (including fast local-only endpoints).
+        unified_data = await asyncio.to_thread(run_ingestion, region_key)
+        ingestion_seconds = time.monotonic() - build_started
 
         if not isinstance(unified_data, dict):
             raise RuntimeError(
@@ -55,6 +138,7 @@ async def build_disaster_intelligence(region: str, client):
 
     except Exception as error:
         ingestion_error = str(error)
+        ingestion_seconds = time.monotonic() - build_started
 
         print(
             f"[DISASTER INTELLIGENCE] "
@@ -771,7 +855,18 @@ async def build_disaster_intelligence(region: str, client):
     # 12. META = EXPLANATION / PREPARATION ASSISTANT
     # ---------------------------------------------------------
 
+    ai_started = time.monotonic()
+    ai_source = "unavailable"
+    ai_fingerprint = None
     if client is not None:
+        ai_fingerprint = _ai_fingerprint(ai_context)
+        cached_insights = _load_ai_insights(region_key, ai_fingerprint)
+        if cached_insights is not None:
+            tactical_insights = cached_insights
+            ai_source = "cache"
+
+    if client is not None and ai_source != "cache":
+        ai_source = "live"
 
         prompt = f"""
 You are an AI disaster-preparedness assistant.
@@ -823,7 +918,8 @@ do not pretend current hazard conditions are known.
 
         try:
 
-            parsed_ai = client.generate_json(
+            parsed_ai = await asyncio.to_thread(
+                client.generate_json,
                 [{"role": "user", "content": prompt}],
                 temperature=0.1,
             )
@@ -865,6 +961,8 @@ do not pretend current hazard conditions are known.
                         else []
                     ),
                 }
+                if ai_fingerprint is not None:
+                    _save_ai_insights(region_key, ai_fingerprint, tactical_insights)
 
         except (MetaClientError, RuntimeError, ValueError) as error:
 
@@ -889,6 +987,13 @@ do not pretend current hazard conditions are known.
     # 13. FINAL RESPONSE
     # ---------------------------------------------------------
 
+    print(
+        f"[DISASTER INTELLIGENCE] region={region_key} "
+        f"ingestion={ingestion_seconds:.1f}s "
+        f"ai={ai_source}:{time.monotonic() - ai_started:.1f}s "
+        f"total={time.monotonic() - build_started:.1f}s"
+    )
+
     return {
         "status": "success",
 
@@ -908,6 +1013,8 @@ do not pretend current hazard conditions are known.
             "telemetry_status": telemetry_data_status,
 
             "ingestion_error": ingestion_error,
+
+            "ai_source": ai_source,
 
             "telemetry_timestamp": telemetry_timestamp,
 

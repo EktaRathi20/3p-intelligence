@@ -73,6 +73,12 @@ def _download_tracks_by_region():
     first_season = now.year - 30
     recent_cutoff = now - timedelta(days=ACTIVE_SYSTEM_WINDOW_DAYS)
     max_observed_at = None
+    # Hoisted out of the row loop: region geometry never changes mid-parse.
+    region_items = list(REGION_COORDS.items())
+    region_radii = {
+        region_key: HISTORY_SEARCH_RADIUS_KM.get(region_key, 250)
+        for region_key in REGION_COORDS
+    }
 
     try:
         with requests.get(IBTRACS_CSV_URL, stream=True, timeout=(15, 120)) as response:
@@ -84,8 +90,6 @@ def _download_tracks_by_region():
             for row in reader:
                 try:
                     season = int(row.get("SEASON", ""))
-                    latitude = float(row.get("LAT", ""))
-                    longitude = float(row.get("LON", ""))
                 except (TypeError, ValueError):
                     continue
                 observed_at = _parse_observed_at(row.get("ISO_TIME", ""))
@@ -97,6 +101,12 @@ def _download_tracks_by_region():
                 if season < first_season:
                     continue
 
+                try:
+                    latitude = float(row.get("LAT", ""))
+                    longitude = float(row.get("LON", ""))
+                except (TypeError, ValueError):
+                    continue
+
                 name = (row.get("NAME") or "UNNAMED").strip()
                 storm_id = row.get("SID") or f"{season}:{name}"
                 wind_knots = _number(row.get("WMO_WIND"))
@@ -106,12 +116,11 @@ def _download_tracks_by_region():
                 observed_date = observed_at.date().isoformat()
                 is_recent = observed_at >= recent_cutoff
 
-                for region_key, coordinates in REGION_COORDS.items():
+                for region_key, coordinates in region_items:
                     distance = _distance_km(
                         coordinates["lat"], coordinates["lon"], latitude, longitude
                     )
-                    radius = HISTORY_SEARCH_RADIUS_KM.get(region_key, 250)
-                    if distance > radius:
+                    if distance > region_radii[region_key]:
                         continue
 
                     storm = events_by_region[region_key].setdefault(storm_id, {

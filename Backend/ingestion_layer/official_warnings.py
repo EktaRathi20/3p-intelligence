@@ -26,6 +26,7 @@ from __future__ import annotations
 import hashlib
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from typing import Any
@@ -406,6 +407,7 @@ def fetch_warnings_for_region(region_key: str = "vizag",
 
     warnings: list[dict[str, Any]] = []
     inactive_warnings: list[dict[str, Any]] = []
+    fresh_events: list[dict[str, Any]] = []
     for event in events:
         if not _event_matches_country(event, country_hint):
             continue
@@ -426,8 +428,17 @@ def fetch_warnings_for_region(region_key: str = "vizag",
                 "exclusion_reason": exclusion,
             })
             continue
+        fresh_events.append(event)
+    # CAP footprints are independent downloads: fetch them concurrently
+    # instead of serially (each carries a 30s timeout).
+    if fresh_events:
+        with ThreadPoolExecutor(max_workers=min(4, len(fresh_events))) as pool:
+            footprints = list(pool.map(fetch_footprint_for_event, fresh_events))
+    else:
+        footprints = []
+    for event, footprint in zip(fresh_events, footprints):
         warning = {**event, "matched_region": region_key}
-        warning["footprint"] = fetch_footprint_for_event(event)
+        warning["footprint"] = footprint
         warnings.append(warning)
 
     warnings.sort(

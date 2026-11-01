@@ -34,6 +34,6 @@ def fetch_sar_imagery(region_key="vizag"):
     vis_params = {"min": -25.0, "max": 0.0, "dimensions": 768, "region": aoi, "format": "png"}
     thumb_url = image.getThumbURL(vis_params)
     
-    response = requests.get(thumb_url)
+    response = requests.get(thumb_url, timeout=60)
     response.raise_for_status()
     return response.content, target

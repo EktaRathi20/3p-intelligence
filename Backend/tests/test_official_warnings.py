@@ -394,5 +394,121 @@ class OfficialWarningFlagTest(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(assessment["official_warning"])
 
 
+@unittest.skipIf(
+    disaster_intelligence is None,
+    f"intelligence import unavailable: {_INTELLIGENCE_IMPORT_ERROR}",
+)
+class AiInsightsCacheTest(unittest.IsolatedAsyncioTestCase):
+    """Identical evidence must reuse the cached advisory, not regenerate."""
+
+    def _payload(self):
+        return {
+            "region_metadata": {
+                "min_lon": 85.75, "min_lat": 19.75,
+                "max_lon": 85.95, "max_lat": 19.85,
+            },
+            "meteorological_telemetry": {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "region_target": "odisha",
+                "system_name": "Test Telemetry",
+                "wind_speed_kmh": 30.0,
+                "pressure_hpa": 1005.0,
+            },
+            "marine": {"wave_height_m": 1.5},
+            "active_systems": {"systems": []},
+            "warnings": {"warnings": [], "source": "GDACS test"},
+            "history": {"historical_analogs": []},
+            "forecast": {"forecast": []},
+            "demography": {"total_population": 1000},
+            "places": {"hospitals": [], "shelters": []},
+        }
+
+    def _client(self, generated):
+        client = mock.Mock()
+        client.generate_json = mock.Mock(return_value=generated)
+        return client
+
+    async def test_cache_miss_generates_and_saves(self):
+        generated = {
+            "summary": "Live advisory.",
+            "recommended_tasks": [{"title": "Stage pumps"}],
+            "reasoning_context": ["Calm telemetry observed."],
+        }
+        with mock.patch.object(
+            disaster_intelligence, "run_ingestion",
+            return_value=self._payload(),
+        ), mock.patch.object(
+            disaster_intelligence.hazard_model, "score", return_value=None
+        ), mock.patch.object(
+            disaster_intelligence, "_load_ai_insights", return_value=None
+        ) as loader, mock.patch.object(
+            disaster_intelligence, "_save_ai_insights"
+        ) as saver:
+            client = self._client(generated)
+            body = await disaster_intelligence.build_disaster_intelligence(
+                "odisha", client
+            )
+        client.generate_json.assert_called_once()
+        loader.assert_called_once()
+        saver.assert_called_once()
+        saved_region, saved_fingerprint, saved_insights = saver.call_args[0]
+        self.assertEqual(saved_region, "odisha")
+        self.assertIsInstance(saved_fingerprint, str)
+        self.assertEqual(saved_insights["summary"], "Live advisory.")
+        self.assertEqual(body["ai_analysis"]["summary"], "Live advisory.")
+        self.assertEqual(body["data_quality"]["ai_source"], "live")
+
+    async def test_cache_hit_skips_generation(self):
+        cached = {
+            "summary": "Cached advisory.",
+            "recommended_tasks": [{"title": "Cached task"}],
+            "reasoning_context": ["Cached evidence."],
+        }
+        with mock.patch.object(
+            disaster_intelligence, "run_ingestion",
+            return_value=self._payload(),
+        ), mock.patch.object(
+            disaster_intelligence.hazard_model, "score", return_value=None
+        ), mock.patch.object(
+            disaster_intelligence, "_load_ai_insights", return_value=cached
+        ), mock.patch.object(
+            disaster_intelligence, "_save_ai_insights"
+        ) as saver:
+            client = self._client({"summary": "Must not be used."})
+            body = await disaster_intelligence.build_disaster_intelligence(
+                "odisha", client
+            )
+        client.generate_json.assert_not_called()
+        saver.assert_not_called()
+        self.assertEqual(body["ai_analysis"], cached)
+        self.assertEqual(body["data_quality"]["ai_source"], "cache")
+
+
+@unittest.skipIf(
+    disaster_intelligence is None,
+    f"intelligence import unavailable: {_INTELLIGENCE_IMPORT_ERROR}",
+)
+class AiFingerprintTest(unittest.TestCase):
+    """The advisory fingerprint tracks the evidence it is reasoned from."""
+
+    def test_fingerprint_changes_with_evidence(self):
+        context = {
+            "current_telemetry": {"wind_speed_kmh": 30.0},
+            "ml_probability": {"probability": 0.1},
+            "active_systems": [],
+            "official_warnings": [],
+            "risk_assessment": {"level": "GREEN"},
+            "historical_analogs": [],
+            "forecast": {"forecast": []},
+            "demography": {"total_population": 1000},
+            "places": {"hospitals": [], "shelters": []},
+        }
+        same = dict(context)
+        changed = dict(context, current_telemetry={"wind_speed_kmh": 130.0})
+        fingerprint = disaster_intelligence._ai_fingerprint
+        self.assertEqual(fingerprint(context), fingerprint(same))
+        self.assertNotEqual(fingerprint(context), fingerprint(changed))
+
+
 if __name__ == "__main__":
     unittest.main()

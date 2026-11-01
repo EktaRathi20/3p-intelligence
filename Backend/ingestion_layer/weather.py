@@ -1,5 +1,6 @@
 import os
 import requests
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from ingestion_layer.cache import load_json_cache, save_json_cache
@@ -339,20 +340,20 @@ def fetch_marine_conditions(region_key="vizag"):
         "source_errors": {},
     }
 
-    try:
+    def _fetch_core():
         core = _marine_request(
             coords["lat"],
             coords["lon"],
             current="wave_height,sea_surface_temperature",
         ).get("current", {})
-        result["wave_height_m"] = _to_float(core.get("wave_height"))
-        result["sea_surface_temperature_c"] = _to_float(
-            core.get("sea_surface_temperature")
-        )
-    except (requests.RequestException, RuntimeError, ValueError) as error:
-        result["source_errors"]["core"] = str(error)
+        return {
+            "wave_height_m": _to_float(core.get("wave_height")),
+            "sea_surface_temperature_c": _to_float(
+                core.get("sea_surface_temperature")
+            ),
+        }
 
-    try:
+    def _fetch_forecast():
         daily = _marine_request(
             coords["lat"],
             coords["lon"],
@@ -361,15 +362,15 @@ def fetch_marine_conditions(region_key="vizag"):
         ).get("daily", {})
         times = daily.get("time", [])
         maxima = daily.get("wave_height_max", [])
-        result["forecast_wave_height_max_7d"] = [
-            {"date": date, "wave_height_max_m": _to_float(maxima[index])}
-            for index, date in enumerate(times[:7])
-            if index < len(maxima)
-        ]
-    except (requests.RequestException, RuntimeError, ValueError) as error:
-        result["source_errors"]["forecast"] = str(error)
+        return {
+            "forecast_wave_height_max_7d": [
+                {"date": date, "wave_height_max_m": _to_float(maxima[index])}
+                for index, date in enumerate(times[:7])
+                if index < len(maxima)
+            ]
+        }
 
-    try:
+    def _fetch_extended():
         extended = _marine_request(
             coords["lat"],
             coords["lon"],
@@ -378,16 +379,30 @@ def fetch_marine_conditions(region_key="vizag"):
                 "ocean_current_velocity,sea_level_height_msl"
             ),
         ).get("current", {})
-        result["wave_direction_deg"] = _to_float(extended.get("wave_direction"))
-        result["wave_period_s"] = _to_float(extended.get("wave_period"))
-        result["ocean_current_velocity_ms"] = _to_float(
-            extended.get("ocean_current_velocity")
-        )
-        result["sea_level_msl_m"] = _to_float(
-            extended.get("sea_level_height_msl")
-        )
-    except (requests.RequestException, RuntimeError, ValueError) as error:
-        result["source_errors"]["extended"] = str(error)
+        return {
+            "wave_direction_deg": _to_float(extended.get("wave_direction")),
+            "wave_period_s": _to_float(extended.get("wave_period")),
+            "ocean_current_velocity_ms": _to_float(
+                extended.get("ocean_current_velocity")
+            ),
+            "sea_level_msl_m": _to_float(
+                extended.get("sea_level_height_msl")
+            ),
+        }
+
+    # The three variable groups are independent: query them concurrently
+    # (each carries a 20s timeout) instead of serially.
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        group_futures = {
+            "core": pool.submit(_fetch_core),
+            "forecast": pool.submit(_fetch_forecast),
+            "extended": pool.submit(_fetch_extended),
+        }
+        for group, future in group_futures.items():
+            try:
+                result.update(future.result())
+            except (requests.RequestException, RuntimeError, ValueError) as error:
+                result["source_errors"][group] = str(error)
 
     has_measurements = any(
         result[key] is not None
