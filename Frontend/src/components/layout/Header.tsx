@@ -6,7 +6,6 @@ import {
   ChevronDown,
   SlidersHorizontal,
   Menu,
-  Settings,
   History,
   LogOut,
   X,
@@ -22,7 +21,6 @@ interface HeaderProps {
   availableCities: CityLocation[];
   onSelectCity: (city: CityLocation) => void;
   onOpenNotifications: () => void;
-  onOpenSettings: () => void;
   onOpenHistoricalDisasters?: () => void;
   unreadAlertsCount: number;
   currentUser?: AuthUser;
@@ -38,7 +36,6 @@ export const Header: React.FC<HeaderProps> = ({
 
 
   onOpenNotifications,
-  onOpenSettings,
   onOpenHistoricalDisasters,
   unreadAlertsCount,
   currentUser,
@@ -126,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-         
+
         </div>
       </div>
 
@@ -292,17 +289,6 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
                   </div>
                   <div className="p-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsProfileDropdownOpen(false);
-                        onOpenSettings();
-                      }}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-100"
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </button>
                     {onOpenHistoricalDisasters && (
                       <button
                         type="button"

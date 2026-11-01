@@ -6,7 +6,6 @@ import type { AuthUser } from '../types';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { EvacuationModal } from '@/components/dashboard/modals/EvacuationModal';
-import { SettingsModal } from '@/components/dashboard/modals/SettingsModal';
 import type { DashboardOutletData } from '../types/dashboard';
 import { isAvailableDisasterIntelligence } from '../types/api';
 
@@ -30,7 +29,6 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const dashboard = useOutletContext<DashboardOutletData>();
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const currentMode = routeModes[location.pathname as keyof typeof routeModes] ?? 'threat';
   const simulatorIntelligence = isAvailableDisasterIntelligence(dashboard.activeIntelligence)
@@ -104,7 +102,6 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
           navigate('/alerts');
           dashboard.markAllRead();
         }}
-        onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenHistoricalDisasters={() => {
           dashboard.resetSimulation();
           navigate('/history');
@@ -235,7 +232,6 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         </main>
       </div>
 
-      <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} defaultRegionName={dashboard.defaultRegionKey ? dashboard.regions[dashboard.defaultRegionKey]?.name ?? dashboard.defaultRegionKey : null} />
       <EvacuationModal
         isOpen={dashboard.isEvacuationModalOpen}
         onClose={() => dashboard.setIsEvacuationModalOpen(false)}
