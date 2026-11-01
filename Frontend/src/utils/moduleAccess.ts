@@ -11,7 +11,7 @@ const ROLE_MODULES: Record<RoleKey, ModuleKey[]> = {
   planner: [...SHARED_MODULES, 'threat', 'tasks'],
   field: [...SHARED_MODULES, 'fieldOps'],
   recovery: [...SHARED_MODULES, 'recovery'],
-  rescue: [...SHARED_MODULES, 'tasks', 'landfall'],
+  rescue: [...SHARED_MODULES,  'landfall'],
   unknown: SHARED_MODULES,
 };
 
