@@ -7,7 +7,6 @@ import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { EvacuationModal } from '@/components/dashboard/modals/EvacuationModal';
 import type { DashboardOutletData } from '../types/dashboard';
-import { isAvailableDisasterIntelligence } from '../types/api';
 
 interface LayoutProps {
   currentUser: AuthUser;
@@ -22,7 +21,6 @@ const routeModes = {
   '/fieldOps': 'fieldOps',
   '/landfall': 'landfall',
   '/recovery': 'recovery',
-  '/simulator': 'simulator',
 } as const;
 
 export default function Layout({ currentUser, onLogout }: LayoutProps) {
@@ -31,9 +29,6 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
   const dashboard = useOutletContext<DashboardOutletData>();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const currentMode = routeModes[location.pathname as keyof typeof routeModes] ?? 'threat';
-  const simulatorIntelligence = isAvailableDisasterIntelligence(dashboard.activeIntelligence)
-    ? dashboard.activeIntelligence
-    : null;
   const isHistoricalView = location.pathname === '/history';
   const isNotificationView = location.pathname === '/alerts';
   const isRegionView = location.pathname === '/region-management';
@@ -91,19 +86,13 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         availableCities={dashboard.availableCities}
         isDefaultRegion={dashboard.defaultRegionKey !== null && dashboard.selectedRegionKey === dashboard.defaultRegionKey}
         onSelectCity={(city) => {
-          dashboard.resetSimulation();
           dashboard.setSelectedRegionKey(city.id);
-          if (currentMode === 'simulator' && dashboard.regions[city.id]) {
-            dashboard.runSimulation('YELLOW', city.id, dashboard.regions[city.id]);
-          }
         }}
         onOpenNotifications={() => {
-          dashboard.resetSimulation();
           navigate('/alerts');
           dashboard.markAllRead();
         }}
         onOpenHistoricalDisasters={() => {
-          dashboard.resetSimulation();
           navigate('/history');
         }}
         unreadAlertsCount={dashboard.unreadCount}
@@ -119,15 +108,12 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
           currentMode={currentMode}
           onSelectMode={(mode) => {
             setIsMobileSidebarOpen(false);
-            if (mode === 'simulator') dashboard.runSimulation('YELLOW');
-            else dashboard.resetSimulation();
             navigate(`/${mode}`);
           }}
           isHistoricalView={isHistoricalView}
           onSelectHistoricalView={(isHistory) => {
             setIsMobileSidebarOpen(false);
             if (isHistory) {
-              dashboard.resetSimulation();
               navigate('/history');
             }
           }}
@@ -135,14 +121,12 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
           onSelectNotificationView={(isNotification) => {
             setIsMobileSidebarOpen(false);
             if (isNotification) {
-              dashboard.resetSimulation();
               navigate('/alerts');
               dashboard.markAllRead();
             }
           }}
           onOpenAlerts={() => {
             setIsMobileSidebarOpen(false);
-            dashboard.resetSimulation();
             navigate('/alerts');
             dashboard.markAllRead();
           }}
@@ -175,12 +159,6 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
               <LoaderCircle size={15} className="animate-spin" /> Loading live region data and disaster intelligence…
             </div>
           )}
-          {!isNotificationView && !isHistoricalView && currentMode === 'simulator' && dashboard.simulationTier && (
-            <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cyan-300 bg-cyan-50 px-3 py-2 text-xs text-cyan-950">
-              <span><strong>SIMULATION ACTIVE · {dashboard.simulationTier}</strong> Risk conditions shown are mock data, not a live warning.</span>
-              <button type="button" onClick={dashboard.resetSimulation} className="font-semibold underline underline-offset-2">Return to live data</button>
-            </div>
-          )}
           {isOverviewMode && (
             <section className="bg-white border border-slate-200/90  p-4 mb-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
@@ -200,17 +178,13 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
                 <div className="flex min-w-0 items-center gap-2.5 px-3 py-1.5  border bg-slate-50 border-slate-200">
                   <CloudRain size={20} className="text-blue-600 shrink-0" />
                   <div>
-                    <div className="text-[10px] text-slate-500 font-medium">{currentMode === 'simulator' && dashboard.simulationTier ? 'Scenario Telemetry' : 'Current Conditions'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">Current Conditions</div>
                     <div className="flex items-baseline gap-1.5">
                       <span className="font-bold text-sm font-mono text-slate-900">
-                        {currentMode === 'simulator' && dashboard.simulationTier
-                          ? simulatorIntelligence?.current_conditions.wind_speed_kmh == null ? 'Unavailable' : `${simulatorIntelligence.current_conditions.wind_speed_kmh} km/h`
-                          : dashboard.regionResponses?.currentConditions?.temperature_c == null ? 'Unavailable' : `${dashboard.regionResponses.currentConditions.temperature_c}°C`}
+                        {dashboard.regionResponses?.currentConditions?.temperature_c == null ? 'Unavailable' : `${dashboard.regionResponses.currentConditions.temperature_c}°C`}
                       </span>
                       <span className="max-w-48 truncate text-[11px] font-medium text-slate-600">
-                        {currentMode === 'simulator' && dashboard.simulationTier
-                          ? `${simulatorIntelligence?.current_conditions.pressure_hpa ?? 'Unavailable'} hPa · ${simulatorIntelligence?.risk_assessment.level ?? 'UNKNOWN'} risk`
-                          : dashboard.regionResponses?.currentConditions?.condition ?? dashboard.regionResponses?.currentConditionsError ?? 'Waiting for current weather data'}
+                        {dashboard.regionResponses?.currentConditions?.condition ?? dashboard.regionResponses?.currentConditionsError ?? 'Waiting for current weather data'}
                       </span>
                     </div>
                   </div>

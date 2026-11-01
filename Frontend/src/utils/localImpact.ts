@@ -97,8 +97,8 @@ function legacyHeadline(
 /**
  * Resolve the ordinary-user local-impact headline from a disaster
  * intelligence response. Prefers the backend `local_impact_assessment`
- * contract; falls back to simulation tier, then to a best-effort
- * mapping from the legacy combined level and footprint verdict.
+ * contract; falls back to a best-effort mapping from the legacy
+ * combined level and footprint verdict.
  * Returns null when no usable assessment exists.
  */
 export function resolveLocalHeadline(
@@ -107,16 +107,6 @@ export function resolveLocalHeadline(
   if (!intelligence || !('risk_assessment' in intelligence)) return null;
   const block = intelligence.local_impact_assessment ?? null;
   if (!block) {
-    if (intelligence.simulation) {
-      const tier = intelligence.simulation.tier;
-      return {
-        zone: tier,
-        headline: `Simulated ${tier} scenario — not a live assessment.`,
-        shortLabel: `${tier} (simulated)`,
-        regionalText: 'No live regional warning (simulation)',
-        reason: null,
-      };
-    }
     return legacyHeadline(intelligence.risk_assessment, intelligence.local_impact ?? null);
   }
   const zone = asZone(block.local_impact_zone);

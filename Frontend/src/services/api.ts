@@ -1,4 +1,4 @@
-import { httpClient } from './httpClient';
+﻿import { httpClient } from './httpClient';
 import type {
   ApiRegion,
   CurrentConditionsResponse,
@@ -10,7 +10,6 @@ import type {
   HistoricalResponse,
   InfrastructureResponse,
   PopulationResponse,
-  SimulatorBroadcastResponse,
   WhatsAppConfigurationResponse,
 } from '../types/api';
 import type { ClimateAlert } from '../types/alerts';
@@ -59,10 +58,6 @@ export const api = {
       `/disaster-intelligence/${encodeURIComponent(region)}/capabilities`,
       { signal },
     ),
-  broadcastSimulatorAlert: (regionKey: string, tier: 'YELLOW' | 'ORANGE' | 'RED', ward: string, phone: string | null, token: string) =>
-    httpClient.post<SimulatorBroadcastResponse>('/simulator/alerts', { region_key: regionKey, tier, ward, phone }, {
-      headers: { 'X-Simulator-Token': token },
-    }),
   startWhatsAppVerification: (phone: string) =>
     httpClient.post<{ status: string }>('/whatsapp/verification/start', { phone }),
   checkWhatsAppVerification: (phone: string, code: string, action: 'subscribe' | 'unsubscribe') =>

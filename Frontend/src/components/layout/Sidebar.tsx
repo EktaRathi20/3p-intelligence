@@ -1,11 +1,10 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   LayoutDashboard,
   History,
   Bell,
   LifeBuoy,
   Banknote,
-  FlaskConical,
   ClipboardCheck,
   CalendarClock,
   ClipboardList,
@@ -170,18 +169,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </section>
         </nav>
 <div className="mt-auto border-t border-slate-300 bg-slate-50">
-              <button type="button" onClick={() => goToMode('simulator' as OperationalMode)}
-                aria-current={!isHistoricalView && !isNotificationView && currentMode === 'simulator' ? 'page' : undefined}
-                className={itemClass(!isHistoricalView && !isNotificationView && currentMode === 'simulator')}>
-                <FlaskConical size={18}
-                  className={!isHistoricalView && !isNotificationView && currentMode === 'simulator' ? 'text-[#17365d]' : 'text-slate-500'} />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-xs">Simulator Mode</span>
-                  <span className="mt-1 block text-[10px] font-normal text-slate-500">Preparedness exercises</span>
-                </span>
-                {!isHistoricalView && !isNotificationView && currentMode === 'simulator' &&
-                  <ChevronRight size={14} className="shrink-0 text-[#17365d]" />}
-              </button>
               <div className=" px-3 border-t border-slate-200 pt-3">
                 <div className="h-1 w-16 bg-[#d88b2b]" aria-hidden="true" />
                 <p className="mt-2 text-[10px] font-semibold text-slate-700">3P</p>

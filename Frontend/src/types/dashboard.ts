@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react';
+﻿import type { Dispatch, SetStateAction } from 'react';
 import type { ClimateAlert } from './alerts';
 import type {
   ApiRegion,
@@ -7,11 +7,9 @@ import type {
   RegionResponses,
 } from './api';
 import type { CityLocation } from './domain';
-import type { SimulationTier } from '../features/simulator/simulator';
 
 export interface DashboardOutletData {
   alerts: ClimateAlert[];
-  simulationAlerts: ClimateAlert[];
   unreadCount: number;
   connectionState: 'connecting' | 'connected' | 'disconnected';
   alertsError: string | null;
@@ -36,9 +34,6 @@ export interface DashboardOutletData {
   regionDataError: string | null;
   retryRegions: () => void;
   retryRegionData: () => void;
-  simulationTier: SimulationTier | null;
-  runSimulation: (tier: SimulationTier, regionKey?: string, region?: ApiRegion) => void;
-  resetSimulation: () => void;
   showMangroveLayer: boolean;
   setShowMangroveLayer: Dispatch<SetStateAction<boolean>>;
   showHistoricalLayer: boolean;

@@ -146,20 +146,6 @@ describe('resolveLocalHeadline', () => {
     assert.equal(unavailable?.regionalText, 'Regional warning source unavailable');
   });
 
-  it('marks simulated assessments as not live', () => {
-    const { local_impact_assessment: _dropped, ...withoutBlock } = makeIntelligence({
-      local_impact_assessment: block(),
-    });
-    void _dropped;
-    const headline = resolveLocalHeadline({
-      ...withoutBlock,
-      simulation: { tier: 'RED', label: 'RED zone scenario' },
-    } as unknown as DisasterIntelligenceResponse);
-    assert.equal(headline?.zone, 'RED');
-    assert.match(headline?.headline ?? '', /Simulated RED scenario/);
-    assert.equal(headline?.regionalText, 'No live regional warning (simulation)');
-  });
-
   it('falls back to legacy fields when the contract block is missing', () => {
     const { local_impact_assessment: _dropped, ...legacy } = makeIntelligence({
       local_impact_assessment: block(),

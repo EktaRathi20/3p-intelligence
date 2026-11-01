@@ -1,4 +1,4 @@
-import type { AuthUser } from '../types';
+﻿import type { AuthUser } from '../types';
 import type { OperationalMode } from '../types/domain';
 
 export type ModuleKey = OperationalMode | 'history' | 'alerts' | 'region-management';
@@ -45,7 +45,7 @@ export function getAllowedModules(
   roleName?: string,
   roleLevel?: number,
 ): ModuleKey[] {
-  return [...ROLE_MODULES[resolveRole(roleId, roleName, roleLevel)], 'simulator', 'region-management'];
+  return [...ROLE_MODULES[resolveRole(roleId, roleName, roleLevel)], 'region-management'];
 }
 
 export function canAccessModule(user: AuthUser, module: ModuleKey): boolean {

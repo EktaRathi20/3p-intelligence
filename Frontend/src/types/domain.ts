@@ -1,11 +1,11 @@
-export type OperationalMode = 
+﻿export type OperationalMode = 
   | 'overview'      
   | 'baseline'       
   | 'threat'         
   | 'tasks'         
   | 'landfall'       
-  | 'recovery'       
-  | 'simulator'| 'fieldOps';
+  | 'recovery'
+  | 'fieldOps';
 
 export type UserRole = 
   | 'municipal_commissioner'

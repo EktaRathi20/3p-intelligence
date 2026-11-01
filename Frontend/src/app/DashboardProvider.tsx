@@ -1,18 +1,16 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { regionApi } from '../services/regionApi';
 import { resolveDefaultRegionKey } from '../utils/regionDefault';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { api } from '../services/api';
 import type {
   ApiRegion,
   DisasterIntelligenceCapabilities,
-  DisasterIntelligenceResponse,
   RegionResponses,
 } from '../types/api';
 import { ClimateAlert } from '../services/climateAlerts';
 import { useClimateAlerts } from '../hooks/useClimateAlerts';
-import { createSimulatedIntelligence, SimulationTier } from '../features/simulator/simulator';
 import { buildCity } from '../utils/transformers';
 import type { DashboardOutletData } from '../types/dashboard';
 import { isAbortError } from '../services/apiError';
@@ -20,22 +18,9 @@ import { isAbortError } from '../services/apiError';
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : 'The request failed unexpectedly.';
 
-const routeModes = {
-  '/overview': 'overview',
-  '/baseline': 'baseline',
-  '/threat': 'threat',
-  '/tasks': 'tasks',
-  '/landfall': 'landfall',
-  '/recovery': 'recovery',
-  '/simulator': 'simulator',
-} as const;
-
 export default function DashboardProvider() {
-  const location = useLocation();
-  const mode = routeModes[location.pathname as keyof typeof routeModes] ?? 'threat';
   const {
     alerts,
-    simulationAlerts,
     latestLiveAlert,
     unreadCount,
     connectionState,
@@ -51,8 +36,6 @@ export default function DashboardProvider() {
   const [selectedHazard, setSelectedHazard] = useState('cyclone');
   const [hazardCapabilities, setHazardCapabilities] = useState<DisasterIntelligenceCapabilities | null>(null);
   const [regionResponses, setRegionResponses] = useState<RegionResponses | null>(null);
-  const [simulationTier, setSimulationTier] = useState<SimulationTier | null>(null);
-  const [simulatedIntelligence, setSimulatedIntelligence] = useState<DisasterIntelligenceResponse | null>(null);
   const [regionLoading, setRegionLoading] = useState(true);
   const [regionError, setRegionError] = useState<string | null>(null);
   const [regionDataError, setRegionDataError] = useState<string | null>(null);
@@ -67,30 +50,12 @@ export default function DashboardProvider() {
     setSelectedRegionKey(value);
   };
   const selectedRegion = regions[selectedRegionKey];
-  const activeIntelligence = mode === 'simulator'
-    ? simulatedIntelligence ?? regionResponses?.disasterIntelligence ?? null
-    : regionResponses?.disasterIntelligence ?? null;
+  const activeIntelligence = regionResponses?.disasterIntelligence ?? null;
   const displayedResponses = regionResponses
     ? { ...regionResponses, disasterIntelligence: activeIntelligence }
     : null;
   const selectedCity = selectedRegion ? buildCity(selectedRegionKey, selectedRegion, displayedResponses) : null;
   const availableCities = Object.entries(regions).map(([key, region]) => buildCity(key, region, null));
-
-  const runSimulation = (tier: SimulationTier, regionKey = selectedRegionKey, region = selectedRegion) => {
-    if (!region) return;
-    setSimulatedIntelligence(createSimulatedIntelligence(
-      regionKey === selectedRegionKey ? regionResponses?.disasterIntelligence ?? null : null,
-      regionKey,
-      region,
-      tier,
-    ));
-    setSimulationTier(tier);
-  };
-
-  const resetSimulation = () => {
-    setSimulatedIntelligence(null);
-    setSimulationTier(null);
-  };
 
   useEffect(() => {
     const onDefaultChanged = () => setRegionsRetry(value => value + 1);
@@ -122,8 +87,6 @@ export default function DashboardProvider() {
     setDefaultRegionKey(null);
     setHazardCapabilities(null);
     setRegionResponses(null);
-    setSimulatedIntelligence(null);
-    setSimulationTier(null);
     const loadDefaultRegion = async () => {
       try {
         const config = await regionApi.getConfiguration(controller.signal);
@@ -198,7 +161,6 @@ export default function DashboardProvider() {
 
   const outletData: DashboardOutletData = {
     alerts,
-    simulationAlerts,
     unreadCount,
     connectionState,
     alertsError,
@@ -223,9 +185,6 @@ export default function DashboardProvider() {
     regionDataError,
     retryRegions,
     retryRegionData,
-    simulationTier,
-    runSimulation,
-    resetSimulation,
     showMangroveLayer,
     setShowMangroveLayer,
     showHistoricalLayer,

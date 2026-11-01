@@ -1,4 +1,4 @@
-
+﻿
 import { useEffect, useState, type ReactNode } from "react";
 import {
   BrowserRouter,
@@ -22,7 +22,6 @@ import HistoryPage from "../pages/HistoryPage";
 import LandfallPage from "../pages/LandfallPage";
 import OverviewPage from "../pages/OverviewPage";
 import RecoveryPage from "../pages/RecoveryPage";
-import SimulatorPage from "../pages/SimulatorPage";
 import TasksPage from "../pages/TasksPage";
 import ThreatPage from "../pages/ThreatPage";
 import FieldOperationPage from '@/pages/FieldOperationPage';
@@ -182,10 +181,6 @@ export default function AppRoutes() {
               <Route
                 path="/recovery"
                 element={<ModuleAccessRoute user={currentUser} module="recovery"><RecoveryPage /></ModuleAccessRoute>}
-              />
-              <Route
-                path="/simulator"
-                element={<ModuleAccessRoute user={currentUser} module="simulator"><SimulatorPage /></ModuleAccessRoute>}
               />
               <Route
                 path="/history"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { AlertConnectionState, ClimateAlert, createClimateAlertSocket } from '../services/climateAlerts';
 
@@ -7,7 +7,6 @@ const newestFirst = (alerts: ClimateAlert[]) =>
 
 export function useClimateAlerts() {
   const [alerts, setAlerts] = useState<ClimateAlert[]>([]);
-  const [simulationAlerts, setSimulationAlerts] = useState<ClimateAlert[]>([]);
   const [latestLiveAlert, setLatestLiveAlert] = useState<ClimateAlert | null>(null);
   const [unreadIds, setUnreadIds] = useState<Set<string>>(() => new Set());
   const [connectionState, setConnectionState] = useState<AlertConnectionState>('connecting');
@@ -28,11 +27,6 @@ export function useClimateAlerts() {
           });
           return newestFirst([...byId.values()]).slice(0, 500);
         });
-        setSimulationAlerts((current) => {
-          const byId = new Map(current.map((alert) => [alert.id, alert]));
-          initialAlerts.filter((alert) => alert.is_simulation).forEach((alert) => byId.set(alert.id, alert));
-          return newestFirst([...byId.values()]).slice(0, 50);
-        });
         setError(null);
       })
       .catch((loadError: unknown) => {
@@ -52,10 +46,7 @@ export function useClimateAlerts() {
     socket.on('disconnect', () => setConnectionState('disconnected'));
     socket.on('connect_error', () => setConnectionState('disconnected'));
     socket.on('climate_alert', (alert: ClimateAlert) => {
-      if (alert.is_simulation) {
-        setSimulationAlerts((current) => newestFirst([alert, ...current.filter((item) => item.id !== alert.id)]).slice(0, 50));
-        return;
-      }
+      if (alert.is_simulation) return;
       setAlerts((current) => newestFirst([alert, ...current.filter((item) => item.id !== alert.id)]).slice(0, 500));
       setUnreadIds((current) => new Set(current).add(alert.id));
       setLatestLiveAlert(alert);
@@ -69,7 +60,6 @@ export function useClimateAlerts() {
 
   return {
     alerts,
-    simulationAlerts,
     latestLiveAlert,
     unreadCount: unreadIds.size,
     connectionState,

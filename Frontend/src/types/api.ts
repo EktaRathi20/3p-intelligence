@@ -1,5 +1,4 @@
-import type { ClimateAlert } from './alerts';
-import type { VerifiedRoute } from './domain';
+﻿import type { VerifiedRoute } from './domain';
 
 export interface DispatchChatRequest {
   query: string;
@@ -124,15 +123,6 @@ export interface WhatsAppConfigurationResponse {
   delivery_configured: boolean;
 }
 
-export interface SimulatorBroadcastResponse {
-  alert: ClimateAlert;
-  whatsapp_preview: string;
-  channels: {
-    socket_io: 'broadcasted';
-    whatsapp: 'queued' | 'not_configured' | 'not_requested';
-  };
-}
-
 export interface DisasterRiskZone {
   id: string;
   label: string;
@@ -224,27 +214,6 @@ export interface DisasterInsuranceSummary {
   note?: string;
 }
 
-export interface PreparednessBudgetLine {
-  label: string;
-  quantity: number;
-  unit: string;
-  unit_cost_inr: number;
-  subtotal_inr: number;
-}
-
-export interface SimulatedPreparednessBudget {
-  status: 'SIMULATED';
-  currency: 'INR';
-  planning_window_hours: number;
-  total_inr: number;
-  range_low_inr: number;
-  range_high_inr: number;
-  lines: PreparednessBudgetLine[];
-  assumptions: string[];
-  government_aid_estimate_inr: null;
-  note: string;
-}
-
 export interface DisasterRecommendedTask {
   department: string;
   location: string;
@@ -262,10 +231,6 @@ export interface DisasterIntelligenceResponse {
   generated_at: string;
   ml_probability?: DisasterMlProbability;
   local_impact_assessment?: DisasterLocalImpactAssessment;
-  simulation?: {
-    tier: 'YELLOW' | 'ORANGE' | 'RED';
-    label: string;
-  };
   data_quality: {
     ingestion_status: 'SUCCESS' | 'FAILED' | string;
     telemetry_status: 'AVAILABLE' | 'UNAVAILABLE' | 'NO_CURRENT_MEASUREMENTS' | string;
@@ -310,7 +275,6 @@ export interface DisasterIntelligenceResponse {
     [key: string]: unknown;
   };
   insurance_summary: DisasterInsuranceSummary;
-  preparedness_budget?: SimulatedPreparednessBudget;
   ai_analysis: {
     summary: string | null;
     recommended_tasks: DisasterRecommendedTask[];
