@@ -1522,5 +1522,1377 @@
         "version": 2
       }
     ]
+  },
+  "OrndKzdfAiPSVON166GH": {
+    "aiAssessment": {
+      "affectedAreas": [
+        "Angul, Odisha",
+        "Test"
+      ],
+      "disclaimer": "Preliminary planning estimates generated from available local data with stated assumptions. Not an official approval, eligibility decision, insurance decision, or payment instruction. A Role 4 officer must review and decide.",
+      "engineVersion": "assess-engine/1.1",
+      "evidenceExcerpts": [],
+      "evidenceSummary": {
+        "damageAssessmentCount": 1,
+        "evidenceAttachmentCount": 0,
+        "expenseCount": 0,
+        "gaps": [
+          "No operational tasks exist for this region yet.",
+          "No field reports exist for this region yet.",
+          "No expense records exist for this region yet; cost figures fall back to modelled proxies or Unknown.",
+          "No linked evidence attachments exist for this region yet."
+        ],
+        "geoContext": {
+          "city": "Angul",
+          "cityId": "57704",
+          "country": "India",
+          "countryCode": "IN",
+          "state": "Odisha",
+          "stateCode": "OR",
+          "sync": {
+            "attribution": "Geographic data by Countries States Cities Database (https://github.com/dr5hn/countries-states-cities-database) | ODbL v1.0",
+            "datasetRef": "master",
+            "syncedAt": "2026-10-28T11:43:08.800126+00:00"
+          }
+        },
+        "historicalStatus": "catalog-only",
+        "intelligenceStatus": "catalog-only",
+        "observedPreparednessInr": 0,
+        "observedRecoveryInr": 0,
+        "peopleAssistedSum": 0,
+        "photoCount": 0,
+        "regionalPopulation": null,
+        "regionalPopulationNote": "Ambient regional population (WorldPop, via GET /api/population) is context only and is never used as affected population. No cached value is available locally; quote the live readout next to this assessment when needed.",
+        "reportCount": 0,
+        "submittedTaskCount": 0,
+        "taskCount": 0,
+        "verifiedFeedbackCount": 0
+      },
+      "figures": [
+        {
+          "assumptions": [
+            "Average household size 4.4 is a planning default; replace with census value.",
+            "Sums officer submissions; overlapping reports of the same households may double-count.",
+            "Regional population is context only and was not used as affected population."
+          ],
+          "calculation": "1 households (sum of 1 damage submission(s)) x 4.4 people/household = 4 people.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Submission-based headcount is a planning estimate. Deduplicate against field verification before relief lists.",
+          "key": "affected_people",
+          "label": "Estimated affected people",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "people",
+          "value": 4
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes uniform damage severity within each category.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "1 x Rs.150,000 + 1 x Rs.500,000 = Rs.650,000 (counts from sums of 1 damage submission(s)).",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Repair-vs-rebuild split follows officer counts; survey data would raise confidence.",
+          "key": "housing_loss_inr",
+          "label": "Housing damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 650000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes a single average crop value per hectare.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "1.0 ha (sum of 1 damage submission(s)) x Rs.30,000/ha = Rs.30,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Crop-cutting experiments and mandi prices are needed for a claim-grade figure.",
+          "key": "crop_loss_inr",
+          "label": "Crop damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 30000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes average value across species; verify with veterinary records.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "11.0 head (sum of 1 damage submission(s)) x Rs.20,000/head = Rs.220,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Species-wise counts would improve this estimate.",
+          "key": "livestock_loss_inr",
+          "label": "Livestock loss",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 220000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes average site/road restoration cost.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "1 x Rs.2,000,000 + 1.0 km x Rs.5,000,000/km = Rs.7,000,000 (counts from sums of 1 damage submission(s)).",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Engineering estimates per asset are needed for sanction-grade figures.",
+          "key": "infrastructure_loss_inr",
+          "label": "Infrastructure damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 7000000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use."
+          ],
+          "calculation": "Housing damage Rs.650,000 + Crop damage Rs.30,000 + Livestock loss Rs.220,000 + Infrastructure damage Rs.7,000,000 = Rs.7,900,000.",
+          "calibratedFrom": null,
+          "confidence": "Medium",
+          "explanation": "Arithmetic sum of the damage lines above; inherits their uncertainties.",
+          "key": "total_damage_inr",
+          "label": "Total estimated damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 7900000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes one task-day of effort per submitted task.",
+            "Task-count proxy is a rough planning fallback, not observed spend."
+          ],
+          "calculation": "No observed spend, no expense records, and no task activity; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "A rough activity proxy. Record preparedness expenses to replace it.",
+          "key": "preparation_cost_inr",
+          "label": "Preparation expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Assumes debris removal + immediate relief scale with damage value."
+          ],
+          "calculation": "Rs.7,900,000 x 12% = Rs.948,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "Planning share only; record recovery expenses as bills arrive.",
+          "key": "recovery_cost_inr",
+          "label": "Recovery expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 948000.0
+        },
+        {
+          "assumptions": [
+            "NOT an eligibility decision, NOT an offer, NOT a sanction. Eligibility is decided solely by the government.",
+            "Share is a planning default for budgeting discussion."
+          ],
+          "calculation": "Rs.7,900,000 x 25% = Rs.1,975,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "explanation": "A budgeting envelope for discussion. Only the approved government decision creates obligations.",
+          "key": "indicative_relief_inr",
+          "label": "Indicative relief envelope (planning only)",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 1975000.0
+        }
+      ],
+      "generatedAt": "2026-11-01T11:29:41.308373+00:00",
+      "hazardId": "cyclone",
+      "hazardName": "Cyclone",
+      "insuranceNotes": "No insurance policy, payout, or transaction ledger is connected to this system. Parametric trigger status must be evaluated separately from disaster intelligence for this region and hazard, and any claim requires authorized insurer review. This assessment makes no insurance decision.",
+      "narrative": "Preliminary assessment for Cyclone affecting Angul (region key IN-OR-NGL). Estimated affected people: 4. Total estimated damage: Rs.7,900,000. Evidence: 0 task(s), 0 field report(s), 1 damage submission(s), 0 expense record(s), 0 evidence attachment(s). Gaps: No operational tasks exist for this region yet. No field reports exist for this region yet. No expense records exist for this region yet; cost figures fall back to modelled proxies or Unknown. No linked evidence attachments exist for this region yet. All figures are planning estimates with stated assumptions; none are official decisions.",
+      "narrativeSource": "deterministic-template (AI unavailable)",
+      "observedInputs": {},
+      "officerNotes": "",
+      "overallConfidence": "Low",
+      "reasoning": [
+        "Affected people derived from 1 households summed across 1 officer damage submission(s).",
+        "Housing loss from 1 damaged + 1 destroyed houses (sums of 1 damage submission(s)).",
+        "Crop loss from 1.0 affected hectares (sum of 1 damage submission(s)).",
+        "Livestock loss from 11.0 head lost (sum of 1 damage submission(s)).",
+        "Infrastructure loss from 1 sites + 1.0 km roads (sums of 1 damage submission(s)).",
+        "Total damage sums 4 of 4 damage lines.",
+        "Preparation cost unknown: no task activity, expense records, or observation.",
+        "Recovery cost modelled as 12% of damage.",
+        "Indicative relief envelope computed as a planning share of damage."
+      ],
+      "regionDetail": {
+        "code": "IN-OR-NGL",
+        "country": "India",
+        "state": "Odisha"
+      },
+      "regionKey": "IN-OR-NGL",
+      "regionName": "Angul"
+    },
+    "approvalHistory": [
+      {
+        "action": "generated",
+        "at": "2026-11-01T11:29:41.308684+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "AI assessment generated for officer review.",
+        "version": 1
+      },
+      {
+        "action": "accepted",
+        "at": "2026-11-01T11:30:06.307827+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "test",
+        "version": 1
+      },
+      {
+        "action": "report_generated",
+        "at": "2026-11-01T11:30:10.275879+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "First official report generated on download.",
+        "version": 1
+      }
+    ],
+    "approvedSnapshot": {
+      "approvedAt": "2026-11-01T11:30:06.307827+00:00",
+      "figures": [
+        {
+          "assumptions": [
+            "Average household size 4.4 is a planning default; replace with census value.",
+            "Sums officer submissions; overlapping reports of the same households may double-count.",
+            "Regional population is context only and was not used as affected population."
+          ],
+          "calculation": "1 households (sum of 1 damage submission(s)) x 4.4 people/household = 4 people.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 4,
+          "edited": false,
+          "explanation": "Submission-based headcount is a planning estimate. Deduplicate against field verification before relief lists.",
+          "key": "affected_people",
+          "label": "Estimated affected people",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "people",
+          "value": 4
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes uniform damage severity within each category.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "1 x Rs.150,000 + 1 x Rs.500,000 = Rs.650,000 (counts from sums of 1 damage submission(s)).",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 650000.0,
+          "edited": false,
+          "explanation": "Repair-vs-rebuild split follows officer counts; survey data would raise confidence.",
+          "key": "housing_loss_inr",
+          "label": "Housing damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 650000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes a single average crop value per hectare.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "1.0 ha (sum of 1 damage submission(s)) x Rs.30,000/ha = Rs.30,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 30000.0,
+          "edited": false,
+          "explanation": "Crop-cutting experiments and mandi prices are needed for a claim-grade figure.",
+          "key": "crop_loss_inr",
+          "label": "Crop damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 30000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes average value across species; verify with veterinary records.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "11.0 head (sum of 1 damage submission(s)) x Rs.20,000/head = Rs.220,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 220000.0,
+          "edited": false,
+          "explanation": "Species-wise counts would improve this estimate.",
+          "key": "livestock_loss_inr",
+          "label": "Livestock loss",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 220000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes average site/road restoration cost.",
+            "Sums officer damage submissions; overlapping reports of the same damage may double-count \u2014 verify before sanction."
+          ],
+          "calculation": "1 x Rs.2,000,000 + 1.0 km x Rs.5,000,000/km = Rs.7,000,000 (counts from sums of 1 damage submission(s)).",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 7000000.0,
+          "edited": false,
+          "explanation": "Engineering estimates per asset are needed for sanction-grade figures.",
+          "key": "infrastructure_loss_inr",
+          "label": "Infrastructure damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 7000000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use."
+          ],
+          "calculation": "Housing damage Rs.650,000 + Crop damage Rs.30,000 + Livestock loss Rs.220,000 + Infrastructure damage Rs.7,000,000 = Rs.7,900,000.",
+          "calibratedFrom": null,
+          "confidence": "Medium",
+          "currentValue": 7900000.0,
+          "edited": false,
+          "explanation": "Arithmetic sum of the damage lines above; inherits their uncertainties.",
+          "key": "total_damage_inr",
+          "label": "Total estimated damage",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 7900000.0
+        },
+        {
+          "assumptions": [
+            "Unit rates are configurable planning defaults, not official SDRF/NDRF schedules. Verify against current government norms before official use.",
+            "Assumes one task-day of effort per submitted task.",
+            "Task-count proxy is a rough planning fallback, not observed spend."
+          ],
+          "calculation": "No observed spend, no expense records, and no task activity; cannot compute.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": null,
+          "edited": false,
+          "explanation": "A rough activity proxy. Record preparedness expenses to replace it.",
+          "key": "preparation_cost_inr",
+          "label": "Preparation expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": null
+        },
+        {
+          "assumptions": [
+            "Assumes debris removal + immediate relief scale with damage value."
+          ],
+          "calculation": "Rs.7,900,000 x 12% = Rs.948,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 948000.0,
+          "edited": false,
+          "explanation": "Planning share only; record recovery expenses as bills arrive.",
+          "key": "recovery_cost_inr",
+          "label": "Recovery expenses",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 948000.0
+        },
+        {
+          "assumptions": [
+            "NOT an eligibility decision, NOT an offer, NOT a sanction. Eligibility is decided solely by the government.",
+            "Share is a planning default for budgeting discussion."
+          ],
+          "calculation": "Rs.7,900,000 x 25% = Rs.1,975,000.",
+          "calibratedFrom": null,
+          "confidence": "Low",
+          "currentValue": 1975000.0,
+          "edited": false,
+          "explanation": "A budgeting envelope for discussion. Only the approved government decision creates obligations.",
+          "key": "indicative_relief_inr",
+          "label": "Indicative relief envelope (planning only)",
+          "sources": [
+            {
+              "detail": "Region record for 'IN-OR-NGL'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "regions.json"
+            },
+            {
+              "detail": "Hazard record for 'cyclone'",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "hazards.json"
+            },
+            {
+              "detail": "0 task(s) in region, 0 submitted",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "tasks.json"
+            },
+            {
+              "detail": "0 report(s), 0 people assisted in total, 0 photo(s) across reports and evidence attachments",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "field reports"
+            },
+            {
+              "detail": "1 officer damage submission(s) for this region and hazard",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "damage_assessments.json"
+            },
+            {
+              "detail": "0 expense record(s): 0 preparedness (Rs.0), 0 recovery (Rs.0)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "expenses.json"
+            },
+            {
+              "detail": "0 linked evidence attachment(s)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "evidence_attachments.json"
+            },
+            {
+              "detail": "Angul, Odisha, India (context only)",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "geo gazetteer"
+            },
+            {
+              "detail": "Hazard/region resolved against the local catalog only. Live telemetry, active systems, and official warnings need GET /api/disaster-intelligence/{region}?hazard=... and were not fetched for this offline assessment.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "disaster intelligence"
+            },
+            {
+              "detail": "Historical analogs (NOAA IBTrACS cyclone tracks) need GET /api/history and were not fetched for this offline assessment; non-cyclone history is not integrated.",
+              "fetchedAt": "2026-11-01T11:29:25.499249+00:00",
+              "name": "historical disasters"
+            }
+          ],
+          "unit": "INR",
+          "value": 1975000.0
+        }
+      ],
+      "overridden": [],
+      "totals": {
+        "affectedPeople": 4,
+        "damageTotalDerived": 7900000.0,
+        "damageTotalInr": 7900000.0,
+        "damageTotalOverride": false,
+        "grandTotalInr": 8848000.0,
+        "preparationInr": null,
+        "recoveryInr": 948000.0,
+        "reliefEnvelopeInr": 1975000.0
+      },
+      "version": 1
+    },
+    "createdAt": "2026-11-01T11:29:41.308684+00:00",
+    "createdById": "user_4",
+    "createdByName": "Ananya Patel",
+    "decision": {
+      "action": "accepted",
+      "at": "2026-11-01T11:30:06.307827+00:00",
+      "byId": "user_4",
+      "byName": "Ananya Patel",
+      "reason": "test",
+      "version": 1
+    },
+    "officialEdits": [],
+    "publicId": "ASM-20261101-MRUA",
+    "reportVersions": [
+      {
+        "assessmentVersion": 1,
+        "byteSize": 14507,
+        "filename": "ASM-20261101-MRUA_report_v1.pdf",
+        "generatedAt": "2026-11-01T11:30:10.275879+00:00",
+        "generatedById": "user_4",
+        "generatedByName": "Ananya Patel",
+        "reason": "First official report generated on download.",
+        "sha256": "0ef0f144e0741bd0bfb3e01e9ab84f188635bea92973ad1ba30559a36b6128b7",
+        "version": 1
+      }
+    ],
+    "status": "approved",
+    "updatedAt": "2026-11-01T11:30:10.275879+00:00",
+    "version": 1,
+    "versions": [
+      {
+        "action": "generated",
+        "at": "2026-11-01T11:29:41.308684+00:00",
+        "byId": "user_4",
+        "byName": "Ananya Patel",
+        "reason": "AI assessment generated for officer review.",
+        "version": 1
+      }
+    ]
   }
 }

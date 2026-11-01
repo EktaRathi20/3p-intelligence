@@ -10,8 +10,8 @@ interface AssessmentCardsProps {
 }
 
 export const AssessmentCards: React.FC<AssessmentCardsProps> = ({ city, infrastructure, isLightMode = true }) => {
-  const cardClass = isLightMode ? 'bg-white border-slate-200/90' : 'bg-slate-900/90 border-slate-800';
-  const titleClass = isLightMode ? 'text-slate-900' : 'text-slate-100';
+  const cardClass = isLightMode ? 'bg-white border-slate-300' : 'bg-slate-900/90 border-slate-800';
+  const titleClass = isLightMode ? 'text-[#18365b]' : 'text-slate-100';
   const mutedClass = isLightMode ? 'text-slate-500' : 'text-slate-400';
   const localZone = city.localImpact?.zone;
   const localColor = localZone === 'RED'
@@ -61,15 +61,15 @@ export const AssessmentCards: React.FC<AssessmentCardsProps> = ({ city, infrastr
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map(({ title, value, detail, icon: Icon, color }) => (
-        <section key={title} className={`border rounded-xl p-3.5 min-h-28 flex flex-col justify-between ${cardClass}`}>
-          <div className={`flex items-center gap-2 text-xs font-semibold uppercase ${mutedClass}`}>
+        <section key={title} className={`flex min-h-28 flex-col justify-between border p-3.5 shadow-sm ${cardClass}`}>
+          <div className={`flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide ${mutedClass}`}>
             <Icon size={15} className={color} /> {title}
           </div>
           <div>
-            <div className={`text-lg font-bold ${titleClass}`}>{value}</div>
-            <div className={`text-[11px] mt-1 ${mutedClass}`}>{detail}</div>
+            <div className={`text-xl font-bold tracking-tight ${titleClass}`}>{value}</div>
+            <div className={`mt-1 text-[11px] leading-4 ${mutedClass}`}>{detail}</div>
           </div>
         </section>
       ))}

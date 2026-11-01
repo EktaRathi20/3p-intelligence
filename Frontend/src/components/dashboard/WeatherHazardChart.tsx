@@ -13,9 +13,9 @@ export const WeatherHazardChart: React.FC<WeatherHazardChartProps> = ({
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const cardBg = isLightMode
-    ? 'bg-white border border-slate-200/90 shadow-xs'
+    ? 'bg-white border border-slate-300 shadow-sm'
     : 'bg-slate-900/90 border border-slate-800 shadow-sm';
-  const headingText = isLightMode ? 'text-slate-900' : 'text-slate-100';
+  const headingText = isLightMode ? 'text-[#18365b]' : 'text-slate-100';
   const labelText = isLightMode ? 'text-slate-500' : 'text-slate-400';
 
   const getWeatherIcon = (condition: string) => {
@@ -31,13 +31,13 @@ export const WeatherHazardChart: React.FC<WeatherHazardChartProps> = ({
   const pointY = (temperature: number) => 100 - (Math.max(0, Math.min(40, temperature)) / 40) * 90;
 
   return (
-    <div className={`${cardBg} rounded-xl p-3.5 flex flex-col justify-between transition-colors`}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className={`font-bold text-sm ${headingText}`}>7-Day Weather Forecast</h3>
+    <div className={`${cardBg} flex flex-col justify-between p-3.5 transition-colors`}>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className={`text-sm font-bold ${headingText}`}>7-Day Weather Forecast</h3>
       </div>
 
       {chartForecast.length === 0 ? (
-        <p className={`py-8 text-center text-sm ${labelText}`}>Forecast data is unavailable.</p>
+        <p className={`border border-dashed border-slate-300 bg-slate-50 py-8 text-center text-sm ${labelText}`}>Forecast data is unavailable.</p>
       ) : (
         <>
           <div className="mb-3 flex gap-2 overflow-x-auto pb-2 text-center text-xs sm:grid sm:grid-cols-4 sm:gap-1.5 sm:overflow-visible sm:pb-0 xl:grid-cols-7">
@@ -46,16 +46,16 @@ export const WeatherHazardChart: React.FC<WeatherHazardChartProps> = ({
                 key={`${day.date}-${index}`}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
-                className={`min-w-[5.5rem] flex-1 rounded-lg border p-2 transition-colors sm:min-w-0 sm:p-1.5 ${hoveredIndex === index ? 'bg-blue-50 border-blue-400' : isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'}`}
+                className={`min-w-[5.5rem] flex-1 border p-2 transition-colors sm:min-w-0 sm:p-1.5 ${hoveredIndex === index ? 'bg-blue-50 border-[#18365b]' : isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'}`}
               >
-                <div className={`text-[11px] font-bold ${headingText}`}>
+                <div className={`text-[11px] font-bold ${isLightMode ? 'text-slate-900' : headingText}`}>
                   {new Date(`${day.date}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short' })}
                 </div>
                 <div className={`text-[10px] mb-1 ${labelText}`}>
                   {new Date(`${day.date}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
                 </div>
                 <div className="flex justify-center my-1">{getWeatherIcon(day.condition)}</div>
-                <div className={`text-[11px] font-bold ${headingText}`}>
+                <div className={`text-[11px] font-bold ${isLightMode ? 'text-slate-900' : headingText}`}>
                   {Math.round(day.max_temp_c)}° / {Math.round(day.min_temp_c)}°
                 </div>
                 <div className={`text-[10px] mt-1 truncate ${labelText}`} title={day.condition}>{day.condition}</div>
@@ -63,7 +63,7 @@ export const WeatherHazardChart: React.FC<WeatherHazardChartProps> = ({
             ))}
           </div>
 
-          <div className={`rounded-lg p-3 ${isLightMode ? 'bg-slate-50 border border-slate-200' : 'bg-slate-950/70 border border-slate-800'}`}>
+          <div className={`${isLightMode ? 'bg-slate-50 border border-slate-200' : 'bg-slate-950/70 border border-slate-800'} p-3`}>
             <div className={`mb-2 flex flex-wrap justify-start gap-x-4 gap-y-1 text-[10px] font-semibold sm:justify-end ${labelText}`}>
               <span className="flex items-center gap-1.5"><i className="w-3 h-0.5 bg-orange-500" />Maximum (°C)</span>
               <span className="flex items-center gap-1.5"><i className="w-3 h-0.5 bg-cyan-600" />Minimum (°C)</span>
