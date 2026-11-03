@@ -1,5 +1,14 @@
 import { httpClient } from './httpClient';
 import type { TaskPriority } from '@/utils/taskReview';
+import {
+  isSimulatorActive,
+  simCreateNotification,
+  simCreateTask,
+  simListNotifications,
+  simListTasks,
+  simMarkNotificationRead,
+  simUpdateTask,
+} from '../simulator/simulatorStore';
 
 export type OperationalTaskStatus = 'Assigned' | 'In Progress' | 'Submitted';
 export type OperationalTaskSource = 'ai' | 'manual';
@@ -121,8 +130,13 @@ interface NotificationResponse {
   notification: OperationalNotification;
 }
 
+// Simulator Mode: when a drill is active, tasks and notifications are served
+// from (and written to) the isolated in-memory drill snapshot. Live paths
+// are untouched and run exactly as before when the simulator is off.
+
 export const tasksApi = {
   async list(params?: { assigneeUserId?: string; regionKey?: string; status?: string }): Promise<BackendTask[]> {
+    if (isSimulatorActive()) return simListTasks(params);
     const search = new URLSearchParams();
     if (params?.assigneeUserId) search.set('assigneeUserId', params.assigneeUserId);
     if (params?.regionKey) search.set('regionKey', params.regionKey);
@@ -132,10 +146,12 @@ export const tasksApi = {
     return result.tasks ?? [];
   },
   async create(input: CreateTaskInput): Promise<BackendTask> {
+    if (isSimulatorActive()) return simCreateTask(input);
     const result = await httpClient.post<TaskResponse, CreateTaskInput>('/tasks', input);
     return result.task;
   },
   async update(taskId: string, input: UpdateTaskInput): Promise<BackendTask> {
+    if (isSimulatorActive()) return simUpdateTask(taskId, input);
     const result = await httpClient.patch<TaskResponse, UpdateTaskInput>(
       `/tasks/${encodeURIComponent(taskId)}`,
       input,
@@ -146,9 +162,16 @@ export const tasksApi = {
 
 export const notificationsApi = {
   async list(box: 'mine' | 'inbox' | 'sent' = 'mine'): Promise<NotificationListResponse> {
+    if (isSimulatorActive()) {
+      // A drill has a single shared training inbox; box is irrelevant.
+      void box;
+      const { notifications, unread } = simListNotifications();
+      return { success: true, count: notifications.length, unread, notifications };
+    }
     return httpClient.get<NotificationListResponse>(`/notifications?box=${box}`);
   },
   async create(input: CreateNotificationInput): Promise<OperationalNotification> {
+    if (isSimulatorActive()) return simCreateNotification(input);
     const result = await httpClient.post<NotificationResponse, CreateNotificationInput>(
       '/notifications',
       input,
@@ -156,6 +179,7 @@ export const notificationsApi = {
     return result.notification;
   },
   async markRead(notificationId: string): Promise<OperationalNotification> {
+    if (isSimulatorActive()) return simMarkNotificationRead(notificationId);
     const result = await httpClient.patch<NotificationResponse>(
       `/notifications/${encodeURIComponent(notificationId)}/read`,
     );

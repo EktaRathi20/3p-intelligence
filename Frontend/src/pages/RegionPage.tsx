@@ -21,6 +21,7 @@ import type {
 import { formatGeoBreadcrumb } from "../utils/regionGeo";
 import ConfirmDialog from "../components/regions/ConfirmDialog";
 import RegionForm from "../components/regions/RegionForm";
+import { useSimulator } from "../simulator/SimulatorContext";
 
 interface RegionPageProps {
   currentUserRole?: string;
@@ -56,6 +57,7 @@ export default function RegionPage({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const { active: simulatorActive, exit: exitSimulator, zone: simulatorZone } = useSimulator();
 
   const activeRegions = regions.filter((region) => region.active !== false);
   const selectedDefault = regions.find(
@@ -193,6 +195,31 @@ export default function RegionPage({
       setSaving(false);
     }
   };
+
+  if (simulatorActive) {
+    return (
+      <div className="min-h-full bg-[#f3f5f7] p-4 text-slate-800 sm:p-6">
+        <div className="mx-auto max-w-2xl border border-amber-300 bg-amber-50 p-6 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-amber-800">
+            Simulation Mode
+          </p>
+          <h1 className="mt-1 text-lg font-bold text-slate-900">Region Management is paused during drills</h1>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+            The drill is running in {simulatorZone?.name ?? 'the simulated zone'} with fictional
+            geography. Region configuration stays on live data and is disabled until you exit
+            Simulator Mode, so live records can never change mid-drill.
+          </p>
+          <button
+            type="button"
+            onClick={exitSimulator}
+            className="mt-4 border border-[#18365b] bg-[#18365b] px-4 py-2 text-xs font-bold text-white hover:bg-[#234d77]"
+          >
+            Exit Simulator to manage regions
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

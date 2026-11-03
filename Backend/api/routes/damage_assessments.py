@@ -1,3 +1,4 @@
+
 """Officer damage-submission endpoints (per-region-per-hazard observed counts).
 
 Field, assessment, and recovery officers record observed damage counts

@@ -1,6 +1,6 @@
-
 import { AuthUser, LoginResponse, OfficerUser, Role } from "@/types";
 import { httpClient } from "./httpClient";
+import { getSimSnapshot, isSimulatorActive } from "../simulator/simulatorStore";
 
 
 
@@ -11,6 +11,9 @@ type UserListResponse = OfficerUser[] | { users: OfficerUser[] };
 type RoleListResponse = Role[] | { roles: Role[] };
 
 export async function getUsers(): Promise<OfficerUser[]> {
+  // Simulator Mode serves fictional drill officers so drill assignments can
+  // never target real users. The signed-in session itself always stays live.
+  if (isSimulatorActive()) return [...getSimSnapshot().officers];
   const result = await httpClient.get<UserListResponse>("/users");
 
   return Array.isArray(result) ? result : result.users;

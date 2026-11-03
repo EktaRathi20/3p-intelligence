@@ -32,6 +32,7 @@ import {
   type DisasterRecommendedTask,
 } from '@/types/api';
 import { api } from '@/services/api';
+import { isSimulatorActive } from '@/simulator/simulatorStore';
 import { getUsers, verifyToken } from '@/services/authApi';
 import {
   notificationsApi,
@@ -186,7 +187,7 @@ async function persistTaskToBackend(
 ): Promise<{ persisted: boolean; id: string | null; note: string }> {
   try {
     const task = await tasksApi.create(input);
-    return { persisted: true, id: task.id, note: 'Confirmed by backend' };
+    return { persisted: true, id: task.id, note: isSimulatorActive() ? 'Recorded in the simulator (live records untouched)' : 'Confirmed by backend' };
   } catch (error) {
     return {
       persisted: false,
@@ -202,7 +203,7 @@ async function updateTaskOnBackend(
 ): Promise<{ persisted: boolean; note: string }> {
   try {
     await tasksApi.update(backendId, input);
-    return { persisted: true, note: 'Confirmed by backend' };
+    return { persisted: true, note: isSimulatorActive() ? 'Recorded in the simulator (live records untouched)' : 'Confirmed by backend' };
   } catch (error) {
     return {
       persisted: false,
@@ -221,7 +222,7 @@ async function dispatchAlertToBackend(
 ): Promise<{ sent: boolean; id: string | null; note: string }> {
   try {
     const notification = await notificationsApi.create(input);
-    return { sent: true, id: notification.id, note: 'Delivered to the field officer inbox' };
+    return { sent: true, id: notification.id, note: isSimulatorActive() ? 'Recorded in the simulated inbox (no real delivery)' : 'Delivered to the field officer inbox' };
   } catch (error) {
     return {
       sent: false,

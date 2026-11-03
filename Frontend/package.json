@@ -11,7 +11,8 @@
     "lint": "tsc --noEmit",
     "test:labels": "node --test src/utils/localImpact.test.ts",
     "test:review": "node --test src/utils/taskReview.test.ts",
-    "test:recovery": "node --test src/utils/recoveryReview.test.ts"
+    "test:recovery": "node --test src/utils/recoveryReview.test.ts",
+    "test:simulator": "node --test src/simulator/simulatorStore.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

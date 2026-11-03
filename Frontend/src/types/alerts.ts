@@ -15,7 +15,7 @@ export interface ClimateAlert {
   received_at: string;
   measurements: Record<string, unknown>;
   is_simulation?: boolean;
-  simulation_tier?: 'YELLOW' | 'ORANGE' | 'RED';
+  simulation_tier?: 'YELLOW' | 'ORANGE' | 'RED' | 'GREEN';
 }
 
 export type AlertConnectionState = 'connecting' | 'connected' | 'disconnected';

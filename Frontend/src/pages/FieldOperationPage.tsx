@@ -20,6 +20,7 @@ import {
   type OperationalTaskStatus,
   type ReportPhoto,
 } from '@/services/operationalApi';
+import { isSimulatorActive } from '@/simulator/simulatorStore';
 import type { TaskPriority } from '@/utils/taskReview';
 
 type TaskStatus = OperationalTaskStatus;
@@ -181,7 +182,9 @@ export default function FieldOperationsPage() {
         task.backendId === selectedTask.backendId ? mapBackendTask(updated) : task,
       ));
       setNotice(status === 'Submitted'
-        ? 'Field report marked as submitted and confirmed by the backend. The Operations Planner has been notified.'
+        ? isSimulatorActive()
+          ? 'Field report marked as submitted in the simulator. No live records changed and nobody was notified.'
+          : 'Field report marked as submitted and confirmed by the backend. The Operations Planner has been notified.'
         : `Task started — progress set to 50%.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Unable to update the task status.');
@@ -253,7 +256,9 @@ export default function FieldOperationsPage() {
       setTasks((current) => current.map((task) =>
         task.backendId === selectedTask.backendId ? mapBackendTask(updated) : task,
       ));
-      setNotice('Field report submitted and confirmed by the backend. The Operations Planner has been notified.');
+      setNotice(isSimulatorActive()
+        ? 'Field report submitted to the simulated planner inbox. No live records changed and nobody was notified.'
+        : 'Field report submitted and confirmed by the backend. The Operations Planner has been notified.');
       setReportText('');
       setPeopleAssisted('');
       setLocationNote('');

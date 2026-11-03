@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { AlertConnectionState, ClimateAlert, createClimateAlertSocket } from '../services/climateAlerts';
+import { isSimulatorActive } from '../simulator/simulatorStore';
 
 const newestFirst = (alerts: ClimateAlert[]) =>
   alerts.sort((left, right) => Date.parse(right.received_at) - Date.parse(left.received_at));
@@ -22,7 +23,9 @@ export function useClimateAlerts() {
       .then((initialAlerts) => {
         setAlerts((current) => {
           const byId = new Map(current.map((alert) => [alert.id, alert]));
-          initialAlerts.filter((alert) => !alert.is_simulation).forEach((alert) => {
+          // Simulator Mode shows drill alerts from the snapshot; live mode
+          // keeps filtering backend-flagged simulations out, as before.
+          initialAlerts.filter((alert) => isSimulatorActive() || !alert.is_simulation).forEach((alert) => {
             if (!byId.has(alert.id)) byId.set(alert.id, alert);
           });
           return newestFirst([...byId.values()]).slice(0, 500);
@@ -47,6 +50,8 @@ export function useClimateAlerts() {
     socket.on('connect_error', () => setConnectionState('disconnected'));
     socket.on('climate_alert', (alert: ClimateAlert) => {
       if (alert.is_simulation) return;
+      // Never stream live alerts into an active drill's context.
+      if (isSimulatorActive()) return;
       setAlerts((current) => newestFirst([alert, ...current.filter((item) => item.id !== alert.id)]).slice(0, 500));
       setUnreadIds((current) => new Set(current).add(alert.id));
       setLatestLiveAlert(alert);

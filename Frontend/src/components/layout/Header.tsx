@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock3,
+  FlaskConical,
 } from "lucide-react";
 import type { AuthUser } from "@/types";
 import type { CityLocation } from "@/types/domain";
@@ -27,6 +28,9 @@ interface HeaderProps {
   onLogout?: () => void;
   onOpenMobileNavigation: () => void;
   onOpenRegionPage?: () => void;
+  onOpenSimulator?: () => void;
+  onExitSimulator?: () => void;
+  simulatorActive?: boolean;
   isMobileNavigationOpen: boolean;
   isDefaultRegion?: boolean;
 }
@@ -43,6 +47,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileNavigation,
   isMobileNavigationOpen,
   onOpenRegionPage,
+  onOpenSimulator,
+  onExitSimulator,
+  simulatorActive = false,
   isDefaultRegion = false,
 }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -158,6 +165,40 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right-side actions */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {onOpenSimulator && (
+              <button
+                type="button"
+                onClick={onOpenSimulator}
+                aria-pressed={simulatorActive}
+                title={simulatorActive ? 'Simulator Mode is ON — change the drill zone or scenario' : 'Enter Simulator Mode (training drill)'}
+                aria-label={simulatorActive ? 'Simulator Mode is on. Change the drill zone or scenario.' : 'Enter Simulator Mode'}
+                className={`inline-flex items-center gap-1.5 border px-3 py-2 text-xs font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b45309] ${
+                  simulatorActive
+                    ? 'border-[#b45309] bg-[#b45309] text-white hover:bg-[#92400e]'
+                    : 'border-dashed border-[#b45309] bg-amber-50 text-amber-900 hover:bg-amber-100'
+                }`}
+              >
+                <FlaskConical size={15} />
+                <span className="hidden sm:inline">Simulator</span>
+                {simulatorActive && (
+                  <span className="bg-white px-1 py-px text-[9px] font-black uppercase tracking-widest text-[#b45309]">
+                    On
+                  </span>
+                )}
+              </button>
+            )}
+            {simulatorActive && onExitSimulator && (
+              <button
+                type="button"
+                onClick={onExitSimulator}
+                title="Exit Simulator Mode and return to live data"
+                aria-label="Exit Simulator Mode and return to live data"
+                className="inline-flex items-center gap-1.5 border border-[#7c2d12] bg-[#7c2d12] px-3 py-2 text-xs font-bold text-white hover:bg-[#5f220e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7c2d12]"
+              >
+                <LogOut size={15} />
+                <span className="hidden sm:inline">Exit to Live</span>
+              </button>
+            )}
             {/* Notifications opens a dropdown; full page opens only from its link */}
             <div ref={notificationsRef} className="relative">
               <button

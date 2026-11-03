@@ -1,5 +1,23 @@
 import { httpClient } from './httpClient';
 import { getAccessToken } from './authApi';
+import {
+  isSimulatorActive,
+  simAssessmentReports,
+  simCreateAssessment,
+  simCreateDamage,
+  simCreateEvidence,
+  simCreateExpense,
+  simDecideAssessment,
+  simDownloadReport,
+  simEditAssessment,
+  simGetAssessment,
+  simListAssessments,
+  simListDamages,
+  simListEvidence,
+  simListExpenses,
+  simListFeedback,
+  simRegenerateReport,
+} from '../simulator/simulatorStore';
 
 export type AssessmentStatus = 'pending_review' | 'approved' | 'rejected';
 export type FigureConfidence = 'High' | 'Medium' | 'Low';
@@ -362,8 +380,13 @@ function apiBase(): string {
   return (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
 }
 
+// Simulator Mode: when a drill is active, recovery records are served from
+// (and written to) the isolated in-memory drill snapshot. Live paths are
+// untouched and run exactly as before when the simulator is off.
+
 export const assessmentsApi = {
   async list(params?: { status?: string; regionKey?: string; hazardId?: string }): Promise<AssessmentSummary[]> {
+    if (isSimulatorActive()) return simListAssessments(params);
     const search = new URLSearchParams();
     if (params?.status) search.set('status', params.status);
     if (params?.regionKey) search.set('regionKey', params.regionKey);
@@ -373,6 +396,7 @@ export const assessmentsApi = {
     return result.assessments ?? [];
   },
   async get(assessmentId: string): Promise<AssessmentDetail> {
+    if (isSimulatorActive()) return simGetAssessment(assessmentId);
     const result = await httpClient.get<AssessmentResponse>(
       `/assessments/${encodeURIComponent(assessmentId)}`,
     );
@@ -384,6 +408,7 @@ export const assessmentsApi = {
     observed: ObservedInputs;
     notes?: string;
   }): Promise<AssessmentDetail> {
+    if (isSimulatorActive()) return simCreateAssessment(input);
     const result = await httpClient.post<AssessmentResponse, typeof input>('/assessments', input);
     return result.assessment;
   },
@@ -391,6 +416,7 @@ export const assessmentsApi = {
     assessmentId: string,
     edits: { path: string; newValue: number | null; reason: string }[],
   ): Promise<AssessmentDetail> {
+    if (isSimulatorActive()) return simEditAssessment(assessmentId, edits);
     const result = await httpClient.patch<AssessmentResponse, { edits: typeof edits }>(
       `/assessments/${encodeURIComponent(assessmentId)}`,
       { edits },
@@ -401,6 +427,7 @@ export const assessmentsApi = {
     assessmentId: string,
     input: { action: 'accept' | 'reject'; reason: string },
   ): Promise<AssessmentDetail> {
+    if (isSimulatorActive()) return simDecideAssessment(assessmentId, input);
     const result = await httpClient.post<AssessmentResponse, typeof input>(
       `/assessments/${encodeURIComponent(assessmentId)}/decision`,
       input,
@@ -408,12 +435,14 @@ export const assessmentsApi = {
     return result.assessment;
   },
   async reports(assessmentId: string): Promise<ReportVersion[]> {
+    if (isSimulatorActive()) return simAssessmentReports(assessmentId);
     const result = await httpClient.get<ReportListResponse>(
       `/assessments/${encodeURIComponent(assessmentId)}/reports`,
     );
     return result.reports ?? [];
   },
   async regenerateReport(assessmentId: string, reason: string): Promise<ReportVersion[]> {
+    if (isSimulatorActive()) return simRegenerateReport(assessmentId, reason);
     const result = await httpClient.post<ReportListResponse, { reason: string }>(
       `/assessments/${encodeURIComponent(assessmentId)}/reports/regenerate`,
       { reason },
@@ -422,6 +451,7 @@ export const assessmentsApi = {
   },
   /** Download official PDF bytes. Only approved assessments have reports. */
   async downloadReport(assessmentId: string, version?: number): Promise<{ blob: Blob; filename: string }> {
+    if (isSimulatorActive()) return simDownloadReport(assessmentId, version);
     const suffix = version !== undefined ? `?version=${version}` : '';
     const response = await fetch(
       `${apiBase()}/assessments/${encodeURIComponent(assessmentId)}/report.pdf${suffix}`,
@@ -480,6 +510,7 @@ interface EvidenceResponse {
 
 export const damageAssessmentsApi = {
   async list(params?: { regionKey?: string; hazardId?: string }): Promise<DamageAssessment[]> {
+    if (isSimulatorActive()) return simListDamages(params);
     const search = new URLSearchParams();
     if (params?.regionKey) search.set('regionKey', params.regionKey);
     if (params?.hazardId) search.set('hazardId', params.hazardId);
@@ -488,6 +519,7 @@ export const damageAssessmentsApi = {
     return result.damageAssessments ?? [];
   },
   async create(input: DamageAssessmentInput): Promise<DamageAssessment> {
+    if (isSimulatorActive()) return simCreateDamage(input);
     const result = await httpClient.post<DamageResponse, DamageAssessmentInput>(
       '/damage-assessments',
       input,
@@ -498,6 +530,7 @@ export const damageAssessmentsApi = {
 
 export const expensesApi = {
   async list(params?: { regionKey?: string; hazardId?: string; kind?: string }): Promise<{ expenses: ExpenseRecord[]; totalInr: number }> {
+    if (isSimulatorActive()) return simListExpenses(params);
     const search = new URLSearchParams();
     if (params?.regionKey) search.set('regionKey', params.regionKey);
     if (params?.hazardId) search.set('hazardId', params.hazardId);
@@ -507,6 +540,7 @@ export const expensesApi = {
     return { expenses: result.expenses ?? [], totalInr: result.totalInr ?? 0 };
   },
   async create(input: ExpenseInput): Promise<ExpenseRecord> {
+    if (isSimulatorActive()) return simCreateExpense(input);
     const result = await httpClient.post<ExpenseResponse, ExpenseInput>('/expenses', input);
     return result.expense;
   },
@@ -514,6 +548,7 @@ export const expensesApi = {
 
 export const evidenceApi = {
   async list(params?: { regionKey?: string; linkedKind?: string; linkedId?: string }): Promise<EvidenceAttachment[]> {
+    if (isSimulatorActive()) return simListEvidence(params);
     const search = new URLSearchParams();
     if (params?.regionKey) search.set('regionKey', params.regionKey);
     if (params?.linkedKind) search.set('linkedKind', params.linkedKind);
@@ -523,6 +558,7 @@ export const evidenceApi = {
     return result.evidence ?? [];
   },
   async create(input: EvidenceInput): Promise<EvidenceAttachment> {
+    if (isSimulatorActive()) return simCreateEvidence(input);
     const result = await httpClient.post<EvidenceResponse, EvidenceInput>('/evidence', input);
     return result.evidence;
   },
@@ -530,6 +566,7 @@ export const evidenceApi = {
 
 export const assessmentFeedbackApi = {
   async list(params?: { status?: string; hazardId?: string }): Promise<FeedbackItem[]> {
+    if (isSimulatorActive()) return simListFeedback(params);
     const search = new URLSearchParams();
     if (params?.status) search.set('status', params.status);
     if (params?.hazardId) search.set('hazardId', params.hazardId);
@@ -538,6 +575,7 @@ export const assessmentFeedbackApi = {
     return result.feedback ?? [];
   },
   async analysis(hazardId?: string): Promise<{ engineVersion: string; rows: AnalysisRow[] }> {
+    if (isSimulatorActive()) return { engineVersion: 'simulator-1.0', rows: [] };
     const suffix = hazardId ? `?hazardId=${encodeURIComponent(hazardId)}` : '';
     const result = await httpClient.get<AnalysisResponse>(`/assessment-feedback/analysis${suffix}`);
     return { engineVersion: result.engineVersion, rows: result.rows ?? [] };

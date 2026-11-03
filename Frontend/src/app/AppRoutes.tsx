@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import DashboardProvider from "./DashboardProvider";
+import { SimulatorProvider, useSimulator } from "../simulator/SimulatorContext";
 import Layout from "./Layout";
 import LoginPage from "../pages/LoginPage";
 import type { AuthUser } from "../types";
@@ -136,7 +137,9 @@ export default function AppRoutes() {
           <Route
             element={
               isLoggedIn && currentUser ? (
-                <DashboardProvider />
+                <SimulatorProvider>
+                  <ModeKeyedDashboard />
+                </SimulatorProvider>
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -207,6 +210,15 @@ export default function AppRoutes() {
       )}
     </BrowserRouter>
   );
+}
+
+/**
+ * Remounts the dashboard subtree on every Live <-> Simulator switch so all
+ * modules refetch consistently from the newly active data source.
+ */
+function ModeKeyedDashboard() {
+  const { modeKey } = useSimulator();
+  return <DashboardProvider key={modeKey} />;
 }
 
 function LoginRoute({

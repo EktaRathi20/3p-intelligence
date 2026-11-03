@@ -5,6 +5,8 @@
 // messages are preserved so validation errors (400/409) and sync errors
 // (503) reach the UI verbatim.
 
+import { getSimSnapshot, isSimulatorActive } from '../simulator/simulatorStore';
+
 const API_BASE = (
   import.meta.env.VITE_API_BASE_URL || "/api"
 ).replace(/\/$/, "");
@@ -189,8 +191,20 @@ function buildQuery(params: Record<string, string | number | undefined>) {
   return text ? `?${text}` : "";
 }
 
+// Simulator Mode: when a drill is active, region reads are served from the
+// isolated in-memory drill snapshot, and region writes are refused so live
+// configuration can never change. Live paths run exactly as before when off.
+
+const SIM_REGION_WRITE_ERROR =
+  "Region configuration is disabled in Simulator Mode. Exit the simulator to manage live regions.";
+
 export const regionApi = {
   async getRegions(signal?: AbortSignal) {
+    if (isSimulatorActive()) {
+      void signal;
+      const items = getSimSnapshot().regionItems;
+      return { items, count: items.length };
+    }
     const result = await request<{
       items?: Region[];
       regions?: Region[];
@@ -203,6 +217,11 @@ export const regionApi = {
   },
 
   async getRegion(id: string, signal?: AbortSignal) {
+    if (isSimulatorActive()) {
+      void id;
+      void signal;
+      return getSimSnapshot().regionRecord;
+    }
     const result = await request<{ region: Region }>(
       `/regions/${encodeURIComponent(id)}`,
       { signal },
@@ -212,6 +231,7 @@ export const regionApi = {
   },
 
   async createRegion(data: RegionPayload) {
+    if (isSimulatorActive()) throw new RegionApiError(SIM_REGION_WRITE_ERROR, 403);
     const result = await request<{ region: Region }>("/regions", {
       method: "POST",
       body: JSON.stringify(data),
@@ -221,6 +241,7 @@ export const regionApi = {
   },
 
   async updateRegion(id: string, data: RegionPayload) {
+    if (isSimulatorActive()) throw new RegionApiError(SIM_REGION_WRITE_ERROR, 403);
     const result = await request<{ region: Region }>(
       `/regions/${encodeURIComponent(id)}`,
       {
@@ -233,6 +254,7 @@ export const regionApi = {
   },
 
   async deleteRegion(id: string) {
+    if (isSimulatorActive()) throw new RegionApiError(SIM_REGION_WRITE_ERROR, 403);
     return request<{ success: boolean; message: string }>(
       `/regions/${encodeURIComponent(id)}`,
       { method: "DELETE" },
@@ -240,6 +262,11 @@ export const regionApi = {
   },
 
   async getHazards(signal?: AbortSignal) {
+    if (isSimulatorActive()) {
+      void signal;
+      const items = getSimSnapshot().hazards;
+      return { items, count: items.length };
+    }
     const result = await request<{
       items?: Hazard[];
       hazards?: Hazard[];
@@ -328,6 +355,10 @@ export const regionApi = {
   },
 
   async getConfiguration(signal?: AbortSignal): Promise<RegionConfiguration> {
+    if (isSimulatorActive()) {
+      void signal;
+      return getSimSnapshot().regionConfig;
+    }
     const result = await request<{
       configuration?: RegionConfiguration;
       defaultRegionId?: string | null;
@@ -341,6 +372,7 @@ export const regionApi = {
   },
 
   async saveConfiguration(config: RegionConfiguration) {
+    if (isSimulatorActive()) throw new RegionApiError(SIM_REGION_WRITE_ERROR, 403);
     // Check whether the region configuration record already exists.
     const current = await request<{
       exists?: boolean;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { BellRing, CloudRain, LoaderCircle, MapPin, RotateCcw, X } from 'lucide-react';
 import { Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { ClimateAlert } from '../services/climateAlerts';
@@ -6,6 +6,9 @@ import type { AuthUser } from '../types';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { EvacuationModal } from '@/components/dashboard/modals/EvacuationModal';
+import { SimulatorBanner } from '@/simulator/SimulatorBanner';
+import { SimulatorSetupModal } from '@/simulator/SimulatorSetupModal';
+import { useSimulator } from '@/simulator/SimulatorContext';
 import type { DashboardOutletData } from '../types/dashboard';
 
 interface LayoutProps {
@@ -28,6 +31,8 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
   const navigate = useNavigate();
   const dashboard = useOutletContext<DashboardOutletData>();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const simulator = useSimulator();
+  const [isSimulatorSetupOpen, setIsSimulatorSetupOpen] = useState(false);
   const currentMode = routeModes[location.pathname as keyof typeof routeModes] ?? 'threat';
   const isHistoricalView = location.pathname === '/history';
   const isNotificationView = location.pathname === '/alerts';
@@ -56,7 +61,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         {dashboard.regionLoading ? (
           <div role="status" className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
             <LoaderCircle size={18} className="animate-spin text-cyan-800" />
-            <span>Loading the configured default region…</span>
+            <span>Loading the configured default regionâ€¦</span>
           </div>
         ) : (
           <div role="alert" className="w-full max-w-lg rounded-lg border border-amber-300 bg-white p-5 shadow-sm">
@@ -99,7 +104,15 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         currentUser={currentUser}
         onLogout={onLogout}
          onOpenRegionPage={() => navigate("/region-management")}
+        onOpenSimulator={() => setIsSimulatorSetupOpen(true)}
+        onExitSimulator={() => {
+          simulator.exit();
+          navigate('/overview');
+        }}
+        simulatorActive={simulator.active}
       />
+
+      <SimulatorBanner />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-row" style={{maxHeight: '80vh'}}>
         <Sidebar
@@ -156,7 +169,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
           )}
           {dashboard.regionLoading && (
             <div role="status" aria-live="polite" className="mb-4 flex items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2.5 text-xs font-medium text-cyan-950">
-              <LoaderCircle size={15} className="animate-spin" /> Loading live region data and disaster intelligence…
+              <LoaderCircle size={15} className="animate-spin" /> Loading live region data and disaster intelligenceâ€¦
             </div>
           )}
           {isOverviewMode && (
@@ -181,7 +194,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
                     <div className="text-[10px] text-slate-500 font-medium">Current Conditions</div>
                     <div className="flex items-baseline gap-1.5">
                       <span className="font-bold text-sm font-mono text-slate-900">
-                        {dashboard.regionResponses?.currentConditions?.temperature_c == null ? 'Unavailable' : `${dashboard.regionResponses.currentConditions.temperature_c}°C`}
+                        {dashboard.regionResponses?.currentConditions?.temperature_c == null ? 'Unavailable' : `${dashboard.regionResponses.currentConditions.temperature_c}Â°C`}
                       </span>
                       <span className="max-w-48 truncate text-[11px] font-medium text-slate-600">
                         {dashboard.regionResponses?.currentConditions?.condition ?? dashboard.regionResponses?.currentConditionsError ?? 'Waiting for current weather data'}
@@ -206,6 +219,10 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         </main>
       </div>
 
+      <SimulatorSetupModal
+        isOpen={isSimulatorSetupOpen}
+        onClose={() => setIsSimulatorSetupOpen(false)}
+      />
       <EvacuationModal
         isOpen={dashboard.isEvacuationModalOpen}
         onClose={() => dashboard.setIsEvacuationModalOpen(false)}
@@ -238,7 +255,7 @@ function AlertToast({ alert, onClose }: { alert: ClimateAlert; onClose: () => vo
           </div>
           <p className="mt-1 text-sm font-bold leading-snug">{alert.title}</p>
           <p className="mt-1 line-clamp-3 text-xs leading-relaxed opacity-85">{alert.description}</p>
-          <p className="mt-2 text-[10px] font-semibold opacity-75">{alert.location.name} · closes automatically</p>
+          <p className="mt-2 text-[10px] font-semibold opacity-75">{alert.location.name} Â· closes automatically</p>
         </div>
         <button type="button" onClick={onClose} aria-label="Dismiss alert toast" className="rounded p-1 opacity-70 hover:bg-black/5 hover:opacity-100"><X size={16} /></button>
       </div>

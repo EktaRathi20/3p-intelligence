@@ -12,6 +12,7 @@ import type {
 import { ClimateAlert } from '../services/climateAlerts';
 import { useClimateAlerts } from '../hooks/useClimateAlerts';
 import { buildCity } from '../utils/transformers';
+import { getSimSnapshot, isSimulatorActive } from '../simulator/simulatorStore';
 import type { DashboardOutletData } from '../types/dashboard';
 import { isAbortError } from '../services/apiError';
 
@@ -33,7 +34,9 @@ export default function DashboardProvider() {
   const [regions, setRegions] = useState<Record<string, ApiRegion>>({});
   const [selectedRegionKey, setSelectedRegionKey] = useState('');
   const [defaultRegionKey, setDefaultRegionKey] = useState<string | null>(null);
-  const [selectedHazard, setSelectedHazard] = useState('cyclone');
+  const [selectedHazard, setSelectedHazard] = useState(() =>
+    isSimulatorActive() ? (getSimSnapshot().intelligence.hazard ?? 'cyclone') : 'cyclone',
+  );
   const [hazardCapabilities, setHazardCapabilities] = useState<DisasterIntelligenceCapabilities | null>(null);
   const [regionResponses, setRegionResponses] = useState<RegionResponses | null>(null);
   const [regionLoading, setRegionLoading] = useState(true);
@@ -71,6 +74,16 @@ export default function DashboardProvider() {
     if (!latestLiveAlert) return;
     setToastAlert(latestLiveAlert);
   }, [latestLiveAlert]);
+
+  useEffect(() => {
+    // Drill entry pops the scenario's headline alert through the same toast
+    // the app uses for live alerts (badged TEST via is_simulation).
+    if (!isSimulatorActive()) return;
+    const headline = getSimSnapshot().alerts[0];
+    if (!headline) return;
+    const timer = window.setTimeout(() => setToastAlert(headline), 900);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!toastAlert) return;
