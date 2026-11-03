@@ -483,10 +483,6 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
   const [alertsLoading, setAlertsLoading] = useState(true);
   const [alertsError, setAlertsError] = useState<string | null>(null);
   const [alertsRefresh, setAlertsRefresh] = useState(0);
-  const [waConfig, setWaConfig] = useState<{
-    verification_configured: boolean;
-    delivery_configured: boolean;
-  } | null>(null);
 
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [operationalDeadline] = useState(() => Date.now() + TASK_DEADLINE_MS);
@@ -887,10 +883,6 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
       .finally(() => {
         if (!controller.signal.aborted) setAlertsLoading(false);
       });
-    api
-      .getWhatsAppConfiguration(controller.signal)
-      .then((config) => setWaConfig(config))
-      .catch(() => setWaConfig(null));
     return () => controller.abort();
   }, [alertsRefresh]);
 
@@ -2090,14 +2082,6 @@ export const TaskEvacuationModeView: FC<TaskEvacuationModeViewProps> = ({
                 Delivery status
               </h4>
               <ul className="space-y-1.5 px-3 py-2.5 text-xs text-slate-700">
-                <li>
-                  WhatsApp verification:{' '}
-                  <strong>{waConfig ? (waConfig.verification_configured ? 'Configured' : 'Not configured') : 'Unknown'}</strong>
-                </li>
-                <li>
-                  WhatsApp delivery:{' '}
-                  <strong>{waConfig ? (waConfig.delivery_configured ? 'Configured' : 'Not configured') : 'Unknown'}</strong>
-                </li>
                 <li>
                   Operational dispatch: <strong>Available</strong> — sent alerts reach the field officer inbox.
                 </li>

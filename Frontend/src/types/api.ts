@@ -118,11 +118,6 @@ export interface DisasterIntelligenceCapabilities {
   };
 }
 
-export interface WhatsAppConfigurationResponse {
-  verification_configured: boolean;
-  delivery_configured: boolean;
-}
-
 export interface DisasterRiskZone {
   id: string;
   label: string;

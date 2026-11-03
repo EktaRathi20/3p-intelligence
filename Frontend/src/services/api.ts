@@ -10,7 +10,6 @@ import type {
   HistoricalResponse,
   InfrastructureResponse,
   PopulationResponse,
-  WhatsAppConfigurationResponse,
 } from '../types/api';
 import type { ClimateAlert } from '../types/alerts';
 
@@ -42,8 +41,6 @@ export const api = {
       + (params.hazard ? `&hazard=${encodeURIComponent(params.hazard)}` : ''),
       { signal, timeout: HISTORY_TIMEOUT_MS },
     ),
-  getWhatsAppConfiguration: (signal?: AbortSignal) =>
-    httpClient.get<WhatsAppConfigurationResponse>('/whatsapp/configuration', { signal }),
   getClimateAlerts: (signal?: AbortSignal) =>
     httpClient.get<ClimateAlert[]>('/alerts', { params: { limit: 500 }, signal }),
   sendDispatchChat: (query: string, region: string) =>
@@ -58,8 +55,4 @@ export const api = {
       `/disaster-intelligence/${encodeURIComponent(region)}/capabilities`,
       { signal },
     ),
-  startWhatsAppVerification: (phone: string) =>
-    httpClient.post<{ status: string }>('/whatsapp/verification/start', { phone }),
-  checkWhatsAppVerification: (phone: string, code: string, action: 'subscribe' | 'unsubscribe') =>
-    httpClient.post<{ status: string; action: string; welcome_message: 'queued' | 'already_subscribed' | 'not_configured' | 'not_applicable' }>('/whatsapp/verification/check', { phone, code, action }),
 };

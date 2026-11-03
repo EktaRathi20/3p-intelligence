@@ -26,17 +26,6 @@ class SimulatorAlertInput(BaseModel):
     region_key: str = Field(min_length=1, max_length=80)
     tier: Literal["YELLOW", "ORANGE", "RED"]
     ward: str = Field(min_length=1, max_length=160)
-    phone: str | None = Field(default=None, pattern=r"^\+[1-9]\d{7,14}$")
-
-
-class WhatsAppVerificationStart(BaseModel):
-    phone: str = Field(pattern=r"^\+[1-9]\d{7,14}$")
-
-
-class WhatsAppVerificationCheck(BaseModel):
-    phone: str = Field(pattern=r"^\+[1-9]\d{7,14}$")
-    code: str = Field(pattern=r"^\d{4,10}$")
-    action: Literal["subscribe", "unsubscribe"]
 
 
 class DispatchChatRequest(BaseModel):

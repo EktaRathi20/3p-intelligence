@@ -29,7 +29,7 @@ The pipeline should normalize and timestamp data, check freshness and quality, e
 Never claim a disaster is certain because an AI generated a response. If evidence is insufficient, label the result uncertain or unavailable.
 
 ### Stage 2 — Alert Role 1
-Notify the appropriate Role 1 officers through in-app alerts and configured channels such as WhatsApp. Include event type/status, location, expected time window, risk/probability if available, evidence-based explanation, source freshness, and a link to details.
+Notify the appropriate Role 1 officers through in-app alerts and configured channels. Include event type/status, location, expected time window, risk/probability if available, evidence-based explanation, source freshness, and a link to details.
 
 Track delivery. Implement retries, deduplication, failure states, and an in-app fallback. Real messages must require explicit environment and recipient configuration.
 
@@ -86,7 +86,7 @@ Technologies are not interchangeable; choose based on capability.
 - Handle timeouts, rate limits, provider outages, and fallback behavior. Never fabricate probabilities, evidence, or citations. Clearly label mocks and demos.
 
 ## 7. Workflow and Notification Reliability
-Provide durable event/workflow states, in-app and optional WhatsApp notifications, delivery status/retries/deduplication, idempotent jobs, controlled state transitions, audit logs, real-time updates where useful, and manual fallback. Reuse existing infrastructure unless a clear gap justifies a change.
+Provide durable event/workflow states, in-app notifications, delivery status/retries/deduplication, idempotent jobs, controlled state transitions, audit logs, real-time updates where useful, and manual fallback. Reuse existing infrastructure unless a clear gap justifies a change.
 
 ## 8. Core Data Concepts
 Inspect existing schemas first. Relevant concepts may include:

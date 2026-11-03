@@ -1,0 +1,98 @@
+{
+  "3Bbfenr1TzIszuJOWfKN": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T02:24:06.912719+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 400): \n\u001b[31m\u001b[49mHTTP Error\u001b[0m \u001b[37m\u001b[49mYour request was:\u001b[0m\n\n\u001b[36m\u001b[49mPOST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json\u001b[0m\n\n\u001b[37m\u001b[49mTwilio returned the following information:\u001b[0m\n\n\u001b[34m\u001b[49mUnable to create record: The ContentSid is Invalid\u001b[0m\n\n\u001b[37m\u001b[",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919462421432"
+  },
+  "EwscDIboSEgCbMq3gG3A": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T04:05:35.524843+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 400, code 21655): HTTP Error Your request was: POST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json Twilio returned the following information: Unable to create record: The ContentSid is Invalid More information may be available here: https://www.twilio.com/docs/er",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919462421432"
+  },
+  "QxqYcCARPCbDo2VplRj2": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T02:36:48.560448+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 400, code 21655): HTTP Error Your request was: POST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json Twilio returned the following information: Unable to create record: The ContentSid is Invalid More information may be available here: https://www.twilio.com/docs/er",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919462421432"
+  },
+  "TtYNc7loTJCWK1oWxLQP": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T02:51:59.170896+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 422, code 572002): HTTP Error Your request was: POST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json Twilio returned the following information: Unable to create record: No Twilio trial phone number is assigned for messaging to this destination number. Please add t",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919460891432"
+  },
+  "YTh6D3lK42YaUalZnLLm": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T04:01:40.204636+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 400, code 21655): HTTP Error Your request was: POST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json Twilio returned the following information: Unable to create record: The ContentSid is Invalid More information may be available here: https://www.twilio.com/docs/er",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919462421432"
+  },
+  "hb3agYqODGji7BdlFkN9": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T02:23:52.171208+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 422): \n\u001b[31m\u001b[49mHTTP Error\u001b[0m \u001b[37m\u001b[49mYour request was:\u001b[0m\n\n\u001b[36m\u001b[49mPOST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json\u001b[0m\n\n\u001b[37m\u001b[49mTwilio returned the following information:\u001b[0m\n\n\u001b[34m\u001b[49mUnable to create record: No Twilio trial phone number is assign",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919460891432"
+  },
+  "oevDfEn0x6QPAmt274pm": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T02:44:41.764540+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 400, code 21655): HTTP Error Your request was: POST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json Twilio returned the following information: Unable to create record: The ContentSid is Invalid More information may be available here: https://www.twilio.com/docs/er",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919462421432"
+  },
+  "t2yPLv2OZFXizmId9V9v": {
+    "action": "otp.requested",
+    "actor": "system",
+    "createdAt": "2026-11-03T02:53:38.247675+00:00",
+    "detail": {
+      "error": "Twilio send failed (HTTP 422, code 572002): HTTP Error Your request was: POST /Accounts/AC5a7a040dac443ffa78b8d04b7205f16c/Messages.json Twilio returned the following information: Unable to create record: No Twilio trial phone number is assigned for messaging to this destination number. Please add t",
+      "ok": false,
+      "purpose": "subscribe"
+    },
+    "targetId": null,
+    "targetPhone": "+919460891432"
+  }
+}

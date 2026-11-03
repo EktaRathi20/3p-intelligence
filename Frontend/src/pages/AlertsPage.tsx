@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { BellRing, CheckCheck, LoaderCircle, RotateCcw } from 'lucide-react';
+import { BellRing, CheckCheck, LoaderCircle, Lock, MessageCircle, Radio, RotateCcw } from 'lucide-react';
 import { Notification } from '@/components/dashboard/modes/NotificationModeView';
 import type { DashboardOutletData } from '../types/dashboard';
 import {
@@ -151,6 +151,42 @@ export default function AlertsPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="space-y-3" aria-label="Notification channels">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2.5">
+            <span className="border border-slate-200 bg-white p-2 text-[#18365b]">
+              <Radio size={17} />
+            </span>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Notification channels</h2>
+              <p className="text-xs text-slate-500">Where alerts can be delivered</p>
+            </div>
+          </div>
+        </header>
+
+        <div
+          title="WhatsApp emergency alerts will be available in a future update."
+          aria-disabled="true"
+          className="flex cursor-not-allowed items-center gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 opacity-70"
+        >
+          <span className="border border-slate-200 bg-white p-2 text-slate-400">
+            <MessageCircle size={17} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-700">
+              WhatsApp Alerts
+              <span className="rounded-sm border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-900">
+                Upcoming Feature
+              </span>
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              WhatsApp emergency alerts will be available in a future update.
+            </p>
+          </div>
+          <Lock size={15} className="shrink-0 text-slate-400" />
+        </div>
       </section>
 
       <Notification

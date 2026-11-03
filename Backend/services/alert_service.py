@@ -7,7 +7,6 @@ from uuid import uuid4
 from fastapi import BackgroundTasks
 
 from ingestion_layer.constant import REGION_DATA
-from integrations.whatsapp import get_configuration_status, send_alert_to_subscribers
 
 
 alerts: deque[dict[str, Any]] = deque(maxlen=500)
@@ -76,18 +75,12 @@ async def emit_risk_assessment_alert(
     }
     alerts.appendleft(record)
     await socket_server.emit("climate_alert", record)
-    if get_configuration_status()["delivery_configured"]:
-        background_tasks.add_task(send_alert_to_subscribers, record)
 
 
 async def publish_alert(
     record: dict[str, Any],
     background_tasks: BackgroundTasks,
     socket_server,
-    *,
-    notify_subscribers: bool = True,
 ) -> None:
     alerts.appendleft(record)
     await socket_server.emit("climate_alert", record)
-    if notify_subscribers and get_configuration_status()["delivery_configured"]:
-        background_tasks.add_task(send_alert_to_subscribers, record)

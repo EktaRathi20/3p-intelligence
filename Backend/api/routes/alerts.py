@@ -8,7 +8,6 @@ from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query, Re
 from ingestion_layer.constant import REGION_DATA
 from schemas.requests import ClimateAlertInput, SimulatorAlertInput
 from services.alert_service import alerts, publish_alert
-from integrations.whatsapp import get_configuration_status, send_whatsapp_message
 
 
 router = APIRouter()
@@ -97,21 +96,10 @@ async def broadcast_simulator_alert(
         record,
         background_tasks,
         request.app.state.socket_server,
-        notify_subscribers=False,
-    )
-    delivery_configured = get_configuration_status()["delivery_configured"]
-    if payload.phone and delivery_configured:
-        background_tasks.add_task(send_whatsapp_message, payload.phone, message_description)
-    whatsapp_status = (
-        "not_requested" if not payload.phone
-        else "queued" if delivery_configured
-        else "not_configured"
     )
     return {
         "alert": record,
-        "whatsapp_preview": message_description,
         "channels": {
             "socket_io": "broadcasted",
-            "whatsapp": whatsapp_status,
         },
     }
