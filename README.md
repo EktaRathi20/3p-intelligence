@@ -413,12 +413,12 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    R[Live readings + history] --> D[Deterministic screening<br/>IMD wind + WMO wave bands<br/>ALWAYS RUNS]
-    D --> S[Score 0-100<br/>→ GREEN/YELLOW/ORANGE/RED]
-    R --> M[H2O severity model<br/>OPTIONAL]
-    M -->|adds probability| S
-    S --> L[Meta Llama Reasoning Layer (Important)]
-    L -->|adds summary + tasks| OUT[Assessment response<br/>with sources + confidence]
+    R["Live readings + history"] --> D["Deterministic screening<br/>IMD wind + WMO wave bands<br/>ALWAYS RUNS"]
+    D --> S["Score 0-100<br/>GREEN / YELLOW / ORANGE / RED"]
+    R --> M["H2O severity model<br/>OPTIONAL"]
+    M -->|"Adds probability"| S
+    S --> L["Meta Llama reasoning layer"]
+    L -->|"Adds summary + tasks"| OUT["Assessment response<br/>with sources + confidence"]
     D --> OUT
 ```
 
