@@ -4,5 +4,4 @@ Backend/Backend/
 Frontend/Frontend/
 
 # Generated geo dataset (large; regenerate with Backend/scripts/sync_geo_data.py)
-database/cities.json
 database/*.tmp
