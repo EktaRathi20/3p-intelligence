@@ -61,7 +61,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
         {dashboard.regionLoading ? (
           <div role="status" className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
             <LoaderCircle size={18} className="animate-spin text-cyan-800" />
-            <span>Loading the configured default regionâ€¦</span>
+            <span>Loading the configured default region</span>
           </div>
         ) : (
           <div role="alert" className="w-full max-w-lg rounded-lg border border-amber-300 bg-white p-5 shadow-sm">
@@ -169,7 +169,7 @@ export default function Layout({ currentUser, onLogout }: LayoutProps) {
           )}
           {dashboard.regionLoading && (
             <div role="status" aria-live="polite" className="mb-4 flex items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2.5 text-xs font-medium text-cyan-950">
-              <LoaderCircle size={15} className="animate-spin" /> Loading live region data and disaster intelligenceâ€¦
+              <LoaderCircle size={15} className="animate-spin" /> Loading live region data and disaster intelligence
             </div>
           )}
           {isOverviewMode && (
