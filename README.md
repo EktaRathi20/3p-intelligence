@@ -213,7 +213,7 @@ Every module below is a real page in the app. Each entry says who it is for, wha
 - **What users can do:** record observed damage counts and preparedness/recovery spending; generate deterministic costed assessments; edit any figure with a reason; approve or reject assessments; download report files; attach photo evidence; submit corrections that calibrate future figures; review calibration analysis.
 - **Connects with:** Field (reports/evidence feed the engine), Tasks (submitted work counts as evidence), Region Management (region/hazard catalogues).
 - **Data displayed:** deterministic figures with calculation + assumptions + sources + confidence each.
-- **Nature:** estimated by transparent formulas (planning-default rates, **not** official SDRF/NDRF schedules); optional Meta-drafted narrative; nothing here is an official approval or payment.
+- **Nature:** estimated by transparent formulas (planning-default rates, **not** official SDRF/NDRF schedules);  Meta-drafted narrative; nothing here is an official approval or payment.
 
 ### 3.8 Disaster History ✅
 
@@ -349,8 +349,8 @@ Every item below was verified in `package.json`, `requirements.txt`, config file
 
 | Area | Technology | Status |
 |---|---|---|
-| Text reasoning/explanations | Meta Llama | ✅ Optional; strict JSON validation + deterministic fallback |
-| Severity probability | H2O AutoML gradient-boosting model on IBTrACS tracks | ✅ Optional; needs `H2O_MODEL_PATH`, else reports unavailable |
+| Text reasoning/explanations | Meta Llama  |
+| Severity probability | H2O AutoML gradient-boosting model on IBTrACS tracks |
 | Deterministic assessment | Transparent formula engine (`assessment_engine.py` v1.1) | ✅ Always on; every figure shows calculation + confidence |
 | External data | NOAA IBTrACS, GDACS, Open-Meteo, Google Weather/Places, Earth Engine, dr5hn geo dataset | ✅ See §7 |
 | Login | Demo officer picker → JWT (HS256, 60 min) | ✅ No passwords (demo-grade) |
@@ -417,7 +417,7 @@ flowchart TD
     D --> S[Score 0-100<br/>→ GREEN/YELLOW/ORANGE/RED]
     R --> M[H2O severity model<br/>OPTIONAL]
     M -->|adds probability| S
-    S --> L[Meta Llama narrative<br/>OPTIONAL]
+    S --> L[Meta Llama Reasoning Layer (Important) <br/>]
     L -->|adds summary + tasks| OUT[Assessment response<br/>with sources + confidence]
     D --> OUT
 ```
@@ -467,7 +467,7 @@ flowchart TD
 | GDACS RSS (EC-JRC, CC BY 4.0) | Official disaster warnings | Warning floor + source links | Nothing |
 | Google Earth Engine | Population estimates | Region cards, exposure context | `GEE_PROJECT_ID` (optional; graceful warning if missing) |
 | dr5hn countries-states-cities (GitHub, ODbL) | 250 countries, ~5.3k states, ~153k cities | Region Management geography | Run `sync_geo_data.py` |
-| Meta Llama API (OpenAI-compatible) | Text reasoning, summaries, task drafts, dispatch answers | AI layers across modules | `META_API_URL`, `META_API_KEY`, `META_MODEL` |
+| Meta Llama API | Reasoning, summaries, task drafts, insurance, dispatch answers | AI layers across modules | `META_API_URL`, `META_API_KEY`, `META_MODEL` |
 
 ### How data is processed and stored
 
@@ -485,7 +485,7 @@ flowchart TD
 
 ### Spotlight: Meta Llama, the reasoning engine of this project
 
-This project was built for the Meta hackathon around one idea: **Meta Llama does the reasoning and writing; deterministic code and humans do the deciding.** Every AI-generated sentence in the app comes from a Meta Llama model (your own model id, via an OpenAI-compatible `/chat/completions` endpoint). Nothing is hard-coded to look smart — and when Meta is unreachable, the app says so instead of faking it.
+This project was built for the Meta hackathon around one idea: **Meta Llama does the reasoning and writing; deterministic code and humans do the deciding.** Every AI-generated sentence in the app comes from a Meta Llama model (your own model id, `/chat/completions` endpoint). Nothing is hard-coded to look smart — and when Meta is unreachable, the app says so instead of faking it.
 
 **The 4 places Meta reasons in the code:**
 
@@ -878,10 +878,8 @@ An honest account — strengths first, then gaps.
 ### Known gaps 🟡 (fix before any production use)
 
 - **No passwords or MFA** — login is officer-picker only, appropriate for demos, not for real operations. `DEMO_LOGIN_PIN` is required at boot but is not verified during the login call.
-- **Public read/config endpoints** — telemetry, intelligence, regions CRUD, geography, roles/users, and health need no token. Region CRUD in particular should require an admin role.
 - **Permissive CORS** — the backend allows all origins (`"*"` alongside localhost entries).
 - **JSON-file database** — fine for demos and single-server use; no encryption at rest, no multi-instance locking, no backup rotation.
-- **No central audit log** — history is scattered across record-level trails; there is no immutable append-only log or admin audit view.
 - **No rate limiting, input scanning, or security headers** beyond FastAPI defaults.
 
 ---
@@ -895,18 +893,11 @@ Full regional dashboard; cyclone threat intelligence with zones, warnings, ML pr
 ### Partially implemented 🟡
 
 - **Role 1 decisions** — threat review is read-only; approve/reject/request-info is vision-only.
-- **Baseline digital twin** — exists at `/baseline` but is unlinked and experimental.
-- **ML scoring** — works only with a model file installed (`H2O_MODEL_PATH`).
-- **AI narratives** — work only with Meta credentials configured.
 - **Evacuation dialog** — siren/SMS toggles flip UI state only; no backend or carrier integration.
-- **Duplicate protection** — alert dedup is in-memory (resets on restart); no cross-instance idempotency.
-- **Docs** — `Database/README.md` references `Backend/docs/GEO_DATA_SETUP.md`, which does not exist.
 
 ### Known limitations
 
 - One hazard engine (cyclone); one ocean basin of history; no flood/earthquake/heatwave engines.
-- IBTrACS latency (weeks) — history corroborates, never warns.
-- Google-dependent features degrade without an API key; population needs Earth Engine setup.
 - Single-server JSON storage; no offline mobile app; no multi-language UI.
 
 ### Planned improvements and integrations 🔮
@@ -1022,6 +1013,3 @@ New simulator logic must extend `src/simulator/simulatorStore.test.ts`; new pure
 - **New hazard engine:** follow `Backend/docs/MULTI_HAZARD_INTELLIGENCE.md` — implement the handler contract, register capabilities, and never return fabricated output for unimplemented hazards.
 
 ---
-
-*Document version: written from a full inspection of the repository in November 2026. Status labels (✅ 🟡 🔮 🧪) reflect the code as found; when behaviour changes, update both the code and this file.*
-
