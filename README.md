@@ -417,7 +417,7 @@ flowchart TD
     D --> S[Score 0-100<br/>→ GREEN/YELLOW/ORANGE/RED]
     R --> M[H2O severity model<br/>OPTIONAL]
     M -->|adds probability| S
-    S --> L[Meta Llama Reasoning Layer (Important) <br/>]
+    S --> L[Meta Llama Reasoning Layer (Important)]
     L -->|adds summary + tasks| OUT[Assessment response<br/>with sources + confidence]
     D --> OUT
 ```
